@@ -1,4 +1,4 @@
-2002-11-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
+2002-12-01  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/process.cpp: Change test character type to settler, as some
 	  servers will not create a farmer.
