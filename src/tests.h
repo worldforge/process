@@ -13,6 +13,5 @@ void testLogout(ClientConnection &c,
                 ClientConnection &watcher);
 void testDuplicateLogin(const std::string &account, const std::string &pass);
 void testInvalidCharacterCreate(ClientConnection &c);    
-void testInGameLook(ClientConnection& con);
 
 #endif // PROCESS_TESTS_H
