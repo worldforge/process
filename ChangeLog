@@ -1,3 +1,11 @@
+2003-11-10  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/tests.cpp: Check for the correct refno when expecting
+	  error op for duplicate login.
+
+	* src/ClientConnection.cpp: Enforce the spec for ARGS of error
+	  ops when expecting an op.
+
 2003-11-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/testIG.cpp: Re-arrange and clean up code a bit, and merge

@@ -548,10 +548,59 @@ bool ClientConnection::waitForError(int refNo)
         return true;    // we failed miserably
     }
     
-    // RootOperation *op = *I; // Not needed right now
+    bool ret = false;
+    RootOperation erOp = *I;
+    Element::ListType erArgs = erOp->getArgsAsList();
+    if (erArgs.size() != 2) {
+        std::cerr << "Error operation does not have 2 args"
+                  << std::endl << std::flush;
+        ret = true;
+    } else {
+        if (!erArgs[0].isMap() || erArgs[0].asMap().empty()) {
+            std::cerr << "Error operation's first arg is not a map"
+                      << std::endl << std::flush;
+            ret = true;
+        } else {
+            Element::MapType & arg1 = erArgs[0].asMap();
+            Element::MapType::const_iterator I = arg1.find("message");
+            if (arg1.size() != 1 || I == arg1.end() || !I->second.isString()) {
+                std::cerr << "Error operation's first arg does not contain a single message string"
+                          << std::endl << std::flush;
+                ret = true;
+            }
+        }
+        if (!erArgs[1].isMap() || erArgs[1].asMap().empty()) {
+            std::cerr << "Error operation's second arg is not a map"
+                      << std::endl << std::flush;
+            ret = true;
+        } else {
+            Element::MapType & arg2 = erArgs[1].asMap();
+            Element::MapType::const_iterator I = arg2.find("objtype");
+            if (I == arg2.end() || !I->second.isString()) {
+                std::cerr << "Error operation's second arg does not have an objtype"
+                          << std::endl << std::flush;
+                ret = true;
+            } else if (I->second.asString() != "op") {
+                std::cerr << "Error operation's second arg does not have objtype=\"op\""
+                          << std::endl << std::flush;
+                ret = true;
+            }
+            I = arg2.find("serialno");
+            if (I == arg2.end() || !I->second.isInt()) {
+                std::cerr << "Error operation's second arg does not have an objtype"
+                          << std::endl << std::flush;
+                ret = true;
+            } else if (I->second.asInt() != refNo) {
+                std::cerr << "Error operation's second arg does not have the serialno we sent "
+                          << I->second.asInt() << " " << refNo
+                          << std::endl << std::flush;
+                ret = true;
+            }
+        }
+    }
     operationQueue.erase(I);
 
-    return false;
+    return ret;
 }
 
 /** determine whether a requested operation is in the queue already; if so, return an

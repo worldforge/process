@@ -146,12 +146,12 @@ void testDuplicateLogin(const std::string &account, const std::string &pass)
         return;
     }
     
-    dup.login(account, pass);
+    int refNo = dup.login(account, pass);
     
     verbose( std::cout << "Waiting for ERROR on duplication login to account " 
         << account << std::endl; );
     
-    if (dup.waitForError()) {
+    if (dup.waitForError(refNo)) {
         std::cerr << "ERROR: duplicate login did not produce an ERROR response" << std::endl;
     }
     
