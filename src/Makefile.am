@@ -5,6 +5,7 @@ process_SOURCES = \
 		  process.cpp process_debug.h opfwd.h debug.h \
 		  validator.cpp validator.h \
 		  testOOG.cpp testOOG.h \
+		  tests.cpp tests.h \
 		  pythonInterface.cpp pythonInterface.h \
 		  atlasUtils.cpp atlasUtils.h
 

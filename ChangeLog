@@ -1,5 +1,11 @@
 2003-10-29  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/tests.h src/tests.cpp, src/process.cpp: Move test functions
+	  out of main file into tests.cpp. Put scopes round the rest
+	  of the tests in preparation for making them into functions as well.
+
+2003-10-29  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/process.cpp: Do not require the entity returned by intial IG
 	  look to have a name.
 
