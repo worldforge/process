@@ -1,3 +1,16 @@
+2003-08-22  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/process.cpp: Add some help documenting options.
+	  Add new options to allow running standalone scripted
+	  tests, or scripted tests that extend the current set.
+
+	* src/pythonInterface.cpp, src/pythonInterface.h: Extend python
+	  interface to allow a number of existing connections to be passed to
+	  the script on startup. Default is that none are passed.
+
+	* process.py: Add debug code to verify that a tuple of connections
+	  are passed to the script.
+
 2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* process.py: Remove debugging output.

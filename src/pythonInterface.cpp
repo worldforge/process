@@ -501,7 +501,7 @@ static void PyConnection_dealloc(PyConnection *self)
 
 static PyObject * PyConnection_getattr(PyConnection *self, char *name)
 {
-    std::cout << "getattr" << name << std::endl << std::flush;
+    std::cout << "getattr: " << name << std::endl << std::flush;
     return Py_FindMethod(PyConnection_methods, (PyObject *)self, name);
 }
 
@@ -524,14 +524,14 @@ PyTypeObject PyConnection_Type = {
         0,                              /*tp_hash*/
 };
 
-PyConnection * newPyConnection(PyObject *arg)
+PyConnection * newPyConnection()
 {
-        PyConnection * self;
-        self = PyObject_NEW(PyConnection, &PyConnection_Type);
-        if (self == NULL) {
-                return NULL;
-        }
-        return self;
+    PyConnection * self;
+    self = PyObject_NEW(PyConnection, &PyConnection_Type);
+    if (self == NULL) {
+        return NULL;
+    }
+    return self;
 }
 
 static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
@@ -704,7 +704,7 @@ static PyObject * connection_new(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "")) {
         return NULL;
     }
-    c = newPyConnection(args);
+    c = newPyConnection();
     if (c == NULL) {
         return NULL;
     }
@@ -733,7 +733,8 @@ void init_python_api()
     }
 }
 
-bool runScript(const std::string & script)
+bool runScript(const std::string & script,
+               const std::set<ClientConnection *> & connections)
 {
     PyObject * package_name = PyString_FromString(script.c_str());
     PyObject * mod_dict = PyImport_Import(package_name);
@@ -758,7 +759,20 @@ bool runScript(const std::string & script)
         Py_DECREF(function);
         return false;
     }
-    PyObject * pyob = PyEval_CallFunction(function, "()");
+    PyObject * pyob;
+    if (connections.empty()) {
+        pyob = PyEval_CallFunction(function, "()");
+    } else {
+        PyObject * cons = PyTuple_New(connections.size());
+        std::set<ClientConnection *>::const_iterator I = connections.begin();
+        for(int i = 0; I != connections.end(); ++I, ++i) {
+            PyConnection * connection = newPyConnection();
+            connection->connection = *I;
+            PyTuple_SetItem(cons, i, (PyObject*)connection);
+        }
+        pyob = PyEval_CallFunction(function, "(O)", cons);
+        Py_DECREF(cons);
+    }
 
     if (pyob == NULL) {
         if (PyErr_Occurred() == NULL) {

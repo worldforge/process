@@ -28,9 +28,19 @@ void testInvalidCharacterCreate(ClientConnection &c);
     
 void usage(const char * progname)
 {
-    std::cerr << "usage: " << progname << " [-vr] [ script ]"
+    std::cerr << "usage: " << progname << " [-vrsh] [ script ]"
               << std::endl << std::flush;
+}
 
+void help(const char * progname)
+{
+    usage(progname);
+    std::cerr << std::endl;
+    std::cerr << "  -v     print verbose descriptions of tests" << std::endl;
+    std::cerr << "  -r     supress output that varies between tests"<<std::endl;
+    std::cerr << "  -s     supress standard tests" << std::endl;
+    std::cerr << "  -h     print this help message" << std::endl;
+    std::cerr << std::endl << std::flush;
 }
 
 Element makeAtlasVec(double x, double y, double z);
@@ -45,7 +55,9 @@ int main(int argc, char ** argv)
     Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
 
     int opt;
-    while ((opt = getopt(argc, argv, "vr")) != -1) {
+    bool script_only_flag = false;
+
+    while ((opt = getopt(argc, argv, "hvrs")) != -1) {
         switch (opt) {
             case 'v':
                 verbose_flag = true;
@@ -53,12 +65,18 @@ int main(int argc, char ** argv)
             case 'r':
                 regress_flag = true;
                 break;
+            case 's':
+                script_only_flag = true;
+                break;
+            case 'h':
             case '?':
-                return 1;
+                help(argv[0]);
+                return 0;
                 break;
             default:
                 std::cerr << "FATAL: Illegal argument misprocessed by getopt"
                           << std::endl << std::flush;
+                usage(argv[0]);
                 return 1;
                 break;
         }
@@ -71,11 +89,20 @@ int main(int argc, char ** argv)
         init_python_api();
         python_script = true;
         script_name = argv[optind];
-        runScript(argv[optind]);
-        return 0;
+        if (script_only_flag) {
+            bool retCode = runScript(script_name);
+            if (retCode) {
+                return 1;
+            }
+            return 0;
+        }
     } else if (argc != optind) {
         usage(argv[0]);
         return 1;
+    }
+
+    if (script_only_flag) {
+        return 0;
     }
 
     ClientConnection connection1, connection2, connection3;
@@ -555,6 +582,18 @@ int main(int argc, char ** argv)
         if (connection3.waitFor("info", character, sno)) {
             std::cerr << "ERROR: Character creation did not result in info"
                       << std::endl << std::flush;
+        }
+    }
+
+    if (python_script) {
+        std::set<ClientConnection*> connections;
+        connections.insert(&connection1);
+        connections.insert(&connection2);
+        connections.insert(&connection3);
+
+        bool retCode = runScript(script_name, connections);
+        if (retCode) {
+            return 1;
         }
     }
     

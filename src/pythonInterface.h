@@ -7,6 +7,10 @@
 
 #include <stdio.h>
 #include <unistd.h>
+
+#include <string>
+#include <set>
+
 #include <Python.h>
 
 #include "opfwd.h"
@@ -50,6 +54,7 @@ Atlas::Message::Element::MapType PyDictObject_asElementMap(PyObject * dict);
 Atlas::Message::Element PyObject_asMessageElement(PyObject * o);
 
 void init_python_api();
-bool runScript(const std::string &);
+bool runScript(const std::string &,
+           const std::set<ClientConnection *> & = std::set<ClientConnection*>());
 
 #endif // RULESETS_PY_OPERATION_H
