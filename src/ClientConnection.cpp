@@ -263,7 +263,7 @@ bool ClientConnection::connect(const std::string & server)
         return false;
     }
     
-    Atlas::Net::StreamConnect conn("cyphesis_aiclient", ios, this);
+    Atlas::Net::StreamConnect conn("process", ios, *this);
 
     while (conn.getState() == Atlas::Net::StreamConnect::IN_PROGRESS) {
       conn.poll();

@@ -1,5 +1,10 @@
 2004-06-28  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/ClientConnection.cpp: Use correct client name. Pass a decoder
+	  reference to Atlas-C++ rather than a pointer.
+
+2004-06-28  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/process.cpp: Don't load Atlas spec from file.
 
 2004-05-26  Al Riddoch  <ajr@ecs.soton.ac.uk>
