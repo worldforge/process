@@ -460,7 +460,7 @@ int main(int argc, char ** argv)
 
     Object::MapType character;
     character["objtype"] = "object";
-    character["parents"] = Object::ListType(1,"farmer");
+    character["parents"] = Object::ListType(1,"settler");
     character["name"] = "Nivek";
 
     Create create = Create::Instantiate();
