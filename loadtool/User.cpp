@@ -88,7 +88,7 @@ void User::onLoggedIn()
 void User::onLoginFailure(const std::string& errMsg)
 {
     if (m_state == ACC_CREATE) {
-        cout << "Failed to create account " << m_uid << ", trying login instead";
+        cout << "Failed to create account " << m_uid << ", trying login instead" << endl << std::flush;
         m_acc->login(m_uid, "secret-romero-love-hideout");
         m_state = LOGGING_IN;
     } else {
