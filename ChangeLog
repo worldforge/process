@@ -1,6 +1,10 @@
+2003-06-23  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* Clean up Makefile.am so dist and distcheck work.
+
 2003-04-23 James Turner <james@worldforge.org>
 
-    * Changed how the python lib check works, to avoid autoconf
+	* Changed how the python lib check works, to avoid autoconf
 	  caching issues.
 
 2003-04-22  Al Riddoch  <ajr@ecs.soton.ac.uk>

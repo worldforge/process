@@ -1,16 +1,12 @@
 bin_PROGRAMS = process gobshite
 
-INCLUDES = $(GNOME_XML_CFLAGS)
-
 process_SOURCES = \
 		  pythonInterface.cpp pythonInterface.h \
 		  ClientConnection.cpp ClientConnection.h \
-                  process.cpp \
+		  process.cpp process_debug.h opfwd.h debug.h \
 		  validator.cpp validator.h \
 		  testOOG.cpp testOOG.h \
-		  atlasUtils.cpp
-
-process_LDADD =
+		  atlasUtils.cpp atlasUtils.h
 
 gobshite_SOURCES = gobshite.cpp \
                    ClientConnection.cpp ClientConnection.h
