@@ -516,22 +516,22 @@ void testTypeQueries(ClientConnection &c)
     query.SetArgs(Object::ListType(1, "root"));
     
     c.send(query);
-    verbose( std::cout << "Waiting for info response to root-type query" << endl; );
+    verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
     
     Object::MapType info;
     info["parents"] = Object::ListType(1, "info");    
     
     if (c.waitFor("info", info)) {
-	std::cerr << "ERROR: Type-query for root did not resut in info" << endl;
+	std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
     query.SetArgs(Object::ListType(1, "game_entity"));
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
     c.send(query);
     
-    verbose( std::cout << "Waiting for info response to game_entity type query" << endl; );
+    verbose( std::cout << "Waiting for info response to game_entity type query" << std::endl; );
     if (c.waitFor("info", info)) {
-	std::cerr << "ERROR: Type-query for game_entity did not resut in info" << endl;
+	std::cerr << "ERROR: Type-query for game_entity did not resut in info" << std::endl;
     }
     
     // try a broken one (unless by some miracle is exists?)
@@ -542,8 +542,8 @@ void testTypeQueries(ClientConnection &c)
     Object::MapType error;
     error["parents"] = Object::ListType(1, "error");  
     
-    verbose( std::cout << "Waiting for error response to _bad_type_ type query" << endl; );
+    verbose( std::cout << "Waiting for error response to _bad_type_ type query" << std::endl; );
     if (c.waitFor("error", error)) {
-	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << endl;
+	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << std::endl;
     }
 }
