@@ -1,5 +1,9 @@
 2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* process.py: Remove debugging output.
+
+2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/pythonInterface.h, src/pythonInterface.cpp:
 	  Update python API code to Atlas-C++ 0.6
 
