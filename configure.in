@@ -117,7 +117,13 @@ LIBS="$LIBS $PYTHON_LIBS"
 dnl ... done with python checks
 dnl -----------------------------------------------------------------
 
-AC_CHECK_LIB(skstream,main)
+dnl Check for libskstream library
+AM_PATH_SKSTREAM(0.2.1, [
+	CFLAGS="$CFLAGS $SKSTREAM_CFLAGS"
+	CXXFLAGS="$CXXFLAGS $SKSTREAM_CFLAGS"
+	LIBS="$LIBS $SKSTREAM_LIBS"],
+	AC_MSG_ERROR(Couldn't find skstream or version is insufficent)
+)
 
 dnl Generate files
 AC_OUTPUT([

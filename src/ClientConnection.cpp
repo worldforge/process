@@ -8,8 +8,6 @@
 #include <Atlas/Objects/Decoder.h>
 #include <Atlas/Objects/Encoder.h>
 
-#include <varconf/Config.h>
-
 #include <skstream.h>
 
 #include "ClientConnection.h"
@@ -42,7 +40,7 @@ static inline const std::string typeAsString(const Object & o)
 }
 
 ClientConnection::ClientConnection() :
-    client_fd(-1), encoder(NULL), serialNo(512)
+    encoder(NULL), serialNo(512)
 {
 }
 
@@ -219,31 +217,9 @@ int ClientConnection::read() {
 
 bool ClientConnection::connect(const std::string & server)
 {
-    struct sockaddr_in serv_sa;
-
-    memset(&serv_sa, 0, sizeof(serv_sa));
-    serv_sa.sin_family = AF_INET;
-    serv_sa.sin_port = htons(6767);
-
-    struct hostent * serv_addr = gethostbyname(server.c_str());
-    if (serv_addr == NULL) {
-        return false;
-    }
-    memcpy(&serv_sa.sin_addr, serv_addr->h_addr_list[0], serv_addr->h_length);
-
-    client_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (client_fd < 0) {
-        return false;
-    }
-
-    int ret;
-    ret = ::connect(client_fd, (struct sockaddr *)&serv_sa, sizeof(serv_sa));
-    if (ret < 0) {
-        return false;
-    }
-
-    ios.attach(client_fd);
-
+    ios.open(server, 6767);
+    if (!ios.is_open()) return false;
+	
     Atlas::Net::StreamConnect conn("cyphesis_aiclient", ios, this);
 
     while (conn.GetState() == Atlas::Net::StreamConnect::IN_PROGRESS) {
@@ -266,7 +242,6 @@ bool ClientConnection::connect(const std::string & server)
 void ClientConnection::close()
 {
     ios.close();
-    client_fd = -1;
 }
 
 bool ClientConnection::login(const std::string & account,
@@ -437,6 +412,7 @@ bool ClientConnection::poll(int time)
 
     FD_ZERO(&infds);
 
+    int client_fd = ios.getSocket();
     FD_SET(client_fd, &infds);
 
     tv.tv_sec = time;
@@ -477,4 +453,10 @@ void ClientConnection::push(const O & op)
     reply_flag = true;
     RootOperation * new_op = new O(op); 
     operationQueue.push_back(new_op);
+}
+
+
+const bool ClientConnection::isOpen() const
+{
+    return ios.is_open();
 }

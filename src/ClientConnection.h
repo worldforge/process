@@ -18,8 +18,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
   private:
     bool reply_flag;
     bool error_flag;
-    int client_fd;
-    socket_stream ios;
+    tcp_socket_stream ios;
     Atlas::Codec<std::iostream> * codec;
     Atlas::Objects::Encoder * encoder;
     std::string acName;
@@ -85,14 +84,12 @@ class ClientConnection : public Atlas::Objects::Decoder {
         return ios.eof();
     }
     int get_fd() {
-        return client_fd;
+        return ios.getSocket();
     }
     const Atlas::Message::Object::MapType & getReply() {
         return reply;
     }
-    const bool isOpen() const {
-        return client_fd != -1;
-    }
+    const bool isOpen() const;
 
     static const int timeOut = 5;
 };
