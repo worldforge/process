@@ -15,40 +15,39 @@ class ClientConnection;
 
 typedef struct {
     PyObject_HEAD
-    PyObject			* Object_attr;	// Attributes dictionary
-    Atlas::Message::Element	* m_obj;
-} AtlasObject;
+    PyObject * m_attr;  // Attributes dictionary
+    Atlas::Message::Element * m_obj;
+} PyMessageElement;
 
 typedef struct {
     PyObject_HEAD
-    RootOperation	* operation;
-    int			own;
-} RootOperationObject;
+    RootOperation operation;
+} PyOperation;
 
 typedef struct {
     PyObject_HEAD
-    ClientConnection	* connection;
-} ConnectionObject;
+    ClientConnection * connection;
+} PyConnection;
 
-extern PyTypeObject RootOperation_Type;
-extern PyTypeObject Object_Type;
-extern PyTypeObject Connection_Type;
+extern PyTypeObject PyOperation_Type;
+extern PyTypeObject PyMessageElement_Type;
+extern PyTypeObject PyConnection_Type;
 
-RootOperationObject * newAtlasRootOperation(PyObject *arg);
-AtlasObject * newAtlasObject(PyObject *arg);
+PyOperation * newPyOperation();
+PyMessageElement * newPyMessageElement();
 
-#define PyAtlasObject_Check(_o) ((PyTypeObject*)PyObject_Type((PyObject*)_o)==&Object_Type)
-#define PyOperation_Check(_o) ((PyTypeObject*)PyObject_Type((PyObject*)_o)==&RootOperation_Type)
-#define PyConnection_Check(_o) ((PyTypeObject*)PyObject_Type((PyObject*)_o)==&RootOperation_Type)
+#define PyMessageElement_Check(_o) ((PyTypeObject*)PyObject_Type((PyObject*)_o)==&PyMessageElement_Type)
+#define PyOperation_Check(_o) ((PyTypeObject*)PyObject_Type((PyObject*)_o)==&PyOperation_Type)
+#define PyConnection_Check(_o) ((PyTypeObject*)PyObject_Type((PyObject*)_o)==&PyOperation_Type)
 
 //
 // Utility functions to munge between Object related types and python types
 //
 
-PyObject * Object_asPyObject(const Atlas::Message::Element & obj);
-Atlas::Message::Element::ListType PyListObject_asListType(PyObject * list);
-Atlas::Message::Element::MapType PyDictObject_asMapType(PyObject * dict);
-Atlas::Message::Element PyObject_asObject(PyObject * o);
+PyObject * MessageElement_asPyObject(const Atlas::Message::Element & obj);
+Atlas::Message::Element::ListType PyListObject_asElementList(PyObject * list);
+Atlas::Message::Element::MapType PyDictObject_asElementMap(PyObject * dict);
+Atlas::Message::Element PyObject_asMessageElement(PyObject * o);
 
 void init_python_api();
 bool runScript(const std::string &);

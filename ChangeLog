@@ -1,5 +1,14 @@
 2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/pythonInterface.h, src/pythonInterface.cpp:
+	  Update python API code to Atlas-C++ 0.6
+
+	* src/process.cpp: Re-add interface to python code, and start
+	  work on allowing scripts to extend rather than replace existing
+	  tests.
+
+2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* Switch to skstream-0.3, which is effectively a null change.
 
 2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>

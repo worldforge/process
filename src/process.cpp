@@ -63,14 +63,16 @@ int main(int argc, char ** argv)
                 break;
         }
     };
+
+    bool python_script = false;
+    std::string script_name;
+
     if (argc == (optind + 1)) {
-        // init_python_api();
-        // if (runScript(argv[optind])) {
-            // return exit_status;
-        // } else {
-            exit_status = 1;
-            return exit_status;
-        // }
+        init_python_api();
+        python_script = true;
+        script_name = argv[optind];
+        runScript(argv[optind]);
+        return 0;
     } else if (argc != optind) {
         usage(argv[0]);
         return 1;

@@ -25,49 +25,37 @@ using Atlas::Objects::Root;
  * Beginning of Operation methods section.
  */
 
-static PyObject * Operation_setFrom(RootOperationObject * self, PyObject * args)
+static PyObject * Operation_setFrom(PyOperation * self, PyObject * args)
 {
     // Takes string, returns none
-    if (self->operation == NULL) {
-        PyErr_SetString(PyExc_TypeError,"invalid operation");
-        return NULL;
-    }
     char * from;
     if (!PyArg_ParseTuple(args, "s", &from)) {
         PyErr_SetString(PyExc_TypeError,"from not a string");
         return NULL;
     }
-    (*self->operation)->setFrom(from);
+    self->operation->setFrom(from);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
-static PyObject * Operation_setTo(RootOperationObject * self, PyObject * args)
+static PyObject * Operation_setTo(PyOperation * self, PyObject * args)
 {
     // Takes string, returns none
-    if (self->operation == NULL) {
-        PyErr_SetString(PyExc_TypeError,"invalid operation");
-        return NULL;
-    }
     char * to;
     if (!PyArg_ParseTuple(args, "s", &to)) {
         PyErr_SetString(PyExc_TypeError,"to not a string");
         return NULL;
     }
-    (*self->operation)->setTo(to);
+    self->operation->setTo(to);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
-static PyObject * Operation_setArgs(RootOperationObject * self, PyObject * args)
+static PyObject * Operation_setArgs(PyOperation * self, PyObject * args)
 {
     // Takes List, returns none
-    if (self->operation == NULL) {
-        PyErr_SetString(PyExc_TypeError,"invalid operation");
-        return NULL;
-    }
     PyObject * args_object;
     if (!PyArg_ParseTuple(args, "O", &args_object)) {
         PyErr_SetString(PyExc_TypeError,"args not an object");
@@ -79,15 +67,15 @@ static PyObject * Operation_setArgs(RootOperationObject * self, PyObject * args)
     }
     Element::ListType argslist;
     for(int i = 0; i < PyList_Size(args_object); i++) {
-        AtlasObject * item = (AtlasObject *)PyList_GetItem(args_object, i);
-        if (!PyAtlasObject_Check(item)) {
+        PyMessageElement * item = (PyMessageElement *)PyList_GetItem(args_object, i);
+        if (!PyMessageElement_Check(item)) {
             PyErr_SetString(PyExc_TypeError,"args contains non Atlas Object");
             return NULL;
         }
         
         argslist.push_back(*(item->m_obj));
     }
-    (*self->operation)->setArgsAsList(argslist);
+    self->operation->setArgsAsList(argslist);
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -112,25 +100,22 @@ PyMethodDef RootOperation_methods[] = {
  * Beginning of Operation standard methods section.
  */
 
-static void Operation_dealloc(RootOperationObject *self)
+static void Operation_dealloc(PyOperation *self)
 {
-        if ((self->own != 0) && (self->operation != NULL)) {
-            // Can't delete until I have sorted out bugs with own flag
-            delete self->operation;
-        }
-	PyMem_DEL(self);
+    self->operation.~RootOperation();
+    PyMem_DEL(self);
 }
 
-static PyObject * Operation_getattr(RootOperationObject * self, char * name)
+static PyObject * Operation_getattr(PyOperation * self, char * name)
 {
     return Py_FindMethod(RootOperation_methods, (PyObject *)self, name);
 }
 
-PyTypeObject RootOperation_Type = {
+PyTypeObject PyOperation_Type = {
         PyObject_HEAD_INIT(&PyType_Type)
         0,                                      // ob_size
         "Operation",                            // tp_name
-        sizeof(RootOperationObject),            // tp_basicsize
+        sizeof(PyOperation),            // tp_basicsize
         0,                                      // tp_itemsize
         //  methods 
         (destructor)Operation_dealloc,          // tp_dealloc
@@ -149,41 +134,41 @@ PyTypeObject RootOperation_Type = {
  * Beginning of Operation creation functions section.
  */
 
-RootOperationObject * newAtlasRootOperation(PyObject *arg)
+PyOperation * newPyOperation()
 {
-	RootOperationObject * self;
-	self = PyObject_NEW(RootOperationObject, &RootOperation_Type);
-	if (self == NULL) {
-		return NULL;
-	}
-	self->operation = NULL;
-	self->own = 0;
-	return self;
+    PyOperation * self;
+    self = PyObject_NEW(PyOperation, &PyOperation_Type);
+    if (self == NULL) {
+        return NULL;
+    }
+    new (&(self->operation)) RootOperation;
+    self->operation = NULL;
+    return self;
 }
 
-static PyMethodDef Object_methods[] = {
-	{NULL,          NULL}           /* sentinel */
+static PyMethodDef MessageElement_methods[] = {
+        {NULL,          NULL}           /* sentinel */
 };
 
 /*
  * Beginning of Object standard methods section.
  */
 
-static void Object_dealloc(AtlasObject *self)
+static void MessageElement_dealloc(PyMessageElement *self)
 {
     if (self->m_obj != NULL) {
         delete self->m_obj;
     }
-    Py_XDECREF(self->Object_attr);
+    Py_XDECREF(self->m_attr);
     PyMem_DEL(self);
 }
 
-static PyObject * Object_getattr(AtlasObject *self, char *name)
+static PyObject * MessageElement_getattr(PyMessageElement *self, char *name)
 {
-    return Py_FindMethod(Object_methods, (PyObject *)self, name);
+    return Py_FindMethod(MessageElement_methods, (PyObject *)self, name);
 }
 
-static int Object_setattr( AtlasObject *self, char *name, PyObject *v)
+static int MessageElement_setattr( PyMessageElement *self, char *name, PyObject *v)
 {
     if (self->m_obj == NULL) {
         PyErr_SetString(PyExc_TypeError,"invalid object");
@@ -191,53 +176,53 @@ static int Object_setattr( AtlasObject *self, char *name, PyObject *v)
     }
     if (self->m_obj->isMap()) {
         Element::MapType & omap = self->m_obj->asMap();
-        Element v_obj = PyObject_asObject(v);
+        Element v_obj = PyObject_asMessageElement(v);
         if (v_obj.getType() != Element::TYPE_NONE) {
             omap[name] = v_obj;
             return 0;
         }
     }
-    if (self->Object_attr == NULL) {
-        self->Object_attr = PyDict_New();
-        if (self->Object_attr == NULL) {
+    if (self->m_attr == NULL) {
+        self->m_attr = PyDict_New();
+        if (self->m_attr == NULL) {
             return -1;
         }
     }
-    return PyDict_SetItemString(self->Object_attr, name, v);
+    return PyDict_SetItemString(self->m_attr, name, v);
 }
 
-PyTypeObject Object_Type = {
-	PyObject_HEAD_INIT(&PyType_Type)
-	0,				/*ob_size*/
-	"AtlasObject",			/*tp_name*/
-	sizeof(AtlasObject),		/*tp_basicsize*/
-	0,				/*tp_itemsize*/
-	/* methods */
-	(destructor)Object_dealloc,	/*tp_dealloc*/
-	0,                              /*tp_print*/
-	(getattrfunc)Object_getattr,    /*tp_getattr*/
-	(setattrfunc)Object_setattr,	/*tp_setattr*/
-	0,                              /*tp_compare*/
-	0,                              /*tp_repr*/
-	0,                              /*tp_as_number*/
-	0,                              /*tp_as_sequence*/
-	0,                              /*tp_as_mapping*/
-	0,                              /*tp_hash*/
+PyTypeObject PyMessageElement_Type = {
+        PyObject_HEAD_INIT(&PyType_Type)
+        0,                                      /*ob_size*/
+        "MessageElement",                       /*tp_name*/
+        sizeof(PyMessageElement),               /*tp_basicsize*/
+        0,                                      /*tp_itemsize*/
+        /* methods */
+        (destructor)MessageElement_dealloc,     /*tp_dealloc*/
+        0,                                      /*tp_print*/
+        (getattrfunc)MessageElement_getattr,    /*tp_getattr*/
+        (setattrfunc)MessageElement_setattr,    /*tp_setattr*/
+        0,                                      /*tp_compare*/
+        0,                                      /*tp_repr*/
+        0,                                      /*tp_as_number*/
+        0,                                      /*tp_as_sequence*/
+        0,                                      /*tp_as_mapping*/
+        0,                                      /*tp_hash*/
 };
 
 /*
  * Beginning of Object creation functions section.
  */
 
-AtlasObject * newAtlasObject(PyObject *arg)
+PyMessageElement * newPyMessageElement(PyObject *arg)
 {
-	AtlasObject * self;
-	self = PyObject_NEW(AtlasObject, &Object_Type);
-	if (self == NULL) {
-		return NULL;
-	}
-	self->Object_attr = NULL;
-	return self;
+        PyMessageElement * self;
+        self = PyObject_NEW(PyMessageElement, &PyMessageElement_Type);
+        if (self == NULL) {
+                return NULL;
+        }
+        self->m_attr = NULL;
+        return self;
 }
 
 /*
@@ -248,10 +233,10 @@ static PyObject * MapType_asPyObject(const Element::MapType & map)
 {
     PyObject * args_pydict = PyDict_New();
     Element::MapType::const_iterator I;
-    AtlasObject * item;
+    PyMessageElement * item;
     for(I=map.begin();I!=map.end();I++) {
         const std::string & key = I->first;
-        item = newAtlasObject(NULL);
+        item = newPyMessageElement(NULL);
         if (item == NULL) {
             PyErr_SetString(PyExc_TypeError,"error creating map");
             return NULL;
@@ -269,9 +254,9 @@ static PyObject * ListType_asPyObject(const Element::ListType & list)
     PyObject * args_pylist = PyList_New(list.size());
     Element::ListType::const_iterator I;
     int j=0;
-    AtlasObject * item;
+    PyMessageElement * item;
     for(I=list.begin();I!=list.end();I++,j++) {
-        item = newAtlasObject(NULL);
+        item = newPyMessageElement(NULL);
         if (item == NULL) {
             PyErr_SetString(PyExc_TypeError,"error creating list");
             return NULL;
@@ -283,7 +268,7 @@ static PyObject * ListType_asPyObject(const Element::ListType & list)
     return args_pylist;
 }
 
-PyObject * Object_asPyObject(const Element & obj)
+PyObject * MessageElement_asPyObject(const Element & obj)
 {
     PyObject * ret = NULL;
     switch (obj.getType()) {
@@ -308,16 +293,16 @@ PyObject * Object_asPyObject(const Element & obj)
     return ret;
 }
 
-Element::ListType PyListObject_asListType(PyObject * list)
+Element::ListType PyListObject_asElementList(PyObject * list)
 {
     Element::ListType argslist;
-    AtlasObject * item;
+    PyMessageElement * item;
     for(int i = 0; i < PyList_Size(list); i++) {
-        item = (AtlasObject *)PyList_GetItem(list, i);
-        if (PyAtlasObject_Check(item)) {
+        item = (PyMessageElement *)PyList_GetItem(list, i);
+        if (PyMessageElement_Check(item)) {
             argslist.push_back(*(item->m_obj));
         } else {
-            Element o = PyObject_asObject((PyObject*)item);
+            Element o = PyObject_asMessageElement((PyObject*)item);
             if (o.getType() != Element::TYPE_NONE) {
                 argslist.push_back(o);
             }
@@ -326,19 +311,19 @@ Element::ListType PyListObject_asListType(PyObject * list)
     return argslist;
 }
 
-Element::MapType PyDictObject_asMapType(PyObject * dict)
+Element::MapType PyDictObject_asElementMap(PyObject * dict)
 {
     Element::MapType argsmap;
-    AtlasObject * item;
+    PyMessageElement * item;
     PyObject * keys = PyDict_Keys(dict);
     PyObject * vals = PyDict_Values(dict);
     for(int i = 0; i < PyDict_Size(dict); i++) {
         PyObject * key = PyList_GetItem(keys, i);
-        item = (AtlasObject *)PyList_GetItem(vals, i);
-        if (PyAtlasObject_Check(item)) {
+        item = (PyMessageElement *)PyList_GetItem(vals, i);
+        if (PyMessageElement_Check(item)) {
             argsmap[PyString_AsString(key)] = *(item->m_obj);
         } else {
-            Element o = PyObject_asObject((PyObject*)item);
+            Element o = PyObject_asMessageElement((PyObject*)item);
             if (o.getType() != Element::TYPE_NONE) {
                 argsmap[PyString_AsString(key)] = o;
             }
@@ -349,7 +334,7 @@ Element::MapType PyDictObject_asMapType(PyObject * dict)
     return argsmap;
 }
 
-Element PyObject_asObject(PyObject * o)
+Element PyObject_asMessageElement(PyObject * o)
 {
     if (PyInt_Check(o)) {
         return Element((int)PyInt_AsLong(o));
@@ -361,34 +346,34 @@ Element PyObject_asObject(PyObject * o)
         return Element(PyString_AsString(o));
     }
     if (PyList_Check(o)) {
-        return Element(PyListObject_asListType(o));
+        return Element(PyListObject_asElementList(o));
     }
     if (PyDict_Check(o)) {
-        return Element(PyDictObject_asMapType(o));
+        return Element(PyDictObject_asElementMap(o));
     }
     if (PyTuple_Check(o)) {
         Element::ListType list;
         int i, size = PyTuple_Size(o);
         for(i = 0; i < size; i++) {
-            Element item = PyObject_asObject(PyTuple_GetItem(o, i));
+            Element item = PyObject_asMessageElement(PyTuple_GetItem(o, i));
             if (item.getType() != Element::TYPE_NONE) {
                 list.push_back(item);
             }
         }
         return Element(list);
     }
-    if (PyAtlasObject_Check(o)) {
-        AtlasObject * obj = (AtlasObject *)o;
+    if (PyMessageElement_Check(o)) {
+        PyMessageElement * obj = (PyMessageElement *)o;
         return *(obj->m_obj);
     }
     if (PyOperation_Check(o)) {
-        RootOperationObject * op = (RootOperationObject *)o;
-        return (*op->operation)->asMessage();
+        PyOperation * op = (PyOperation *)o;
+        return op->operation->asMessage();
     }
     return Element();
 }
 
-static PyObject * Connection_connect(ConnectionObject * self, PyObject * args)
+static PyObject * PyConnection_connect(PyConnection * self, PyObject * args)
 {
     if (self->connection == NULL) {
         PyErr_SetString(PyExc_TypeError,"invalid connection");
@@ -409,7 +394,7 @@ static PyObject * Connection_connect(ConnectionObject * self, PyObject * args)
     }
 }
 
-static PyObject * Connection_login(ConnectionObject * self, PyObject * args)
+static PyObject * PyConnection_login(PyConnection * self, PyObject * args)
 {
     if (self->connection == NULL) {
         PyErr_SetString(PyExc_TypeError,"invalid connection");
@@ -431,7 +416,7 @@ static PyObject * Connection_login(ConnectionObject * self, PyObject * args)
     }
 }
 
-static PyObject * Connection_create(ConnectionObject * self, PyObject * args)
+static PyObject * PyConnection_create(PyConnection * self, PyObject * args)
 {
     if (self->connection == NULL) {
         PyErr_SetString(PyExc_TypeError,"invalid connection");
@@ -453,13 +438,13 @@ static PyObject * Connection_create(ConnectionObject * self, PyObject * args)
     }
 }
 
-static PyObject * Connection_send(ConnectionObject * self, PyObject * args)
+static PyObject * PyConnection_send(PyConnection * self, PyObject * args)
 {
     if (self->connection == NULL) {
         PyErr_SetString(PyExc_TypeError,"invalid connection");
         return NULL;
     }
-    RootOperationObject * op;
+    PyOperation * op;
     if (!PyArg_ParseTuple(args, "O", &op)) {
         PyErr_SetString(PyExc_TypeError,"send takes one argument");
         return NULL;
@@ -468,25 +453,25 @@ static PyObject * Connection_send(ConnectionObject * self, PyObject * args)
         PyErr_SetString(PyExc_TypeError,"send argument must be an op");
         return NULL;
     }
-    self->connection->send(*op->operation);
+    self->connection->send(op->operation);
 
     Py_INCREF(Py_None);
     return Py_None;
 }
 
-static PyObject * Connection_waitfor(ConnectionObject * self, PyObject * args)
+static PyObject * PyConnection_waitfor(PyConnection * self, PyObject * args)
 {
     if (self->connection == NULL) {
         PyErr_SetString(PyExc_TypeError,"invalid connection");
         return NULL;
     }
     char * parents;
-    AtlasObject * arg;
+    PyMessageElement * arg;
     if (!PyArg_ParseTuple(args, "sO", &parents, &arg)) {
         PyErr_SetString(PyExc_TypeError,"waitfor takes two arguments");
         return NULL;
     }
-    if (!PyAtlasObject_Check(arg)) {
+    if (!PyMessageElement_Check(arg)) {
         PyErr_SetString(PyExc_TypeError,"waitfor argument must be an entity");
         return NULL;
     }
@@ -500,58 +485,58 @@ static PyObject * Connection_waitfor(ConnectionObject * self, PyObject * args)
     }
 }
 
-PyMethodDef Connection_methods[] = {
-    {"connect",    (PyCFunction)Connection_connect,      METH_VARARGS},
-    {"login",      (PyCFunction)Connection_login,        METH_VARARGS},
-    {"create",     (PyCFunction)Connection_create,       METH_VARARGS},
-    {"send",       (PyCFunction)Connection_send,         METH_VARARGS},
-    {"waitfor",    (PyCFunction)Connection_waitfor,      METH_VARARGS},
+PyMethodDef PyConnection_methods[] = {
+    {"connect",    (PyCFunction)PyConnection_connect,      METH_VARARGS},
+    {"login",      (PyCFunction)PyConnection_login,        METH_VARARGS},
+    {"create",     (PyCFunction)PyConnection_create,       METH_VARARGS},
+    {"send",       (PyCFunction)PyConnection_send,         METH_VARARGS},
+    {"waitfor",    (PyCFunction)PyConnection_waitfor,      METH_VARARGS},
     {NULL,         NULL}
 };
 
-static void Connection_dealloc(ConnectionObject *self)
+static void PyConnection_dealloc(PyConnection *self)
 {
     PyMem_DEL(self);
 }
 
-static PyObject * Connection_getattr(ConnectionObject *self, char *name)
+static PyObject * PyConnection_getattr(PyConnection *self, char *name)
 {
     std::cout << "getattr" << name << std::endl << std::flush;
-    return Py_FindMethod(Connection_methods, (PyObject *)self, name);
+    return Py_FindMethod(PyConnection_methods, (PyObject *)self, name);
 }
 
-PyTypeObject Connection_Type = {
-	PyObject_HEAD_INIT(&PyType_Type)
-	0,                              /*ob_size*/
-	"ConnectionObject",             /*tp_name*/
-	sizeof(ConnectionObject),	/*tp_basicsize*/
-	0,				/*tp_itemsize*/
-	/* methods */
-	(destructor)Connection_dealloc,	/*tp_dealloc*/
-	0,                              /*tp_print*/
-	(getattrfunc)Connection_getattr,/*tp_getattr*/
-	0,                              /*tp_setattr*/
-	0,                              /*tp_compare*/
-	0,                              /*tp_repr*/
-	0,                              /*tp_as_number*/
-	0,                              /*tp_as_sequence*/
-	0,                              /*tp_as_mapping*/
-	0,                              /*tp_hash*/
+PyTypeObject PyConnection_Type = {
+        PyObject_HEAD_INIT(&PyType_Type)
+        0,                              /*ob_size*/
+        "PyConnection",             /*tp_name*/
+        sizeof(PyConnection),       /*tp_basicsize*/
+        0,                              /*tp_itemsize*/
+        /* methods */
+        (destructor)PyConnection_dealloc, /*tp_dealloc*/
+        0,                              /*tp_print*/
+        (getattrfunc)PyConnection_getattr,/*tp_getattr*/
+        0,                              /*tp_setattr*/
+        0,                              /*tp_compare*/
+        0,                              /*tp_repr*/
+        0,                              /*tp_as_number*/
+        0,                              /*tp_as_sequence*/
+        0,                              /*tp_as_mapping*/
+        0,                              /*tp_hash*/
 };
 
-ConnectionObject * newConnectionObject(PyObject *arg)
+PyConnection * newPyConnection(PyObject *arg)
 {
-	ConnectionObject * self;
-	self = PyObject_NEW(ConnectionObject, &Connection_Type);
-	if (self == NULL) {
-		return NULL;
-	}
-	return self;
+        PyConnection * self;
+        self = PyObject_NEW(PyConnection, &PyConnection_Type);
+        if (self == NULL) {
+                return NULL;
+        }
+        return self;
 }
 
 static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
 {
-    AtlasObject *o;
+    PyMessageElement *o;
     char * id = NULL;
     
     if (!PyArg_ParseTuple(args, "|s", &id)) {
@@ -577,7 +562,7 @@ static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
             } else if ((strcmp(key, "type") == 0) && (PyString_Check(val))) {
                 omap["parents"] = Element::ListType(1,std::string(PyString_AsString(val)));
             } else {
-                Element val_obj = PyObject_asObject(val);
+                Element val_obj = PyObject_asMessageElement(val);
                 if (val_obj.getType() == Element::TYPE_NONE) {
                     fprintf(stderr, "Could not handle %s value in Entity()", key);
                     PyErr_SetString(PyExc_TypeError, "Argument type error to Entity()");
@@ -592,7 +577,7 @@ static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
         Py_DECREF(vals);
     }
 
-    o = newAtlasObject(args);
+    o = newPyMessageElement(args);
     if ( o == NULL ) {
         return NULL;
     }
@@ -605,16 +590,16 @@ static inline void addToArgs(Element::ListType & args, PyObject * ent)
     if (ent == NULL) {
         return;
     }
-    if (PyAtlasObject_Check(ent)) {
-        AtlasObject * obj = (AtlasObject*)ent;
+    if (PyMessageElement_Check(ent)) {
+        PyMessageElement * obj = (PyMessageElement*)ent;
         if (obj->m_obj == NULL) {
             fprintf(stderr, "Invalid object in Operation arguments\n");
             return;
         }
         Element o(*obj->m_obj);
-        if (o.isMap() && (obj->Object_attr != NULL)) {
+        if (o.isMap() && (obj->m_attr != NULL)) {
             Element::MapType & ent = o.asMap();
-            Element::MapType ent2 = PyDictObject_asMapType(obj->Object_attr);
+            Element::MapType ent2 = PyDictObject_asElementMap(obj->m_attr);
             Element::MapType::iterator I = ent2.begin();
             for(; I != ent2.end(); I++) {
                 if (ent.find(I->first) != ent.end()) {
@@ -624,12 +609,8 @@ static inline void addToArgs(Element::ListType & args, PyObject * ent)
         }
         args.push_back(o);
     } else if (PyOperation_Check(ent)) {
-        RootOperationObject * op = (RootOperationObject*)ent;
-        if (op->operation == NULL) {
-            fprintf(stderr, "Invalid operation in Operation arguments\n");
-            return;
-        }
-        args.push_back((*op->operation)->asMessage());
+        PyOperation * op = (PyOperation*)ent;
+        args.push_back(op->operation->asMessage());
     } else {
         fprintf(stderr, "Non-entity passed as arg to Operation()\n");
     }
@@ -637,7 +618,7 @@ static inline void addToArgs(Element::ListType & args, PyObject * ent)
 
 static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwds)
 {
-    RootOperationObject * op;
+    PyOperation * op;
 
     char * type;
     PyObject * to = NULL;
@@ -649,36 +630,35 @@ static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwd
     if (!PyArg_ParseTuple(args, "s|OOO", &type, &arg1, &arg2, &arg3)) {
         return NULL;
     }
-    op = newAtlasRootOperation(args);
+    op = newPyOperation();
     if (op == NULL) {
         return NULL;
     }
     if (strcmp(type, "sight") == 0) {
-        op->operation = new Sight();
+        op->operation = Sight();
     } else if (strcmp(type, "set") == 0) {
-        op->operation = new Set();
+        op->operation = Set();
     } else if (strcmp(type, "action") == 0) {
-        op->operation = new Action();
+        op->operation = Action();
     } else if (strcmp(type, "create") == 0) {
-        op->operation = new Create();
+        op->operation = Create();
     } else if (strcmp(type, "look") == 0) {
-        op->operation = new Look();
+        op->operation = Look();
     } else if (strcmp(type, "move") == 0) {
-        op->operation = new Move();
+        op->operation = Move();
     } else if (strcmp(type, "talk") == 0) {
-        op->operation = new Talk();
+        op->operation = Talk();
     } else if (strcmp(type, "touch") == 0) {
-        op->operation = new Touch();
+        op->operation = Touch();
     } else if (strcmp(type, "info") == 0) {
-        op->operation = new Info();
+        op->operation = Info();
     } else {
         fprintf(stderr, "NOTICE: Python creating a custom %s op\n", type);
-        *op->operation = RootOperation::Instantiate();
+        // *op->operation = RootOperation::Instantiate();
         Py_DECREF(op);
         Py_INCREF(Py_None);
         return Py_None;
     }
-    op->own = 1;
     if (PyMapping_HasKeyString(kwds, "to")) {
         to = PyMapping_GetItemString(kwds, "to");
         PyObject * to_id;
@@ -692,7 +672,7 @@ static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwd
             fprintf(stderr, "To id is not a string\n");
             return NULL;
         }
-        op->operation->SetTo(PyString_AsString(to_id));
+        op->operation->setTo(PyString_AsString(to_id));
     }
     if (PyMapping_HasKeyString(kwds, "from_")) {
         from = PyMapping_GetItemString(kwds, "from_");
@@ -707,24 +687,24 @@ static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwd
             fprintf(stderr, "From id is not a string\n");
             return NULL;
         }
-        op->operation->SetFrom(PyString_AsString(from_id));
+        op->operation->setFrom(PyString_AsString(from_id));
         // FIXME I think I need to actually do something with said value now
     }
     Element::ListType args_list;
     addToArgs(args_list, arg1);
     addToArgs(args_list, arg2);
     addToArgs(args_list, arg3);
-    op->operation->SetArgs(args_list);
+    op->operation->setArgsAsList(args_list);
     return (PyObject *)op;
 }
 
 static PyObject * connection_new(PyObject* self, PyObject* args)
 {
-    ConnectionObject *c;
+    PyConnection *c;
     if (!PyArg_ParseTuple(args, "")) {
         return NULL;
     }
-    c = newConnectionObject(args);
+    c = newPyConnection(args);
     if (c == NULL) {
         return NULL;
     }
@@ -733,10 +713,10 @@ static PyObject * connection_new(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef atlas_methods[] = {
-    {"Operation",  (PyCFunction)operation_new,	METH_VARARGS|METH_KEYWORDS},
-    {"Entity",     (PyCFunction)entity_new,	METH_VARARGS|METH_KEYWORDS},
-    {"Connection", (PyCFunction)connection_new,	METH_VARARGS},
-    {NULL,		NULL}				/* Sentinel */
+    {"Operation",  (PyCFunction)operation_new,  METH_VARARGS|METH_KEYWORDS},
+    {"Entity",     (PyCFunction)entity_new,     METH_VARARGS|METH_KEYWORDS},
+    {"Connection", (PyCFunction)connection_new, METH_VARARGS},
+    {NULL,              NULL}                           /* Sentinel */
 };
 
 void init_python_api()
