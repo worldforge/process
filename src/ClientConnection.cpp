@@ -341,19 +341,26 @@ bool ClientConnection::waitFor(const std::string & opParent,
     if (wait(timeOut)) {
         return true;
     }
-    RootOperation * op = pop();
-    if (op == NULL) {
-        std::cerr << "ERROR: No response to operation"
-                  << std::endl << std::flush;
-        return true;
-    }
-    const std::string & p = op->GetParents().front().AsString();
-    if (p != opParent) {
-        std::cerr << "ERROR: Response to operation has parent " << p
-                  << "but it should have parent " << opParent
-                  << std::endl << std::flush;
-        return true;
-    }
+    RootOperation * op;
+    std::string opP;
+    do {
+        poll(0);
+        op = pop();
+        if (op == NULL) {
+            std::cerr << "ERROR: No response to operation"
+                      << std::endl << std::flush;
+            return true;
+        }
+        opP = op->GetParents().front().AsString();
+        verbose( cout << "Got op of type " << opP << std::endl << std::flush;);
+    } while (opP != opParent);
+    //const std::string & p = op->GetParents().front().AsString();
+    //if (p != opParent) {
+        //std::cerr << "ERROR: Response to operation has parent " << p
+                  //<< "but it should have parent " << opParent
+                  //<< std::endl << std::flush;
+        //return true;
+    //}
     const Object::ListType & args = op->GetArgs();
     if (arg.empty()) {
         if (!args.empty()) {
