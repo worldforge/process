@@ -1,24 +1,29 @@
+2003-04-22  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* configure.in: Adapt python check so it works on BSD systems
+	  without libutil.
+
 2003-04-22 James Turner <james@worldforge.org>
 
-    * Fix detection of Account ID by ClientConnection; use
-      the serialno of the activation op (either LOGIN or CREATE)
-      to detect which INFO response contains the account object.
-      This fixes compliance issues with Indri and Stage (which set
-      an ID attribute on the server object).
-    * Added some tests to ensure the every account gets a valid ID,
-      and that other INFO ops do not cause the account ID to be set.
-    * Handle servers the do not use 'lobby' as the root OOG room ID.
-      This required catching the results of the anonymous OOG LOOK and
-      extracting the ID from it.
-    * Factored the code to compare arecived operation against an Atlas
-      template into a separate method on ClientConnection (previously in
-      ::waitFor). This allows code to use ClientConnection::recv() but
-      still validate the op.
-    * Changed the OOG talk tests to use a custom template for validating
-      the SOUND responses. Using an Atlas::Objects instance converted to
-      a Message::Object is problematic becuase it demands every single
-      atribute defined by Objects::RootOperation to be present, including
-      a whole slew of optional ones (such as seconds and future seconds) 
+	* Fix detection of Account ID by ClientConnection; use
+	  the serialno of the activation op (either LOGIN or CREATE)
+	  to detect which INFO response contains the account object.
+	  This fixes compliance issues with Indri and Stage (which set
+	  an ID attribute on the server object).
+	* Added some tests to ensure the every account gets a valid ID,
+	  and that other INFO ops do not cause the account ID to be set.
+	* Handle servers the do not use 'lobby' as the root OOG room ID.
+	  This required catching the results of the anonymous OOG LOOK and
+	  extracting the ID from it.
+	* Factored the code to compare arecived operation against an Atlas
+	  template into a separate method on ClientConnection (previously in
+	  ::waitFor). This allows code to use ClientConnection::recv() but
+	  still validate the op.
+	* Changed the OOG talk tests to use a custom template for validating
+	  the SOUND responses. Using an Atlas::Objects instance converted to
+	  a Message::Object is problematic becuase it demands every single
+	  atribute defined by Objects::RootOperation to be present, including
+	  a whole slew of optional ones (such as seconds and future seconds) 
 
 2003-01-02  Al Riddoch  <ajr@ecs.soton.ac.uk>
 

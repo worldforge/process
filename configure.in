@@ -80,12 +80,16 @@ CPPFLAGS="$CPPFLAGS ${PYTHON_INCLUDES}"
 dnl build the library path from the found version
 python_lib_path=${python_prefix}/lib/${python_version}/config
 
+dnl ugly check for Python, need to see if Python needs -lutil to link
+
 AC_CHECK_LIB(${python_version},
     Py_Initialize,
-    [
-        python_libs="-L${python_lib_path} -l${python_version} -lutil"
-    ],,
-    [-L${python_lib_path} -lutil]
+    [python_libs="-L${python_lib_path} -l${python_version}"],
+    AC_CHECK_LIB(${python_version}, Py_Initialize,
+        [python_libs="-L${python_lib_path} -l${python_version} -lutil"],
+        ,[-L${python_lib_path} -lutil]
+    ),
+    [-L${python_lib_path}]
 )
 
 PYTHON_LIBS=${python_libs}
