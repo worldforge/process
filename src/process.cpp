@@ -12,6 +12,8 @@
 
 using Atlas::Message::Object;
 
+void testTypeQueries(ClientConnection &c);
+
 void usage(const char * progname)
 {
     std::cerr << "usage: " << progname << " [-vr] [ script ]"
@@ -242,6 +244,8 @@ int main(int argc, char ** argv)
         return 1;
     }
 
+    testTypeQueries(connection1);
+    
     verbose( std::cout << "Waiting for appearance of account 1 on connections 2 & 3"
                        << std::endl << std::flush; );
 
@@ -497,4 +501,45 @@ int main(int argc, char ** argv)
 
     // Try out some IG stuff, like creating looking, talking and moving
     return exit_status;
+}
+
+void testTypeQueries(ClientConnection &c)
+{
+    assert(c.isOpen());
+    verbose( std::cout << "Requesting root-type" << std::endl; );
+    
+    Get query = Get::Instantiate();
+    query.SetArgs(Object::ListType(1, "root"));
+    
+    c.send(query);
+    verbose( std::cout << "Waiting for info response to root-type query" << endl; );
+    
+    Object::MapType info;
+    info["parents"] = Object::ListType(1, "info");    
+    
+    if (c.waitFor("info", info)) {
+	std::cerr << "ERROR: Type-query for root did not resut in info" << endl;
+    }
+    
+    query.SetArgs(Object::ListType(1, "game_entity"));
+    verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
+    c.send(query);
+    
+    verbose( std::cout << "Waiting for info response to game_entity type query" << endl; );
+    if (c.waitFor("info", info)) {
+	std::cerr << "ERROR: Type-query for game_entity did not resut in info" << endl;
+    }
+    
+    // try a broken one (unless by some miracle is exists?)
+    query.SetArgs(Object::ListType(1, "_bad_type_"));
+    verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
+    c.send(query);
+    
+    Object::MapType error;
+    error["parents"] = Object::ListType(1, "error");  
+    
+    verbose( std::cout << "Waiting for error response to _bad_type_ type query" << endl; );
+    if (c.waitFor("error", error)) {
+	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << endl;
+    }
 }
