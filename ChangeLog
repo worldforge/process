@@ -1,3 +1,7 @@
+2005-04-06  James Turner  <james@worldforge.org>
+
+	* loadtool/User.cpp: update for new Eris CVS Connection API
+
 2005-04-05  James Turner  <james@worldforge.org>
 
 	* loadtool/Character.cpp, loadtool/Character.h: add virtual dtor to

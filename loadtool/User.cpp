@@ -15,11 +15,10 @@ User::User(const std::string& uid, const std::string& host, short port) :
     m_acc(NULL),
     m_charCount(1)
 {
-    cout << "creating user " << uid << endl;
-    m_con = new Eris::Connection("fuckwad", false);
+    m_con = new Eris::Connection("fuckwad", host, port, false);
     m_con->Connected.connect(SigC::slot(*this, &User::onConnected));
     m_con->Failure.connect(SigC::slot(*this, &User::onConnectionFail));
-    m_con->connect(host, port);
+    m_con->connect();
 }
 
 User::~User()
