@@ -10,6 +10,8 @@
 
 #include <Atlas/Objects/Operation/Look.h>
 
+#include <iostream>
+
 using namespace Atlas::Message;
 using namespace Atlas::Objects::Operation;
 

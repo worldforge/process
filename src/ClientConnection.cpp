@@ -7,6 +7,7 @@
 #endif
 
 #include <algorithm>
+#include <iostream>
 
 #include <Atlas/Codec.h>
 #include <Atlas/Message/Object.h>
@@ -240,7 +241,7 @@ bool ClientConnection::connect(const std::string & server)
     ios.clear(); // clear any lingering errors (necessary for re-conncections)
     ios.open(server, 6767);
     if (!ios.is_open()) {
-	cerr << "failed to open socket" << endl;
+	std::cerr << "failed to open socket" << std::endl;
 	return false;
     }
     
@@ -251,7 +252,7 @@ bool ClientConnection::connect(const std::string & server)
     }
   
     if (conn.GetState() == Atlas::Net::StreamConnect::FAILED) {
-	cerr << "atlas negotiation failed" << endl;
+	std::cerr << "atlas negotiation failed" << std::endl;
         return false;
     }
 

@@ -15,8 +15,8 @@ dnl Test for C++ compiler
 AC_PROG_CC
 AC_PROG_CXX
 
-CFLAGS='-Wall -g'
-CXXFLAGS='-Wall -g'
+CFLAGS="$CFLAGS -Wall -g"
+CXXFLAGS="$CXXFLAGS -Wall -g"
 
 AC_PREFIX_DEFAULT("/usr/local")
 
@@ -25,7 +25,7 @@ AC_REQUIRE_CPP
 
 dnl Test for WorldForge Atlas Libraries
 
-ATLAS_VERSION=0.3.10
+ATLAS_VERSION=0.4.4
 AM_PATH_ATLAS($ATLAS_VERSION)
 CFLAGS="$CFLAGS $ATLAS_CFLAGS"
 CPPFLAGS="$CPPFLAGS $ATLAS_CFLAGS"

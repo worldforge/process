@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <iostream.h>
 
 #include "pythonInterface.h"
 #include "ClientConnection.h"

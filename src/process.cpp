@@ -13,6 +13,7 @@
 #endif
 
 #include <unistd.h>
+#include <iostream>
 
 using Atlas::Message::Object;
 
