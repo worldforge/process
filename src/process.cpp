@@ -4,7 +4,7 @@
 
 #include "ClientConnection.h"
 #include "pythonInterface.h"
-#include "process.h"
+#include "process_debug.h"
 
 #if defined(__GNUC__) && __GNUC__ < 3
 #include "sstream.h"

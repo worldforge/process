@@ -4,7 +4,7 @@
 
 #include "debug.h"
 #include "validator.h"
-#include "process.h"
+#include "process_debug.h"
 #include "testOOG.h"
 #include "atlasUtils.h"
 

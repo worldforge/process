@@ -20,7 +20,7 @@
 #include "ClientConnection.h"
 
 #include "debug.h"
-#include "process.h"
+#include "process_debug.h"
 
 static const bool debug_flag = false;
 

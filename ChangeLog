@@ -1,3 +1,9 @@
+2002-07-15  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/ClientConnection.cpp, src/process.cpp, src/testOOG.cpp,
+	  src/process.h, src/process_debug.h: Rename process.h to
+	  process_debug.h to avoid header clash on windows.
+
 2002-07-14  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/ClientConnection.cpp, src/process.cpp, src/pythonInterface.cpp,
