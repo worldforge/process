@@ -18,6 +18,8 @@ using Atlas::Message::Object;
 
 void testTypeQueries(ClientConnection &c);
 
+void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher);
+
 void usage(const char * progname)
 {
     std::cerr << "usage: " << progname << " [-vr] [ script ]"
@@ -247,8 +249,6 @@ int main(int argc, char ** argv)
                   << std::endl << std::flush;
         return 1;
     }
-
-    testTypeQueries(connection1);
     
     verbose( std::cout << "Waiting for appearance of account 1 on connections 2 & 3"
                        << std::endl << std::flush; );
@@ -263,6 +263,10 @@ int main(int argc, char ** argv)
                   << std::endl << std::flush;
     }
 
+    testLogout(connection2, ac2.str(), connection1);
+    
+    testTypeQueries(connection1);
+    
     verbose( std::cout << "Sending out-of-game (OOG) look on primary connection"
                        << std::endl << std::flush; );
 
@@ -544,10 +548,48 @@ void testTypeQueries(ClientConnection &c)
     c.send(query);
     
     Object::MapType error;
-    error["parents"] = Object::ListType(1, "error");  
+    error["message"] = std::string();
     
     verbose( std::cout << "Waiting for error response to _bad_type_ type query" << std::endl; );
-    if (c.waitFor("error", error)) {
+    if (c.waitFor("error", error, true)) {
 	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << std::endl;
     }
+}
+
+void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher)
+{
+    Logout lg = Logout::Instantiate();
+    lg.SetFrom(acc);
+    verbose( std::cout << "Sending logut for connection 2" << std::endl; );
+    c.send(lg);
+    
+    verbose( std::cout << "Waiting for disappearance of connection 2" << std::endl; );
+    Object::MapType disap;
+    disap["id"] = Object(acc);  
+    if (watcher.waitFor("disappearance", disap)) {
+	std::cerr << "ERROR: didn't get a disappearance of account 2" << std::endl;
+    }
+    
+    verbose( std::cout << "Waiting for info(logout) of connection 2" << std::endl; );
+    Object::MapType info;
+    info["parents"] = Object::ListType(1, "logout");  
+    if (c.waitFor("info", info)) {
+	std::cerr << "NOTE: LOGOUT did not produce an INFO response; this is okay could be fixed" << std::endl;
+    }
+    
+    c.close();
+    
+    if (!c.connect("localhost")) {
+	std::cerr << "ERROR: Unable to re-connect to server"
+                  << std::endl << std::flush;
+        return;
+    }
+    
+    c.login(acc, "ptacpw2pc");
+    
+    verbose( std::cout << "Waiting for info(player) of connection 2" << std::endl; );
+    if (c.waitFor("info", info)) {
+	std::cerr << "ERROR: login did not produce an INFO response" << std::endl;
+    }
+    
 }

@@ -69,8 +69,10 @@ class ClientConnection : public Atlas::Objects::Decoder {
     void close();
     bool login(const std::string &, const std::string &);
     bool create(const std::string &, const std::string &);
-    bool wait(int time = 0);
-    bool waitFor(const std::string &, const Atlas::Message::Object::MapType &);
+    bool wait(int time = 0, bool error_expected = false);
+    bool waitFor(const std::string &,
+                 const Atlas::Message::Object::MapType &,
+                 bool error_expected = false);
     void send(Atlas::Objects::Operation::RootOperation & op);
     void error(const std::string & message);
     bool poll(int time);

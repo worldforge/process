@@ -218,8 +218,11 @@ int ClientConnection::read() {
 bool ClientConnection::connect(const std::string & server)
 {
     ios.open(server, 6767);
-    if (!ios.is_open()) return false;
-	
+    if (!ios.is_open()) {
+	cerr << "failed to open socket" << endl;
+	return false;
+    }
+    
     Atlas::Net::StreamConnect conn("cyphesis_aiclient", ios, this);
 
     while (conn.GetState() == Atlas::Net::StreamConnect::IN_PROGRESS) {
@@ -227,6 +230,7 @@ bool ClientConnection::connect(const std::string & server)
     }
   
     if (conn.GetState() == Atlas::Net::StreamConnect::FAILED) {
+	cerr << "atlas negotiation failed" << endl;
         return false;
     }
 
@@ -284,7 +288,7 @@ bool ClientConnection::create(const std::string & account,
     return true;
 }
 
-bool ClientConnection::wait(int time)
+bool ClientConnection::wait(int time, bool error_expected)
 // Waits for response from server. Used when we are expecting a login response
 // Return whether or not an error occured
 {
@@ -307,13 +311,14 @@ bool ClientConnection::wait(int time)
     }
     // codec->Poll();
     debug(std::cout << "WAIT finished" << std::endl << std::flush;);
-    return error_flag;
+    return error_expected ? !error_flag : error_flag;
 }
 
 bool ClientConnection::waitFor(const std::string & opParent,
-                               const Object::MapType & arg)
+                               const Object::MapType & arg,
+                               bool error_expected)
 {
-    if (wait(timeOut)) {
+    if (wait(timeOut, error_expected)) {
         return true;
     }
     RootOperation * op;

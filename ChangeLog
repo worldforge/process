@@ -1,3 +1,13 @@
+2002-02-20  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/process.cpp: Logout tests added by James.
+
+	* src/ClientConnection.h, src/ClientConnection.cpp: Add flag
+	  so tests can be run which expect an error.
+
+	* src/process.cpp: Fix _bad_type_ query so an error is expected
+	  correctly, with arguments in the right form.
+
 Saturday, January 26 2002, James Turner <jmtn@blueyonder.co.uk>
 
 	* configure.in checks for skstream2 using the AM_PATH_SKSTREAM
