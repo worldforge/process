@@ -10,6 +10,7 @@
 
 using Atlas::Message::Element;
 
+#if 0
 static Element makeAtlasVec(double x, double y, double z)
 {
     Element::ListType vec;
@@ -18,6 +19,7 @@ static Element makeAtlasVec(double x, double y, double z)
     vec.push_back(z);
     return Element(vec);
 }
+#endif
 
 void testTypeQueries(ClientConnection &c)
 {
