@@ -392,12 +392,20 @@ bool ClientConnection::waitFor(const std::string & opParent,
             continue;
         }
         if (I->second.GetType() != J->second.GetType()) {
-            std::cerr << "ERROR: Response to operation args should have "
-                      << "attribute '" << I->first << "' of type "
-                      << typeAsString(I->second) << " but it is of type "
-                      << typeAsString(J->second)
-                      << std::endl << std::flush;
-            error = true;
+            if (I->second.IsNum() && J->second.IsNum()) {
+                std::cerr << "WARNING: Response to operation args should have "
+                          << "attribute '" << I->first << "' of type "
+                          << typeAsString(I->second) << " but it is of type "
+                          << typeAsString(J->second)
+                          << std::endl << std::flush;
+            } else {
+                std::cerr << "ERROR: Response to operation args should have "
+                          << "attribute '" << I->first << "' of type "
+                          << typeAsString(I->second) << " but it is of type "
+                          << typeAsString(J->second)
+                          << std::endl << std::flush;
+                error = true;
+            }
         }
     }
     return error;

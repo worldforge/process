@@ -90,6 +90,9 @@ class ClientConnection : public Atlas::Objects::Decoder {
     const Atlas::Message::Object::MapType & getReply() {
         return reply;
     }
+    const bool isOpen() const {
+        return client_fd != -1;
+    }
 
     static const int timeOut = 5;
 };
