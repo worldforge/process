@@ -84,8 +84,14 @@ void ClientConnection::ObjectArrived(const Info & op)
     const std::string & from = op.GetFrom();
     if (from.empty()) {
         try {
-            Object ac = op.GetArgs().front();
+            const Object & ac = op.GetArgs().front();
             reply = ac.AsMap();
+            Object::MapType::const_iterator I = reply.find("id");
+            if ((I != reply.end()) && I->second.IsString() && accountId.empty()) {
+                accountId = I->second.AsString();
+                verbose_only( std::cout << "Got account id of " << accountId
+                                        << std::endl << std::flush; );
+            }
             // const std::string & acid = reply["id"].AsString();
             // objects[acid] = new ClientAccount(acid, *this);
         }

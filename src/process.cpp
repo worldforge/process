@@ -22,7 +22,7 @@ void testTypeQueries(ClientConnection &c);
 void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher);
 void testDuplicateLogin(const std::string &account, const std::string &pass);
     
-void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc);    
+void testInvalidCharacterCreate(ClientConnection &c);    
     
 void usage(const char * progname)
 {
@@ -279,7 +279,7 @@ int main(int argc, char ** argv)
                        << std::endl << std::flush; );
 
     Look l(Look::Instantiate());
-    l.SetFrom(ac1.str());
+    l.SetFrom(connection1.getAccountId());
     sno = connection1.send(l);
 
     verbose( std::cout << "Waiting for look response on primary connection"
@@ -304,7 +304,7 @@ int main(int argc, char ** argv)
     Object::MapType say;
     say["say"] = "Hello";
     say["loc"] = "lobby";
-    t.SetFrom(ac1.str());
+    t.SetFrom(connection1.getAccountId());
     t.SetArgs(Object::ListType(1, say));
     sno = connection1.send(t);
 
@@ -378,7 +378,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Sending out-of-game (OOG) talk on second connection"
                            << std::endl << std::flush; );
 
-        t.SetFrom(ac2.str());
+        t.SetFrom(connection2.getAccountId());
         sno = connection2.send(t);
 
         verbose( std::cout << "Waiting for sound response to talk on primary connection"
@@ -409,7 +409,7 @@ int main(int argc, char ** argv)
     }
 
     // Talk t(Talk::Instantiate());
-    // t->SetFrom(ac1.str());
+    // t->SetFrom(connection1.getAccountId());
     // Try out some OOG stuff, like looking, talking and private messages
 
 	// send private chats from 2 -> 1 and 2 -> 3 
@@ -418,8 +418,8 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Sending private out-of-game (OOG) talk on secondary connection"
                            << std::endl << std::flush; );
 
-        t.SetTo(ac1.str());
-        t.SetFrom(ac2.str());
+        t.SetTo(connection1.getAccountId());
+        t.SetFrom(connection2.getAccountId());
         Object::MapType say;
         say["say"] = "Private_2_1";
         t.SetArgs(Object::ListType(1, say));
@@ -438,7 +438,7 @@ int main(int argc, char ** argv)
             verbose( std::cout << "Sending private out-of-game (OOG) talk on secondary connection"
                                << std::endl << std::flush; );
 
-            t.SetTo(ac3.str());
+            t.SetTo(connection3.getAccountId());
             say["say"] = "Private_2_3";
             t.SetArgs(Object::ListType(1, say));
             sno = connection2.send(t);
@@ -464,7 +464,7 @@ int main(int argc, char ** argv)
     character["name"] = "Nivek";
 
     Create create = Create::Instantiate();
-    create.SetFrom(ac1.str());
+    create.SetFrom(connection1.getAccountId());
     create.SetArgs(Object::ListType(1,character));
 
     sno = connection1.send(create);
@@ -482,7 +482,7 @@ int main(int argc, char ** argv)
                            << std::endl << std::flush; );
 
         character["name"] = "Cevin";
-        create.SetFrom(ac2.str());
+        create.SetFrom(connection2.getAccountId());
         create.SetArgs(Object::ListType(1,character));
 
         sno = connection2.send(create);
@@ -497,13 +497,13 @@ int main(int argc, char ** argv)
     }
 
     if (connection3.isOpen()) {
-	testInvalidCharacterCreate(connection3, ac3.str());
+	testInvalidCharacterCreate(connection3);
 	
         verbose( std::cout << "Creating character on third connection"
                            << std::endl << std::flush; );
 
         character["name"] = "Dwayne";
-        create.SetFrom(ac3.str());
+        create.SetFrom(connection3.getAccountId());
         create.SetArgs(Object::ListType(1,character));
 
         sno = connection3.send(create);
@@ -566,7 +566,7 @@ void testTypeQueries(ClientConnection &c)
 void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher)
 {
     Logout lg = Logout::Instantiate();
-    lg.SetFrom(acc);
+    lg.SetFrom(c.getAccountId());
     verbose( std::cout << "Sending logut for connection 2" << std::endl; );
     int sno = c.send(lg);
     
@@ -601,7 +601,7 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     
 }
 
-void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc)
+void testInvalidCharacterCreate(ClientConnection &c)
 {
     verbose( std::cout << "Testing character creation with invalid type"
                            << std::endl << std::flush; );
@@ -612,7 +612,7 @@ void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc)
     character["name"] = "Dwayne";
 
     Create create = Create::Instantiate();
-    create.SetFrom(acc);
+    create.SetFrom(c.getAccountId());
     create.SetArgs(Object::ListType(1,character));
     
     int sno = c.send(create);
@@ -633,7 +633,7 @@ void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc)
 void testRooms(ClientConnection &cl, const std::string &acc)
 {
     Create cr;
-    cr.SetFrom(acc);
+    cr.SetFrom(cl.getAccountId());
     
     cr.SetTo(lobby);
     
@@ -650,7 +650,7 @@ void testInGame(ClientConnection &a, ClientConnection &b, ClientConnection &c)
 {
     // movement
     Move mv = Move::Instantiate();
-    mv.SetFrom(ac1Char);
+    mv.SetFrom(a.getAccountId());
     mv.SetTo(ac1Char);
     
     Object::MapType move;

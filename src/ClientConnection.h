@@ -27,6 +27,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
     tcp_socket_stream ios;
     Atlas::Codec<std::iostream> * codec;
     Atlas::Objects::Encoder * encoder;
+    std::string accountId;
     
     Atlas::Message::Object::MapType reply;
     static int serialNoBase;
@@ -109,6 +110,10 @@ class ClientConnection : public Atlas::Objects::Decoder {
     
     const std::string getPassword()
     { return getTag("pass"); }
+
+    const std::string & getAccountId() const {
+        return accountId;
+    }
 
     int getLastSerialno()
     { return serialNo; }
