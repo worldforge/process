@@ -28,9 +28,27 @@ User::~User()
     delete m_con;
 }
 
+static const char* static_charNames[] = 
+{
+    "Gabe",
+    "Tycho",
+    "Batjew",
+    "Safety monkey",
+    "Div",
+    0,
+};
+
 void User::createCharacter()
 {
     Atlas::Objects::Entity::GameEntity charData;
+    
+    static int nameCounter = 0;
+    
+    if (static_charNames[nameCounter] == NULL) nameCounter = 0;
+    charData->setName(static_charNames[nameCounter++]);
+    
+    charData->setParents(std::list<std::string>(1, "settler"));
+    
     m_acc->createCharacter(charData);
 }
 

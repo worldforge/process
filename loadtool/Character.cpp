@@ -37,8 +37,8 @@ void Character::onHear(Eris::Entity* src, const Atlas::Objects::Operation::RootO
     if (!args->hasAttr("say")) return; // weird
     std::string m = args->getAttr("say").asString();
     
-    if (m == "Shitcock") {
-        m_avatar->say("You are the Homo King!");
+    if (m == "Shitcock!") {
+        m_avatar->say("I fucked your dad!");
     }
 }
 

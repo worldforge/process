@@ -1,3 +1,16 @@
+2005-02-16  James Turner  <james@worldforge.org>
+
+	* loadtool/User.cpp: define a list of character names, and set the
+	  character type to settler. Also set a random height for characters
+	  over a narrow range.
+	  
+	* loadtool/Action.cpp: add in a Babble action, with various phrases
+	  which are randomly spoken. Also tweak the numbers for the random
+	  move and action selector.
+	  
+	* loadtool/Character.cpp: tweak the heard-speech handler, though it
+	  doesn't appear to work correctly yet.
+
 2005-02-09  James Turner  <james@worldforge.org>
 
 	* loadtool/* : add initial load-testing harness, which sort of works,
