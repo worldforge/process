@@ -11,6 +11,8 @@
 #include <iostream>
 
 using Atlas::Message::Element;
+using Atlas::Message::MapType;
+using Atlas::Message::ListType;
 
 void testOOG(ClientConnection & connection1,
              ClientConnection & connection2,
@@ -26,16 +28,16 @@ void testOOG(ClientConnection & connection1,
     verbose( std::cout << "Waiting for look response on primary connection"
                        << std::endl << std::flush; );
 
-    Element::MapType room_template;
+    MapType room_template;
     room_template["id"] = std::string();
     room_template["name"] = std::string();
-    room_template["parents"] = Element::ListType();
-    room_template["people"] = Element::ListType();
-    room_template["rooms"] = Element::ListType();
+    room_template["parents"] = ListType();
+    room_template["people"] = ListType();
+    room_template["rooms"] = ListType();
     room_template["objtype"] = std::string();
     
     RootOperation anonLookResponse = connection1.recv("sight", sno);
-    if (!anonLookResponse || connection1.compareArgToTemplate(anonLookResponse, room_template)) {
+    if (!anonLookResponse.isValid() || connection1.compareArgToTemplate(anonLookResponse, room_template)) {
         std::cerr << "ERROR: Out-of-game Look failed"
                   << std::endl << std::flush;
     }
@@ -48,19 +50,19 @@ void testOOG(ClientConnection & connection1,
                        << std::endl << std::flush; );
 
     Talk t;
-    Element::MapType say;
+    MapType say;
     say["say"] = "Hello";
     say["loc"] = lobbyId;
     t->setFrom(connection1.getAccountId());
-    t->setArgsAsList(Element::ListType(1, say));
+    t->setArgsAsList(ListType(1, say));
     sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
-    Element::MapType talkTemplate;
+    MapType talkTemplate;
     talkTemplate["from"] = connection1.getAccountId();
-    talkTemplate["args"] = Element::ListType(1, say);
+    talkTemplate["args"] = ListType(1, say);
 
     if (connection1.waitFor("sound", talkTemplate, sno)) {
         std::cerr << "WARNING: Out-of-game Talk did not result in sound"
@@ -171,9 +173,9 @@ void testOOG(ClientConnection & connection1,
 
         t->setTo(connection1.getAccountId());
         t->setFrom(connection2.getAccountId());
-        Element::MapType say;
+        MapType say;
         say["say"] = "Private_2_1";
-        t->setArgsAsList(Element::ListType(1, say));
+        t->setArgsAsList(ListType(1, say));
 
         talkTemplate["args"] = t->getArgsAsList();
         talkTemplate["from"] = connection2.getAccountId();
@@ -195,7 +197,7 @@ void testOOG(ClientConnection & connection1,
 
             t->setTo(connection3.getAccountId());
             say["say"] = "Private_2_3";
-            t->setArgsAsList(Element::ListType(1, say));
+            t->setArgsAsList(ListType(1, say));
             sno = connection2.send(t);
 
             talkTemplate["args"] = t->getArgsAsList();

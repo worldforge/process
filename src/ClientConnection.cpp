@@ -30,6 +30,8 @@ StringVec tokenize(const std::string &s, const char t);
 int ClientConnection::serialNoBase = 0;
 
 using Atlas::Message::Element;
+using Atlas::Message::ListType;
+using Atlas::Message::MapType;
 
 static inline const std::string typeAsString(const Element & o)
 {
@@ -291,16 +293,16 @@ int ClientConnection::login(const std::string & account,
                              const std::string & password)
 {
     Atlas::Objects::Operation::Login l; // = Atlas::Objects::Operation::Login::Instantiate();
-    Element::MapType acmap;
+    MapType acmap;
     acmap["username"] = account;
     acmap["password"] = password;
-    acmap["parents"] = Element::ListType(1,"account");
+    acmap["parents"] = ListType(1,"account");
     acmap["objtype"] = "object";
 
     setTag("account", account);
     setTag("pass", password);
     
-    l->setArgsAsList(Element::ListType(1,Element(acmap)));
+    l->setArgsAsList(ListType(1,Element(acmap)));
 
     reply_flag = false;
     error_flag = false;
@@ -312,16 +314,16 @@ int ClientConnection::create(const std::string & account,
                               const std::string & password)
 {
     Atlas::Objects::Operation::Create c; // = Atlas::Objects::Operation::Create::Instantiate();
-    Element::MapType acmap;
+    MapType acmap;
     acmap["username"] = account;
     acmap["password"] = password;
-    acmap["parents"] = Element::ListType(1,"account");
+    acmap["parents"] = ListType(1,"account");
     acmap["objtype"] = "object";
 
     setTag("account", account);
     setTag("pass", password);
 
-    c->setArgsAsList(Element::ListType(1,Element(acmap)));
+    c->setArgsAsList(ListType(1,Element(acmap)));
 
     reply_flag = false;
     error_flag = false;
@@ -333,7 +335,7 @@ bool ClientConnection::createChar(const Element& charData)
 {
     Atlas::Objects::Operation::Create create;
     create->setFrom(accountId);
-    create->setArgsAsList(Element::ListType(1,charData));
+    create->setArgsAsList(ListType(1,charData));
 
     int serialno = send(create);
     verbose( std::cout << "Waiting for info response to character creation"
@@ -397,7 +399,7 @@ bool ClientConnection::wait(int time, bool error_expected, int refNo)
 }
 
 bool ClientConnection::waitFor(const std::string & opParent,
-                               const Element::MapType & arg,
+                               const MapType & arg,
                                int refNo)
 {
     if (refNo == -1) {
@@ -431,9 +433,9 @@ bool ClientConnection::waitFor(const std::string & opParent,
     return compareArgToTemplate(op, arg);
 }
 
-bool ClientConnection::compareArgToTemplate(const RootOperation & op, const Element::MapType & arg)
+bool ClientConnection::compareArgToTemplate(const RootOperation & op, const MapType & arg)
 {
-    const Element::ListType args = op->getArgsAsList();
+    const ListType args = op->getArgsAsList();
     if (arg.empty()) {
         if (!args.empty()) {
             std::cerr << "ERROR: Response from server has args "
@@ -455,8 +457,8 @@ bool ClientConnection::compareArgToTemplate(const RootOperation & op, const Elem
                         << std::endl << std::flush;);
     }
     
-    const Element::MapType & a = args.front().asMap();
-    Element::MapType::const_iterator J, K;
+    const MapType & a = args.front().asMap();
+    MapType::const_iterator J, K;
     bool error = false;
     for (J = arg.begin(); J != arg.end(); J++) {
         K = a.find(J->first);
@@ -550,7 +552,7 @@ bool ClientConnection::waitForError(int refNo)
     
     bool ret = false;
     RootOperation erOp = *I;
-    Element::ListType erArgs = erOp->getArgsAsList();
+    ListType erArgs = erOp->getArgsAsList();
     if (erArgs.size() != 2) {
         std::cerr << "Error operation does not have 2 args"
                   << std::endl << std::flush;
@@ -561,8 +563,8 @@ bool ClientConnection::waitForError(int refNo)
                       << std::endl << std::flush;
             ret = true;
         } else {
-            Element::MapType & arg1 = erArgs[0].asMap();
-            Element::MapType::const_iterator I = arg1.find("message");
+            MapType & arg1 = erArgs[0].asMap();
+            MapType::const_iterator I = arg1.find("message");
             if (arg1.size() != 1 || I == arg1.end() || !I->second.isString()) {
                 std::cerr << "Error operation's first arg does not contain a single message string"
                           << std::endl << std::flush;
@@ -574,8 +576,8 @@ bool ClientConnection::waitForError(int refNo)
                       << std::endl << std::flush;
             ret = true;
         } else {
-            Element::MapType & arg2 = erArgs[1].asMap();
-            Element::MapType::const_iterator I = arg2.find("objtype");
+            MapType & arg2 = erArgs[1].asMap();
+            MapType::const_iterator I = arg2.find("objtype");
             if (I == arg2.end() || !I->second.isString()) {
                 std::cerr << "Error operation's second arg does not have an objtype"
                           << std::endl << std::flush;
@@ -688,7 +690,7 @@ void ClientConnection::push(const Atlas::Objects::Root & op)
 {
     reply_flag = true;
     RootOperation new_op = Atlas::Objects::smart_dynamic_cast<Atlas::Objects::Operation::RootOperation>(op); 
-    if (!new_op) {
+    if (!new_op.isValid()) {
         verbose( std::cout << "Recived message which is not an op"
                            << std::endl << std::flush; );
         return;

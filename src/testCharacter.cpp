@@ -9,20 +9,22 @@
 #include <iostream>
 
 using Atlas::Message::Element;
+using Atlas::Message::MapType;
+using Atlas::Message::ListType;
 
 void testInvalidCharacterCreate(ClientConnection &c)
 {
     verbose( std::cout << "Testing character creation with invalid type"
                            << std::endl << std::flush; );
 
-    Element::MapType character;
+    MapType character;
     character["objtype"] = "object";
-    character["parents"] = Element::ListType(1,"__bad__type__");
+    character["parents"] = ListType(1,"__bad__type__");
     character["name"] = "Dwayne";
 
     Create create;
     create->setFrom(c.getAccountId());
-    create->setArgsAsList(Element::ListType(1,character));
+    create->setArgsAsList(ListType(1,character));
     
     int sno = c.send(create);
 
@@ -42,9 +44,9 @@ void testCharacterCreate(ClientConnection & connection1,
     verbose( std::cout << "Creating character on primary connection"
                        << std::endl << std::flush; );
 
-    Element::MapType character;
+    MapType character;
     character["objtype"] = "object";
-    character["parents"] = Element::ListType(1,"settler");
+    character["parents"] = ListType(1,"settler");
     character["name"] = "Nivek";
 
     connection1.createChar(character);

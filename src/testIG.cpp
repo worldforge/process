@@ -11,6 +11,8 @@
 #include <iostream>
 
 using Atlas::Message::Element;
+using Atlas::Message::MapType;
+using Atlas::Message::ListType;
 using Atlas::Objects::Operation::RootOperation;
 using Atlas::Objects::Entity::RootEntity;
 
@@ -19,21 +21,21 @@ static void lookAtEntity(ClientConnection& con, const std::string & eid,
 {
     Look l;
     l->setFrom(con.getCharacterId());
-    Element::MapType lookEnt;
+    MapType lookEnt;
     lookEnt["id"] = eid;
-    l->setArgsAsList(Element::ListType(1, lookEnt));
+    l->setArgsAsList(ListType(1, lookEnt));
     int serial = con.send(l);
     
     verbose( std::cout << "Waiting for In-game look response on connection "
                        << con.getAccount() << std::endl << std::flush; );
 
-    Element::MapType game_entity_template;
+    MapType game_entity_template;
     game_entity_template["id"] = std::string();
-    game_entity_template["parents"] = Element::ListType();
+    game_entity_template["parents"] = ListType();
     game_entity_template["objtype"] = std::string();
     
     RootOperation sight = con.recv("sight", serial);
-    if (!sight || con.compareArgToTemplate(sight, game_entity_template)) {
+    if (!sight.isValid() || con.compareArgToTemplate(sight, game_entity_template)) {
         std::cerr << "ERROR: In-game Look failed" << std::endl << std::flush;
         return;
     }
@@ -80,13 +82,13 @@ void testInGameLook(ClientConnection& con)
     verbose( std::cout << "Waiting for In-game look response on connection "
                        << con.getAccount() << std::endl << std::flush; );
 
-    Element::MapType game_entity_template;
+    MapType game_entity_template;
     game_entity_template["id"] = std::string();
-    game_entity_template["parents"] = Element::ListType();
+    game_entity_template["parents"] = ListType();
     game_entity_template["objtype"] = std::string();
     
     RootOperation anonLookResponse = con.recv("sight", serial);
-    if (!anonLookResponse || con.compareArgToTemplate(anonLookResponse, game_entity_template)) {
+    if (!anonLookResponse.isValid() || con.compareArgToTemplate(anonLookResponse, game_entity_template)) {
         std::cerr << "ERROR: In-game anonymous Look failed"
                   << std::endl << std::flush;
     }
@@ -106,16 +108,16 @@ void testInGameLook(ClientConnection& con)
     }
     
 // let's look at ourselves ....    
-    Element::MapType lookEnt;
+    MapType lookEnt;
     lookEnt["id"] = con.getCharacterId();
-    l->setArgsAsList(Element::ListType(1, lookEnt));
+    l->setArgsAsList(ListType(1, lookEnt));
     serial = con.send(l);
     
     verbose( std::cout << "Waiting for self IG look response on connection "
                        << con.getAccount() << std::endl << std::flush; );
     
     RootOperation selfLookResponse = con.recv("sight", serial);
-    if (!selfLookResponse || con.compareArgToTemplate(selfLookResponse, game_entity_template)) {
+    if (!selfLookResponse.isValid() || con.compareArgToTemplate(selfLookResponse, game_entity_template)) {
         std::cerr << "ERROR: In-game self Look failed" << std::endl << std::flush;
     }
 

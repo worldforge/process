@@ -9,6 +9,8 @@
 #include <iostream>
 
 using Atlas::Message::Element;
+using Atlas::Message::MapType;
+using Atlas::Message::ListType;
 
 #if 0
 static Element makeAtlasVec(double x, double y, double z)
@@ -27,22 +29,22 @@ void testTypeQueries(ClientConnection &c)
     verbose( std::cout << "Requesting root-type" << std::endl; );
     
     Get query;
-    Element::MapType arg;
+    MapType arg;
     arg["id"] = "root";
-    query->setArgsAsList(Element::ListType(1, arg));
+    query->setArgsAsList(ListType(1, arg));
     
     int sno = c.send(query);
     verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
     
-    Element::MapType info;
-    info["parents"] = Element::ListType(1, "info");    
+    MapType info;
+    info["parents"] = ListType(1, "info");    
     
     if (c.waitFor("info", info, sno)) {
         std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
     arg["id"] = "game_entity";
-    query->setArgsAsList(Element::ListType(1, arg));
+    query->setArgsAsList(ListType(1, arg));
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
     sno = c.send(query);
     
@@ -53,7 +55,7 @@ void testTypeQueries(ClientConnection &c)
     
     // try a broken one (unless by some miracle is exists?)
     arg["id"] = "_bad_type_";
-    query->setArgsAsList(Element::ListType(1, arg));
+    query->setArgsAsList(ListType(1, arg));
     verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
     sno = c.send(query);
     
@@ -73,15 +75,15 @@ void testLogout(ClientConnection &c, ClientConnection &watcher)
     int sno = c.send(lg);
     
     verbose( std::cout << "Waiting for disappearance of connection 2" << std::endl; );
-    Element::MapType disap;
+    MapType disap;
     disap["id"] = Element(acc);  
     if (watcher.waitFor("disappearance", disap)) {
         std::cerr << "ERROR: didn't get a disappearance of account 2" << std::endl;
     }
     
     verbose( std::cout << "Waiting for info(logout) of connection 2" << std::endl; );
-    Element::MapType info;
-    info["parents"] = Element::ListType(1, "logout");  
+    MapType info;
+    info["parents"] = ListType(1, "logout");  
     if (c.waitFor("info", info, sno)) {
         std::cerr << "NOTE: LOGOUT did not produce an INFO response; this is okay could be fixed" << std::endl;
     }

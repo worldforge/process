@@ -11,6 +11,8 @@
 #include <unistd.h>
 
 using Atlas::Message::Element;
+using Atlas::Message::ListType;
+using Atlas::Message::MapType;
 using Atlas::Objects::Root;
 
 /*
@@ -65,7 +67,7 @@ static PyObject * Operation_setArgs(PyOperation * self, PyObject * args)
         PyErr_SetString(PyExc_TypeError,"args not a list");
         return NULL;
     }
-    Element::ListType argslist;
+    ListType argslist;
     for(int i = 0; i < PyList_Size(args_object); i++) {
         PyMessageElement * item = (PyMessageElement *)PyList_GetItem(args_object, i);
         if (!PyMessageElement_Check(item)) {
@@ -175,7 +177,7 @@ static int MessageElement_setattr( PyMessageElement *self, char *name, PyObject 
         return -1;
     }
     if (self->m_obj->isMap()) {
-        Element::MapType & omap = self->m_obj->asMap();
+        MapType & omap = self->m_obj->asMap();
         Element v_obj = PyObject_asMessageElement(v);
         if (v_obj.getType() != Element::TYPE_NONE) {
             omap[name] = v_obj;
@@ -229,10 +231,10 @@ PyMessageElement * newPyMessageElement(PyObject *arg)
  * Utility functions to munge between Object related types and python types
  */
 
-static PyObject * MapType_asPyObject(const Element::MapType & map)
+static PyObject * MapType_asPyObject(const MapType & map)
 {
     PyObject * args_pydict = PyDict_New();
-    Element::MapType::const_iterator I;
+    MapType::const_iterator I;
     PyMessageElement * item;
     for(I=map.begin();I!=map.end();I++) {
         const std::string & key = I->first;
@@ -249,10 +251,10 @@ static PyObject * MapType_asPyObject(const Element::MapType & map)
     return args_pydict;
 }
 
-static PyObject * ListType_asPyObject(const Element::ListType & list)
+static PyObject * ListType_asPyObject(const ListType & list)
 {
     PyObject * args_pylist = PyList_New(list.size());
-    Element::ListType::const_iterator I;
+    ListType::const_iterator I;
     int j=0;
     PyMessageElement * item;
     for(I=list.begin();I!=list.end();I++,j++) {
@@ -293,9 +295,9 @@ PyObject * MessageElement_asPyObject(const Element & obj)
     return ret;
 }
 
-Element::ListType PyListObject_asElementList(PyObject * list)
+ListType PyListObject_asElementList(PyObject * list)
 {
-    Element::ListType argslist;
+    ListType argslist;
     PyMessageElement * item;
     for(int i = 0; i < PyList_Size(list); i++) {
         item = (PyMessageElement *)PyList_GetItem(list, i);
@@ -311,9 +313,9 @@ Element::ListType PyListObject_asElementList(PyObject * list)
     return argslist;
 }
 
-Element::MapType PyDictObject_asElementMap(PyObject * dict)
+MapType PyDictObject_asElementMap(PyObject * dict)
 {
-    Element::MapType argsmap;
+    MapType argsmap;
     PyMessageElement * item;
     PyObject * keys = PyDict_Keys(dict);
     PyObject * vals = PyDict_Values(dict);
@@ -352,7 +354,7 @@ Element PyObject_asMessageElement(PyObject * o)
         return Element(PyDictObject_asElementMap(o));
     }
     if (PyTuple_Check(o)) {
-        Element::ListType list;
+        ListType list;
         int i, size = PyTuple_Size(o);
         for(i = 0; i < size; i++) {
             Element item = PyObject_asMessageElement(PyTuple_GetItem(o, i));
@@ -542,7 +544,7 @@ static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
     if (!PyArg_ParseTuple(args, "|s", &id)) {
         return NULL;
     }
-    Element::MapType omap;
+    MapType omap;
     if (id != NULL) {
         omap["id"] = std::string(id);
     }
@@ -560,7 +562,7 @@ static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
             if ((strcmp(key, "parent") == 0) && (PyString_Check(val))) {
                 omap["loc"] = Element(std::string(PyString_AsString(val)));
             } else if ((strcmp(key, "type") == 0) && (PyString_Check(val))) {
-                omap["parents"] = Element::ListType(1,std::string(PyString_AsString(val)));
+                omap["parents"] = ListType(1,std::string(PyString_AsString(val)));
             } else {
                 Element val_obj = PyObject_asMessageElement(val);
                 if (val_obj.getType() == Element::TYPE_NONE) {
@@ -585,7 +587,7 @@ static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
     return (PyObject *)o;
 }
 
-static inline void addToArgs(Element::ListType & args, PyObject * ent)
+static inline void addToArgs(ListType & args, PyObject * ent)
 {
     if (ent == NULL) {
         return;
@@ -598,9 +600,9 @@ static inline void addToArgs(Element::ListType & args, PyObject * ent)
         }
         Element o(*obj->m_obj);
         if (o.isMap() && (obj->m_attr != NULL)) {
-            Element::MapType & ent = o.asMap();
-            Element::MapType ent2 = PyDictObject_asElementMap(obj->m_attr);
-            Element::MapType::iterator I = ent2.begin();
+            MapType & ent = o.asMap();
+            MapType ent2 = PyDictObject_asElementMap(obj->m_attr);
+            MapType::iterator I = ent2.begin();
             for(; I != ent2.end(); I++) {
                 if (ent.find(I->first) != ent.end()) {
                     ent[I->first] = I->second;
@@ -690,7 +692,7 @@ static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwd
         op->operation->setFrom(PyString_AsString(from_id));
         // FIXME I think I need to actually do something with said value now
     }
-    Element::ListType args_list;
+    ListType args_list;
     addToArgs(args_list, arg1);
     addToArgs(args_list, arg2);
     addToArgs(args_list, arg3);

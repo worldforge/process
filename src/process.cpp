@@ -23,6 +23,8 @@
 #include <iostream>
 
 using Atlas::Message::Element;
+using Atlas::Message::ListType;
+using Atlas::Message::MapType;
 
 static void usage(const char * progname)
 {
@@ -148,9 +150,9 @@ int main(int argc, char ** argv)
     {
     Get g;
     int sno = connection1.send(RootOperation(g));
-    Element::MapType server_template;
+    MapType server_template;
     // server_template["id"] = std::string();
-    server_template["parents"] = Element::ListType();
+    server_template["parents"] = ListType();
     server_template["name"] = std::string();
     server_template["server"] = std::string();
     server_template["clients"] = 0;

@@ -33,7 +33,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     Atlas::Objects::ObjectsEncoder * encoder;
     std::string accountId;
     
-    Atlas::Message::Element::MapType reply;
+    Atlas::Message::MapType reply;
     static int serialNoBase;
     int serialNo;
 
@@ -65,7 +65,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     int create(const std::string &, const std::string &);
     bool wait(int time = 0, bool error_expected = false, int refNo = -1);
     bool waitFor(const std::string &,
-                 const Atlas::Message::Element::MapType &,
+                 const Atlas::Message::MapType &,
                  int refNo = -1);
   
     bool waitForError(int refNo = -1);
@@ -73,7 +73,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     bool createChar(const Atlas::Message::Element& charData);
     
     bool compareArgToTemplate(const Atlas::Objects::Operation::RootOperation & op, 
-        const Atlas::Message::Element::MapType & arg);
+        const Atlas::Message::MapType & arg);
 
     void setTag(const std::string &tag, const std::string &value);
     bool hasTag(const std::string &t)
@@ -118,7 +118,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     int get_fd() {
         return ios.getSocket();
     }
-    const Atlas::Message::Element::MapType & getReply() {
+    const Atlas::Message::MapType & getReply() {
         return reply;
     }
     const bool isOpen() const;

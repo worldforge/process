@@ -15,6 +15,8 @@
 #include <iostream>
 
 using Atlas::Message::Element;
+using Atlas::Message::MapType;
+using Atlas::Message::ListType;
 
 void testLogin(ClientConnection & connection1,
                ClientConnection & connection2,
@@ -35,10 +37,10 @@ void testLogin(ClientConnection & connection1,
     ac1 << getpid() << "testac" << 1;
     int sno = connection1.create(ac1.str(), "ptacpw1pc");
 
-    Element::MapType account_template;
+    MapType account_template;
     account_template["id"] = std::string();
-    account_template["parents"] = Element::ListType();
-    account_template["characters"] = Element::ListType();
+    account_template["parents"] = ListType();
+    account_template["characters"] = ListType();
     account_template["objtype"] = std::string();
 
     verbose( std::cout << "Waiting for response to account creation on primary connection"
@@ -79,7 +81,7 @@ void testLogin(ClientConnection & connection1,
             exit(1);
     }
         
-    Element::MapType appearance_template;
+    MapType appearance_template;
     appearance_template["id"] = std::string();
     appearance_template["loc"] = std::string();
 

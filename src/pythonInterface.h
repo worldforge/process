@@ -49,8 +49,8 @@ PyMessageElement * newPyMessageElement();
 //
 
 PyObject * MessageElement_asPyObject(const Atlas::Message::Element & obj);
-Atlas::Message::Element::ListType PyListObject_asElementList(PyObject * list);
-Atlas::Message::Element::MapType PyDictObject_asElementMap(PyObject * dict);
+Atlas::Message::ListType PyListObject_asElementList(PyObject * list);
+Atlas::Message::MapType PyDictObject_asElementMap(PyObject * dict);
 Atlas::Message::Element PyObject_asMessageElement(PyObject * o);
 
 void init_python_api();
