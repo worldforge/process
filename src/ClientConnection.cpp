@@ -276,6 +276,8 @@ bool ClientConnection::login(const std::string & account,
     Object::MapType acmap;
     acmap["id"] = account;
     acmap["password"] = password;
+    acmap["parents"] = Object::ListType(1,"account");
+    acmap["objtype"] = "object";
 
     acName = account;
 
@@ -294,6 +296,8 @@ bool ClientConnection::create(const std::string & account,
     Object::MapType acmap;
     acmap["id"] = account;
     acmap["password"] = password;
+    acmap["parents"] = Object::ListType(1,"account");
+    acmap["objtype"] = "object";
 
     acName = account;
 
