@@ -1,3 +1,8 @@
+2001-11-08  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/process.cpp: Tidied up formatting of private chat tests,
+	  and added character creation tests.
+
 Wednesday, October 17 2001, James Turner <jmtn@blueyonder.co.uk>
 
 	* basic tests for private chat functionality
