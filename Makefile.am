@@ -1,4 +1,4 @@
-SUBDIRS = src
+SUBDIRS = src loadtool
 
 test:
 	./src/process

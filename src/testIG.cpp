@@ -64,12 +64,37 @@ static void lookAtChildren(ClientConnection& con, const RootEntity & ent)
     if (children.size() > 0)
     {
         std::vector<std::string> cv(children.begin(), children.end());
-        int childA = random() % cv.size(), 
+        unsigned int childA = random() % cv.size(), 
             childB = random() % cv.size();
             
         lookAtEntity(con, cv[childA], ent->getId()); 
         lookAtEntity(con, cv[childB], ent->getId());   
     }
+}
+
+static void touchEntity(ClientConnection& con, const std::string& eid)
+{
+    Touch t;
+    t->setFrom(con.getCharacterId());
+    MapType touchEnt;
+    touchEnt["id"] = eid;
+    t->setArgsAsList(ListType(1, touchEnt));
+
+    con.send(t);
+}
+
+static void testTouchChildren(ClientConnection& con, const RootEntity& ent)
+{
+     const std::list<std::string> & children = ent->getContains();
+    if (children.empty())
+        return;
+        
+    std::vector<std::string> cv(children.begin(), children.end());
+    unsigned int childA = random() % cv.size(), 
+        childB = random() % cv.size();
+        
+    touchEntity(con, cv[childA]); 
+    touchEntity(con, cv[childB]);   
 }
 
 void testInGameLook(ClientConnection& con)
@@ -105,6 +130,8 @@ void testInGameLook(ClientConnection& con)
         }
         
         lookAtChildren(con, ent);
+        
+        testTouchChildren(con, ent);
     }
     
 // let's look at ourselves ....    

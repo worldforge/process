@@ -32,6 +32,11 @@ PKG_CHECK_MODULES(WF, skstream-0.3 atlascpp-0.6 ,
         AC_MSG_ERROR(Couldn't find WF libs.)
     ])
 
+PKG_CHECK_MODULES(ERIS, eris-1.3, [ AC_MSG_NOTICE(Found Eris.)],
+    [
+        AC_MSG_ERROR(Couldn't find Eris.)
+    ])
+
 dnl allow the user to provide the directory where python is installed in
 dnl
 AC_CACHE_CHECK(for location of python, python_prefix,
@@ -121,4 +126,5 @@ dnl Generate files
 AC_OUTPUT([
         Makefile
         src/Makefile
+        loadtool/Makefile
 ])

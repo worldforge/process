@@ -1,3 +1,10 @@
+2005-02-09  James Turner  <james@worldforge.org>
+
+	* loadtool/* : add initial load-testing harness, which sort of works,
+	  but is currently very limited in scope, and buggy.
+	  
+	* configure.in, Makefile.am: build changes for compiling the load tool.
+
 2004-11-20  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/ClientConnection.cpp, src/ClientConnection.h, src/debug.h,
