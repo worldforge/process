@@ -38,6 +38,7 @@ void Character::onHear(Eris::Entity* src, const Atlas::Objects::Operation::RootO
     std::string m = args->getAttr("say").asString();
     
     if (m == "Shitcock!") {
+        cout << "doing retort" << endl;
         m_avatar->say("I fucked your dad!");
     }
 }
@@ -49,13 +50,7 @@ void Character::tick()
         m_action->run();
         if (m_action->finished()) {
             m_action.reset();
-            cout << "Character finished action" << endl;
         }
     } else
         m_action = ::Action::newRandomAction(this);
-}
-
-void Character::randomTalk()
-{
-    m_avatar->say("Shitcock!");
 }

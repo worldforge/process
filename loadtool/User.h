@@ -21,6 +21,7 @@ private:
     {
         INVALID,
         CONNECTING,
+        ACC_CREATE,
         LOGGING_IN,
         CONNECTED,
         FAILED

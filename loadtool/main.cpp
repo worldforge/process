@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
             if (users[i]->failed()) {
                 delete users[i];
                 users.erase(users.begin() + i);
+                std::cerr << "deleting failed user" << endl;
             } else
                 ++i;
         }

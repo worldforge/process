@@ -1,3 +1,9 @@
+2005-04-04  James Turner  <james@worldforge.org>
+
+	* loadtool/User.h, loadtool/User.cpp: if creating an account fails,
+	  try to login to the account instead (and give up if that too
+	  fails).
+
 2005-02-16  James Turner  <james@worldforge.org>
 
 	* loadtool/User.cpp: define a list of character names, and set the

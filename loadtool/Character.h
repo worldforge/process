@@ -16,11 +16,7 @@ public:
     
     Eris::Avatar* avatar() const
     { return m_avatar; }
-private:
-    void randomMove();
-    void randomTalk();
-    void moveToOrigin();
-        
+private:        
 // lots of slots    
     void onEntityTalk();
     void onHear(Eris::Entity* src, const Atlas::Objects::Operation::RootOperation&);

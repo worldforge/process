@@ -35,6 +35,8 @@ static const char* static_charNames[] =
     "Batjew",
     "Safety monkey",
     "Div",
+    "The Merch",
+    "Jesus", // fixme, need description "Is f'ing metal"
     0,
 };
 
@@ -69,7 +71,7 @@ void User::onConnected()
     m_acc->LoginFailure.connect(SigC::slot(*this, &User::onLoginFailure));
     m_acc->AvatarSuccess.connect(SigC::slot(*this, &User::onCharCreated));
     
-    m_state = CONNECTED;
+    m_state = ACC_CREATE;
 }
 
 void User::onConnectionFail(const std::string& errMsg)
@@ -80,13 +82,20 @@ void User::onConnectionFail(const std::string& errMsg)
 
 void User::onLoggedIn()
 {
+    m_state = CONNECTED;
     if (m_charCount) createCharacter();
 }
 
 void User::onLoginFailure(const std::string& errMsg)
 {
-    cerr << "User " << m_uid << " got account login failure: " << errMsg << endl;
-    m_state = FAILED;
+    if (m_state == ACC_CREATE) {
+        cout << "Failed to create account " << m_uid << ", trying login instead";
+        m_acc->login(m_uid, "secret-romero-love-hideout");
+        m_state = LOGGING_IN;
+    } else {
+        m_state = FAILED;
+        cerr << "User " << m_uid << " got account login failure: " << errMsg << endl;
+    }
 }
 
 void User::onCharCreated(Eris::Avatar* av)

@@ -17,11 +17,11 @@ public:
         Action(c)
     {
         int durationMsec = random() % 0x3fff; // 16 seconds max
-        cout << "move duration is " << durationMsec << endl;
         m_finishTime = WFMath::TimeStamp::now() + WFMath::TimeDiff(durationMsec);
         
         WFMath::Quaternion q(2, drand48() * WFMath::Pi * 2); // random heading
-        WFMath::Vector<3> vel(3.0, 0, 0);
+        double scalarVel = 3.0 + (drand48() * 3.0);
+        WFMath::Vector<3> vel(scalarVel, 0, 0);
     
         c->avatar()->moveInDirection(vel.rotate(q), q);
     }
@@ -47,7 +47,6 @@ public:
     {
         m_dest = WFMath::Point<3>( 100 * (drand48() - 0.5), 100 * (drand48() - 0.5), 0.0);
         c->avatar()->moveToPoint(m_dest);
-        cout << "moving to point near origin: " << m_dest << endl;
     }
 
     virtual bool finished()
@@ -56,8 +55,8 @@ public:
         cur.z() = 0;
         
         double d = (cur - m_dest).mag();
-        if (d < 5.0) {
-            cout << "Character returned to near origin" << endl;
+        if (d < 3.0) {
+            // within 3 metres of target, that'll do
             return true;
         } else {
             return false;
@@ -95,7 +94,7 @@ public:
     virtual bool finished()
     {
         if (WFMath::TimeStamp::now() >= m_finishTime) {
-            if (drand48() < 0.2) return true;
+            if (drand48() < 0.3) return true;
             speak();
             return false;
         } else
@@ -106,9 +105,8 @@ private:
     void speak()
     {
         std::string s= msg();
-        cout << "saying: " << s << endl;
         m_char->avatar()->say(s);
-        int durationMsec = random() % 2000; // 2 seconds max
+        int durationMsec = 1000 + (random() % 1500);
         m_finishTime = WFMath::TimeStamp::now() + WFMath::TimeDiff(durationMsec);
     }
     
@@ -137,9 +135,9 @@ std::auto_ptr<Action> Action::newRandomAction(Character* c)
         
     case 3:
     case 4:
-    case 5:
         return std::auto_ptr<Action>(new Babble(c));
-        
+    
+    case 5:
     default:
         return std::auto_ptr<Action>(new RandomMove(c));
     }

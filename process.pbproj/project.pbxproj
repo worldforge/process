@@ -239,12 +239,6 @@
 			settings = {
 			};
 		};
-		C459191807A8617E00130471 = {
-			fileRef = C459191607A8617E00130471;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		C46AE81D074AC4E000714F79 = {
 			buildActionMask = 2147483647;
 			dstPath = "";
@@ -454,6 +448,12 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
+		C48CCDFD07C9573300C696C7 = {
+			fileRef = C4DE4B9E055BCF3A0091BF9A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		C491F583054952C800A800CF = {
 			children = (
 				C4F73AB9079DC70F0040A5B4,
@@ -469,10 +469,10 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -555,44 +555,6 @@
 			settings = {
 			};
 		};
-		C4DE9D6707A1B5FF00CB3E24 = {
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 16;
-			files = (
-				C4DE9DDF07A1B64700CB3E24,
-				C4DE9DBA07A1B64500CB3E24,
-				C4DE9DB707A1B64200CB3E24,
-				C4DE9DB607A1B63F00CB3E24,
-				C459191807A8617E00130471,
-			);
-			isa = PBXCopyFilesBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C4DE9DB607A1B63F00CB3E24 = {
-			fileRef = C4DE413B055B16450091BF9A;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		C4DE9DB707A1B64200CB3E24 = {
-			fileRef = C4DE4B9E055BCF3A0091BF9A;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		C4DE9DBA07A1B64500CB3E24 = {
-			fileRef = C4F739EA079DC53C0040A5B4;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		C4DE9DDF07A1B64700CB3E24 = {
-			fileRef = C4F739E9079DC51F0040A5B4;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		C4F739E4079DC4A10040A5B4 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -612,6 +574,7 @@
 				C4F73AB5079DC5740040A5B4,
 				C4F73AB6079DC5740040A5B4,
 				C4F73AC2079DC7A10040A5B4,
+				C48CCDFD07C9573300C696C7,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -620,7 +583,6 @@
 			buildPhases = (
 				C4F739E4079DC4A10040A5B4,
 				C4F739E5079DC4A10040A5B4,
-				C4DE9D6707A1B5FF00CB3E24,
 			);
 			buildRules = (
 			);
