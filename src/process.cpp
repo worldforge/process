@@ -78,6 +78,7 @@ int main(int argc, char ** argv)
         }
     };
 
+#if 0
     try {
         Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
     }
@@ -91,6 +92,7 @@ int main(int argc, char ** argv)
             return 1;
         }
     }
+#endif
 
     bool python_script = false;
     std::string script_name;
