@@ -1,5 +1,14 @@
 2002-11-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/ClientConnection.cpp, src/ClientConnection.h: Pass through
+	  serialno when logging in, or creating account. Report refno of
+	  incoming ops, and refno expected when waiting.
+
+	* src/process.cpp: Add refno checks to all tests for which it is
+	  apropriate.
+
+2002-11-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/ClientConnection.cpp, src/ClientConnection.h, src/process.cpp:
 	  Re-structure core test code so it is more resiliant to things
 	  that don't matter, and has the capability to check for refno.

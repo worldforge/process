@@ -272,7 +272,7 @@ void ClientConnection::close()
     ios.close();
 }
 
-bool ClientConnection::login(const std::string & account,
+int ClientConnection::login(const std::string & account,
                              const std::string & password)
 {
     Atlas::Objects::Operation::Login l = Atlas::Objects::Operation::Login::Instantiate();
@@ -289,11 +289,10 @@ bool ClientConnection::login(const std::string & account,
 
     reply_flag = false;
     error_flag = false;
-    send(l);
-    return true;
+    return send(l);
 }
 
-bool ClientConnection::create(const std::string & account,
+int ClientConnection::create(const std::string & account,
                               const std::string & password)
 {
     Atlas::Objects::Operation::Create c = Atlas::Objects::Operation::Create::Instantiate();
@@ -310,8 +309,7 @@ bool ClientConnection::create(const std::string & account,
 
     reply_flag = false;
     error_flag = false;
-    send(c);
-    return true;
+    return send(c);
 }
 
 bool ClientConnection::wait(int time, bool error_expected, int refNo)
@@ -344,6 +342,12 @@ bool ClientConnection::waitFor(const std::string & opParent,
                                const Object::MapType & arg,
                                int refNo)
 {
+    if (refNo == -1) {
+	verbose(std::cout << "Waiting for " << opParent << " op" << std::endl;);
+    } else {
+	verbose(std::cout << "Waiting for " << opParent << " op with refno "
+		          << refNo << std::endl;);
+    }
     OperationDeque::iterator I = checkQueue(opParent, refNo);
     int remainingTime = timeOut;
     struct timeval tm, initialTm;
@@ -460,6 +464,12 @@ RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
  i.e args[1] of the ERROR op */
 bool ClientConnection::waitForError(int refNo)
 {
+    if (refNo == -1) {
+	verbose(std::cout << "Waiting for error op" << std::endl;);
+    } else {
+	verbose(std::cout << "Waiting for error op with refno "
+		          << refNo << std::endl;);
+    }
     OperationDeque::iterator I = checkQueue("error", refNo);
     int remainingTime = timeOut;
     struct timeval tm, initialTm;
@@ -571,7 +581,9 @@ void ClientConnection::push(const O & op)
     RootOperation * new_op = new O(op); 
     operationQueue.push_back(new_op);
     const std::string & opP = op.GetParents().front().AsString();
-    verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
+    int refNo = op.GetRefno();
+    verbose( std::cout << "Got op of type " << opP << " with refno "
+	               << refNo << std::endl << std::flush;);
 }
 
 

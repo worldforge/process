@@ -105,7 +105,7 @@ int main(int argc, char ** argv)
                        << std::endl << std::flush; );
 
     Get g(Get::Instantiate());
-    connection1.send(g);
+    int sno = connection1.send(g);
     Object::MapType server_template;
     // server_template["id"] = std::string();
     server_template["parents"] = Object::ListType();
@@ -118,7 +118,7 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Waiting for server description on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("info", server_template)) {
+    if (connection1.waitFor("info", server_template, sno)) {
         std::cerr << "ERROR: Unable to query server information"
                   << std::endl << std::flush;
     }
@@ -132,7 +132,7 @@ int main(int argc, char ** argv)
                                << std::endl << std::flush; );
 
     ac1 << getpid() << "testac" << 1;
-    connection1.create(ac1.str(), "ptacpw1pc");
+    sno = connection1.create(ac1.str(), "ptacpw1pc");
 
     Object::MapType account_template;
     account_template["id"] = std::string();
@@ -143,7 +143,7 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Waiting for response to account creation on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("info", account_template)) {
+    if (connection1.waitFor("info", account_template, sno)) {
         std::cerr << "FATAL: Unable to create account"
                   << std::endl << std::flush;
         return 1;
@@ -157,12 +157,12 @@ int main(int argc, char ** argv)
     verbose_regress( std::cout << "Creating test account on second connection"
                                << std::endl << std::flush; );
 
-    connection2.create(ac2.str(), "ptacpw2pc");
+    sno = connection2.create(ac2.str(), "ptacpw2pc");
 
     verbose( std::cout << "Waiting for response to account creation on second connection"
                        << std::endl << std::flush; );
 
-    if (connection2.waitFor("info", account_template)) {
+    if (connection2.waitFor("info", account_template, sno)) {
         std::cerr << "ERROR: Unable to create second account"
                   << std::endl << std::flush;
         connection2.close();
@@ -188,12 +188,12 @@ int main(int argc, char ** argv)
     verbose_regress( std::cout << "Creating test account on third connection"
                                << std::endl << std::flush; );
 
-    connection3.create(ac3.str(), "ptacpw3pc");
+    sno = connection3.create(ac3.str(), "ptacpw3pc");
 
     verbose( std::cout << "Waiting for response to account creation on third connection"
                        << std::endl << std::flush; );
 
-    if (connection3.waitFor("info", account_template)) {
+    if (connection3.waitFor("info", account_template, sno)) {
         std::cerr << "ERROR: Unable to create third account"
                   << std::endl << std::flush;
         connection3.close();
@@ -245,12 +245,12 @@ int main(int argc, char ** argv)
     verbose_regress( std::cout << "Logging test account on third connection"
                                << std::endl << std::flush; );
 
-    connection1.login(ac1.str(), "ptacpw1pc");
+    sno = connection1.login(ac1.str(), "ptacpw1pc");
 
     verbose( std::cout << "Waiting for login response on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("info", account_template)) {
+    if (connection1.waitFor("info", account_template, sno)) {
         std::cerr << "FATAL: Unable to login to pre-created account"
                   << std::endl << std::flush;
         return 1;
@@ -280,7 +280,7 @@ int main(int argc, char ** argv)
 
     Look l(Look::Instantiate());
     l.SetFrom(ac1.str());
-    connection1.send(l);
+    sno = connection1.send(l);
 
     verbose( std::cout << "Waiting for look response on primary connection"
                        << std::endl << std::flush; );
@@ -292,7 +292,7 @@ int main(int argc, char ** argv)
     room_template["people"] = Object::ListType();
     room_template["rooms"] = Object::ListType();
     room_template["objtype"] = std::string();
-    if (connection1.waitFor("sight", room_template)) {
+    if (connection1.waitFor("sight", room_template, sno)) {
         std::cerr << "ERROR: Out-of-game Look failed"
                   << std::endl << std::flush;
     }
@@ -306,12 +306,12 @@ int main(int argc, char ** argv)
     say["loc"] = "lobby";
     t.SetFrom(ac1.str());
     t.SetArgs(Object::ListType(1, say));
-    connection1.send(t);
+    sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("sound", t.AsObject().AsMap())) {
+    if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
         std::cerr << "WARNING: Out-of-game Talk did not result in sound"
                   << std::endl << "WARNING: Server may require TO"
                   << std::endl << std::flush;
@@ -321,7 +321,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection2.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "WARNING: Out-of-game Talk was not heard by connection 2"
                       << std::endl << "WARNING: Server may require TO"
                       << std::endl << std::flush;
@@ -332,7 +332,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on third connection"
                            << std::endl << std::flush; );
 
-        if (connection3.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "WARNING: Out-of-game Talk was not heard by connection 3"
                       << std::endl << "WARNING: Server may require TO"
                       << std::endl << std::flush;
@@ -343,12 +343,12 @@ int main(int argc, char ** argv)
                        << std::endl << std::flush; );
 
     t.SetTo("lobby");
-    connection1.send(t);
+    sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("sound", t.AsObject().AsMap())) {
+    if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
         std::cerr << "ERROR: Out-of-game Talk did not result in sound"
                   << std::endl << std::flush;
     }
@@ -357,7 +357,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection2.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "ERROR: Out-of-game Talk was not heard by connection 2"
                       << std::endl << std::flush;
         }
@@ -367,7 +367,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on third connection"
                            << std::endl << std::flush; );
 
-        if (connection3.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "ERROR: Out-of-game Talk was not heard by connection 3"
                       << std::endl << std::flush;
         }
@@ -379,12 +379,12 @@ int main(int argc, char ** argv)
                            << std::endl << std::flush; );
 
         t.SetFrom(ac2.str());
-        connection2.send(t);
+        sno = connection2.send(t);
 
         verbose( std::cout << "Waiting for sound response to talk on primary connection"
                            << std::endl << std::flush; );
 
-        if (connection1.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "ERROR: Out-of-game Talk was not heard by connection 1"
                       << std::endl << std::flush;
         }
@@ -392,7 +392,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection2.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "ERROR: Out-of-game Talk did not result in sound"
                       << std::endl << std::flush;
         }
@@ -401,7 +401,7 @@ int main(int argc, char ** argv)
             verbose( std::cout << "Waiting for sound response to talk on third connection"
                                << std::endl << std::flush; );
 
-            if (connection3.waitFor("sound", t.AsObject().AsMap())) {
+            if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
                 std::cerr << "ERROR: Out-of-game Talk was not heard by connection 3"
                           << std::endl << std::flush;
             }
@@ -424,12 +424,12 @@ int main(int argc, char ** argv)
         say["say"] = "Private_2_1";
         t.SetArgs(Object::ListType(1, say));
 
-        connection2.send(t);
+        sno = connection2.send(t);
 
         verbose( std::cout << "Waiting for sound response to private chat on first connection"
                            << std::endl << std::flush; );
 
-        if (connection1.waitFor("sound", t.AsObject().AsMap())) {
+        if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
             std::cerr << "ERROR: Out-of-game private chat did not result in sound"
                       << std::endl << std::flush;
         }
@@ -441,12 +441,12 @@ int main(int argc, char ** argv)
             t.SetTo(ac3.str());
             say["say"] = "Private_2_3";
             t.SetArgs(Object::ListType(1, say));
-            connection2.send(t);
+            sno = connection2.send(t);
 
             verbose( std::cout << "Waiting for sound response to private chat on third connection"
                                << std::endl << std::flush; );
 
-            if (connection3.waitFor("sound", t.AsObject().AsMap())) {
+            if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
                 std::cerr << "ERROR: Out-of-game private chat did not result in sound"
                           << std::endl << std::flush;
             }
@@ -467,12 +467,12 @@ int main(int argc, char ** argv)
     create.SetFrom(ac1.str());
     create.SetArgs(Object::ListType(1,character));
 
-    connection1.send(create);
+    sno = connection1.send(create);
 
     verbose( std::cout << "Waiting for info response to character creation on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("info", character)) {
+    if (connection1.waitFor("info", character, sno)) {
         std::cerr << "ERROR: Character creation did not result in info"
                   << std::endl << std::flush;
     }
@@ -485,12 +485,12 @@ int main(int argc, char ** argv)
         create.SetFrom(ac2.str());
         create.SetArgs(Object::ListType(1,character));
 
-        connection2.send(create);
+        sno = connection2.send(create);
 
         verbose( std::cout << "Waiting for info response to character creation on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("info", character)) {
+        if (connection2.waitFor("info", character, sno)) {
             std::cerr << "ERROR: Character creation did not result in info"
                       << std::endl << std::flush;
         }
@@ -506,12 +506,12 @@ int main(int argc, char ** argv)
         create.SetFrom(ac3.str());
         create.SetArgs(Object::ListType(1,character));
 
-        connection3.send(create);
+        sno = connection3.send(create);
 
         verbose( std::cout << "Waiting for info response to character creation on third connection"
                            << std::endl << std::flush; );
 
-        if (connection3.waitFor("info", character)) {
+        if (connection3.waitFor("info", character, sno)) {
             std::cerr << "ERROR: Character creation did not result in info"
                       << std::endl << std::flush;
         }
@@ -531,23 +531,23 @@ void testTypeQueries(ClientConnection &c)
     arg["id"] = "root";
     query.SetArgs(Object::ListType(1, arg));
     
-    c.send(query);
+    int sno = c.send(query);
     verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
     
     Object::MapType info;
     info["parents"] = Object::ListType(1, "info");    
     
-    if (c.waitFor("info", info)) {
+    if (c.waitFor("info", info, sno)) {
 	std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
     arg["id"] = "game_entity";
     query.SetArgs(Object::ListType(1, arg));
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
-    c.send(query);
+    sno = c.send(query);
     
     verbose( std::cout << "Waiting for info response to game_entity type query" << std::endl; );
-    if (c.waitFor("info", info)) {
+    if (c.waitFor("info", info, sno)) {
 	std::cerr << "ERROR: Type-query for game_entity did not resut in info" << std::endl;
     }
     
@@ -555,10 +555,10 @@ void testTypeQueries(ClientConnection &c)
     arg["id"] = "_bad_type_";
     query.SetArgs(Object::ListType(1, arg));
     verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
-    c.send(query);
+    sno = c.send(query);
     
     verbose( std::cout << "Waiting for error response to _bad_type_ type query" << std::endl; );
-    if (c.waitForError()) {
+    if (c.waitForError(sno)) {
 	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << std::endl;
     }
 }
@@ -568,7 +568,7 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     Logout lg = Logout::Instantiate();
     lg.SetFrom(acc);
     verbose( std::cout << "Sending logut for connection 2" << std::endl; );
-    c.send(lg);
+    int sno = c.send(lg);
     
     verbose( std::cout << "Waiting for disappearance of connection 2" << std::endl; );
     Object::MapType disap;
@@ -580,7 +580,7 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     verbose( std::cout << "Waiting for info(logout) of connection 2" << std::endl; );
     Object::MapType info;
     info["parents"] = Object::ListType(1, "logout");  
-    if (c.waitFor("info", info)) {
+    if (c.waitFor("info", info, sno)) {
 	std::cerr << "NOTE: LOGOUT did not produce an INFO response; this is okay could be fixed" << std::endl;
     }
     
@@ -592,10 +592,10 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
         return;
     }
     
-    c.login(acc, "ptacpw2pc");
+    sno = c.login(acc, "ptacpw2pc");
     
     verbose( std::cout << "Waiting for info(player) of connection 2" << std::endl; );
-    if (c.waitFor("info", info)) {
+    if (c.waitFor("info", info, sno)) {
 	std::cerr << "ERROR: login did not produce an INFO response" << std::endl;
     }
     
@@ -615,14 +615,14 @@ void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc)
     create.SetFrom(acc);
     create.SetArgs(Object::ListType(1,character));
     
-    c.send(create);
+    int sno = c.send(create);
 
-    verbose( std::cout << "Waiting for ERROR response to invlaid character create"
+    verbose( std::cout << "Waiting for error response to invalid character create"
                            << std::endl << std::flush; );
 
-    if (c.waitForError()) {
-	std::cerr << "ERROR: Invalid Character creation did not result in ERROR"
-	    << std::endl << std::flush;
+    if (c.waitForError(sno)) {
+	std::cerr << "ERROR: Invalid Character creation did not result in error"
+	          << std::endl << std::flush;
     }
 }
 
