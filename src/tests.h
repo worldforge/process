@@ -12,6 +12,5 @@ void testLogout(ClientConnection &c,
                 const std::string &acc,
                 ClientConnection &watcher);
 void testDuplicateLogin(const std::string &account, const std::string &pass);
-void testInvalidCharacterCreate(ClientConnection &c);    
 
 #endif // PROCESS_TESTS_H

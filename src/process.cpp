@@ -6,6 +6,7 @@
 #include "pythonInterface.h"
 #include "tests.h"
 #include "testOOG.h"
+#include "testCharacter.h"
 #include "testIG.h"
 #include "process_debug.h"
 
@@ -339,38 +340,7 @@ int main(int argc, char ** argv)
     
     testOOG(connection1, connection2, connection3);
 
-    {
-    verbose( std::cout << "Creating character on primary connection"
-                       << std::endl << std::flush; );
-
-    Element::MapType character;
-    character["objtype"] = "object";
-    character["parents"] = Element::ListType(1,"settler");
-    character["name"] = "Nivek";
-
-    connection1.createChar(character);
-    verbose(std::cout << "created character with ID " << connection1.getCharacterId() <<
-            " on connection 1" << std::endl << std::flush; );
-    
-    if (connection2.isOpen()) {
-        character["name"] = "Civen";
-        connection2.createChar(character);
-        verbose(std::cout << "created character with ID " << connection2.getCharacterId() <<
-            " on connection 2" << std::endl << std::flush; );
-    }
-
-    if (connection3.isOpen()) {
-        testInvalidCharacterCreate(connection3);
-        
-        verbose( std::cout << "Creating character on third connection"
-                           << std::endl << std::flush; );
-
-        character["name"] = "Dwayne";
-        connection3.createChar(character);
-        verbose(std::cout << "created character with ID " << connection3.getCharacterId() <<
-            " on connection 3" << std::endl << std::flush; );
-    }
-    }
+    testCharacterCreate(connection1, connection2, connection3);
 
     // Try out some IG stuff, like creating looking, talking and moving
     testInGameLook(connection1);

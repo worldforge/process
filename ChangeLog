@@ -1,5 +1,11 @@
 2003-10-30  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/process.cpp, src/tests.cpp, src/tests.h, src/testCharacter.cpp,
+	  src/testCharacter.h: Move character creation related tests into
+	  new file.
+
+2003-10-30  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/testOOG.h, src/testOOG.cpp: Re-purpose files to contain
 	  OOG Look and Talk test code copied from main().
 

@@ -100,33 +100,6 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     
 }
 
-void testInvalidCharacterCreate(ClientConnection &c)
-{
-    verbose( std::cout << "Testing character creation with invalid type"
-                           << std::endl << std::flush; );
-
-    Element::MapType character;
-    character["objtype"] = "object";
-    character["parents"] = Element::ListType(1,"__bad__type__");
-    character["name"] = "Dwayne";
-
-    Create create;
-    create->setFrom(c.getAccountId());
-    create->setArgsAsList(Element::ListType(1,character));
-    
-    int sno = c.send(create);
-
-    verbose( std::cout << "Waiting for error response to invalid character create"
-                           << std::endl << std::flush; );
-
-    if (c.waitForError(sno)) {
-        std::cerr << "ERROR: Invalid Character creation did not result in error"
-                  << std::endl << std::flush;
-    }
-}
-
-
-
 /*
 
 void testRooms(ClientConnection &cl, const std::string &acc)
