@@ -7,24 +7,26 @@
 	objects = {
 		C4858134054ECED600A800CF = {
 			children = (
-				C491F5900549530B00A800CF,
-				C4858136054ECF2800A800CF,
-				C4858137054ECF2800A800CF,
-				C4858138054ECF2800A800CF,
-				C4858139054ECF2800A800CF,
-				C485813A054ECF2800A800CF,
-				C485813B054ECF2800A800CF,
-				C485813C054ECF2800A800CF,
 				C485813D054ECF2800A800CF,
-				C485813E054ECF2800A800CF,
-				C485813F054ECF2800A800CF,
-				C4858140054ECF2800A800CF,
-				C4858141054ECF2800A800CF,
-				C4858142054ECF2800A800CF,
-				C4858143054ECF2800A800CF,
 				C4858144054ECF2800A800CF,
-				C4858145054ECF2800A800CF,
+				C4858143054ECF2800A800CF,
+				C4858138054ECF2800A800CF,
 				C4858146054ECF2800A800CF,
+				C4858141054ECF2800A800CF,
+				C485813B054ECF2800A800CF,
+				C485813E054ECF2800A800CF,
+				C4858142054ECF2800A800CF,
+				C485813A054ECF2800A800CF,
+				C4858137054ECF2800A800CF,
+				C4858140054ECF2800A800CF,
+				C485819305513FD300A800CF,
+				C485819405513FD300A800CF,
+				C485819505513FD300A800CF,
+				C485819605513FD300A800CF,
+				C485813C054ECF2800A800CF,
+				C4858136054ECF2800A800CF,
+				C48581700550714600A800CF,
+				C48581710550714600A800CF,
 			);
 			isa = PBXGroup;
 			path = src;
@@ -46,12 +48,6 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = gobshite.cpp;
-			refType = 4;
-		};
-		C4858139054ECF2800A800CF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = validator.h;
 			refType = 4;
 		};
 		C485813A054ECF2800A800CF = {
@@ -84,12 +80,6 @@
 			path = process_debug.h;
 			refType = 4;
 		};
-		C485813F054ECF2800A800CF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = validator.cpp;
-			refType = 4;
-		};
 		C4858140054ECF2800A800CF = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -118,12 +108,6 @@
 			fileEncoding = 30;
 			isa = PBXFileReference;
 			path = ClientConnection.h;
-			refType = 4;
-		};
-		C4858145054ECF2800A800CF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = atlasUtils.h;
 			refType = 4;
 		};
 		C4858146054ECF2800A800CF = {
@@ -223,6 +207,90 @@
 			path = ChangeLog;
 			refType = 4;
 		};
+		C48581700550714600A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = tests.cpp;
+			refType = 4;
+		};
+		C48581710550714600A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = tests.h;
+			refType = 4;
+		};
+		C48581720550714600A800CF = {
+			fileRef = C48581700550714600A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C48581730550714600A800CF = {
+			fileRef = C48581710550714600A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485819305513FD300A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testCharacter.cpp;
+			refType = 4;
+		};
+		C485819405513FD300A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testCharacter.h;
+			refType = 4;
+		};
+		C485819505513FD300A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testIG.cpp;
+			refType = 4;
+		};
+		C485819605513FD300A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testIG.h;
+			refType = 4;
+		};
+		C485819705513FD300A800CF = {
+			fileRef = C485819305513FD300A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485819805513FD300A800CF = {
+			fileRef = C485819405513FD300A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485819905513FD300A800CF = {
+			fileRef = C485819505513FD300A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485819A05513FD300A800CF = {
+			fileRef = C485819605513FD300A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485819B0551402100A800CF = {
+			fileRef = C485813C054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485819C0551402200A800CF = {
+			fileRef = C4858136054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		C491F583054952C800A800CF = {
 			children = (
 				C485815B054FD82200A800CF,
@@ -274,6 +342,10 @@
 				C4858150054ECF2800A800CF,
 				C4858155054ECF2800A800CF,
 				C4858156054ECF2800A800CF,
+				C48581730550714600A800CF,
+				C485819805513FD300A800CF,
+				C485819A05513FD300A800CF,
+				C485819C0551402200A800CF,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -284,6 +356,10 @@
 				C485814D054ECF2800A800CF,
 				C485814F054ECF2800A800CF,
 				C4858154054ECF2800A800CF,
+				C48581720550714600A800CF,
+				C485819705513FD300A800CF,
+				C485819905513FD300A800CF,
+				C485819B0551402100A800CF,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -337,12 +413,6 @@
 			);
 			isa = PBXGroup;
 			name = Products;
-			refType = 4;
-		};
-		C491F5900549530B00A800CF = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			path = atlasUtils.cpp;
 			refType = 4;
 		};
 		C49DBC08054DD79800A800CF = {
