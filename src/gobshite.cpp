@@ -11,7 +11,7 @@
 bool verbose_flag = false;
 bool regress_flag = false;
     
-void usage(const char * progname)
+static void usage(const char * progname)
 {
     std::cerr << "usage: " << progname << std::endl << std::flush;
 
@@ -24,7 +24,19 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
+    try {
+        Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
+    }
+    catch (Atlas::Objects::DefaultLoadingException d) {
+        try {
+            Atlas::Objects::loadDefaults("atlas.xml");
+        }
+        catch (Atlas::Objects::DefaultLoadingException d) {
+            std::cerr << argv[0] << ": Could not load atlas.xml: "
+                      << d.getDescription() << std::endl << std::flush;
+            return 1;
+        }
+    }
 
     ClientConnection c1;
 

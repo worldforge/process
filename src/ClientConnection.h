@@ -1,20 +1,24 @@
 // This file may be redistributed and modified only under the terms of
 // the GNU Lesser General Public License (See COPYING for details).
-// Copyright (C) 2001 Alistair Riddoch
+// Copyright (C) 2001-2003 Alistair Riddoch
 
 #ifndef CLIENT_CONNECTION_H
 #define CLIENT_CONNECTION_H
 
 #include <Atlas/Objects/Decoder.h>
-#include <Atlas/Objects/Encoder.h>
-#include <Atlas/Codec.h>
 
 #include <skstream/skstream.h>
 
 #include <deque>
-#include <map>
 
 #include "opfwd.h"
+
+namespace Atlas {
+  class Codec;
+  namespace Objects {
+    class ObjectsEncoder;
+  }
+}
 
 typedef std::map<std::string, std::string> StringMap;
 
@@ -33,10 +37,10 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     static int serialNoBase;
     int serialNo;
 
-	/** the serialno of the OOG activation op, either account
-	creation or longin. We watch for an INFO whose REFNO
-	matches this to determine our account ID. */
-	int oogActivationRefno;
+    /** the serialno of the OOG activation op, either account
+    creation or longin. We watch for an INFO whose REFNO
+    matches this to determine our account ID. */
+    int oogActivationRefno;
   
     OperationDeque operationQueue;
 
@@ -46,38 +50,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     void push(const Atlas::Objects::Root &);
 
     virtual void objectInfoArrived(const Atlas::Objects::Operation::Info&);
-#if 0
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Error&);
-
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Action&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Appearance&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Combine&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Communicate&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Create&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Delete&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Disappearance&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Divide&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Feel&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Get&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Imaginary&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Listen&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Login&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Logout&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Look&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Move&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Perceive&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Perception&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::RootOperation&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Set&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Sight&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Smell&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Sniff&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Sound&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Talk&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Touch&);
-#else
     virtual void objectArrived(const Atlas::Objects::Root &);
-#endif
 
     StringMap m_tags;
 
@@ -149,4 +122,3 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
 ClientConnection* getConnectionBySpec(const std::string &spec);
 
 #endif // CLIENT_CONNECTION_H
-

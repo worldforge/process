@@ -7,6 +7,7 @@
 #include "process_debug.h"
 
 #include <Atlas/Objects/loadDefaults.h>
+#include <Atlas/Objects/Entity.h>
 
 #if defined(__GNUC__) && __GNUC__ < 3
 #include "sstream.h"
@@ -26,13 +27,13 @@ void testDuplicateLogin(const std::string &account, const std::string &pass);
     
 void testInvalidCharacterCreate(ClientConnection &c);    
     
-void usage(const char * progname)
+static void usage(const char * progname)
 {
     std::cerr << "usage: " << progname << " [-vrsh] [ script ]"
               << std::endl << std::flush;
 }
 
-void help(const char * progname)
+static void help(const char * progname)
 {
     usage(progname);
     std::cerr << std::endl;
@@ -43,17 +44,22 @@ void help(const char * progname)
     std::cerr << std::endl << std::flush;
 }
 
-Element makeAtlasVec(double x, double y, double z);
-
 bool verbose_flag = false;
 bool regress_flag = false;
 
 int exit_status = 0;
 
+static Element makeAtlasVec(double x, double y, double z)
+{
+    Element::ListType vec;
+    vec.push_back(x);
+    vec.push_back(y);
+    vec.push_back(z);
+    return Element(vec);
+}
+
 int main(int argc, char ** argv)
 {
-    Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
-
     int opt;
     bool script_only_flag = false;
 
@@ -81,6 +87,20 @@ int main(int argc, char ** argv)
                 break;
         }
     };
+
+    try {
+        Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
+    }
+    catch (Atlas::Objects::DefaultLoadingException d) {
+        try {
+            Atlas::Objects::loadDefaults("atlas.xml");
+        }
+        catch (Atlas::Objects::DefaultLoadingException d) {
+            std::cerr << argv[0] << ": Could not load atlas.xml: "
+                      << d.getDescription() << std::endl << std::flush;
+            return 1;
+        }
+    }
 
     bool python_script = false;
     std::string script_name;
@@ -352,6 +372,8 @@ int main(int argc, char ** argv)
     }
     
     std::string lobbyId = anonLookResponse->getArgs().front()->getId();
+    Root lobby = anonLookResponse->getArgs().front();
+    Atlas::Objects::Entity::RootEntity lobent = Atlas::Objects::smart_dynamic_cast<Atlas::Objects::Entity::RootEntity>(lobby);
 
     verbose( std::cout << "Sending out-of-game (OOG) talk without TO on primary connection"
                        << std::endl << std::flush; );
@@ -744,15 +766,6 @@ void testInGame(ClientConnection &a, ClientConnection &b, ClientConnection &c)
     // stop
 }
 */
-
-Element makeAtlasVec(double x, double y, double z)
-{
-    Element::ListType vec;
-    vec.push_back(x);
-    vec.push_back(y);
-    vec.push_back(z);
-    return Element(vec);
-}
 
 void testDuplicateLogin(const std::string &account, const std::string &pass)
 {

@@ -1,15 +1,19 @@
+// This file may be redistributed and modified only under the terms of
+// the GNU General Public License (See COPYING for details).
+// Copyright (C) 2002-2003 Alistair Riddoch and James Turner
+
 #ifdef HAVE_CONFIG_H
     #include "config.h"
 #endif
 
 #include "atlasUtils.h"
+
 #include "process_debug.h"
 
-#include <cppunit/TestAssert.h>
+#include <Atlas/Objects/RootOperation.h>
 
 #include <iostream>
 
-using Atlas::Message::Element;
 using Atlas::Objects::Root;
 using Atlas::Objects::Operation::RootOperation;
 
