@@ -61,8 +61,9 @@ void testTypeQueries(ClientConnection &c)
     }
 }
 
-void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher)
+void testLogout(ClientConnection &c, ClientConnection &watcher)
 {
+    std::string acc = c.getAccount();
     Logout lg;
     lg->setFrom(c.getAccountId());
     verbose( std::cout << "Sending logout for connection 2 (" 

@@ -8,9 +8,7 @@
 class ClientConnection;
 
 void testTypeQueries(ClientConnection &c);
-void testLogout(ClientConnection &c,
-                const std::string &acc,
-                ClientConnection &watcher);
+void testLogout(ClientConnection &c, ClientConnection &watcher);
 void testDuplicateLogin(const std::string &account, const std::string &pass);
 
 #endif // PROCESS_TESTS_H

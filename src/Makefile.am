@@ -5,6 +5,7 @@ process_SOURCES = \
 		  process.cpp process_debug.h opfwd.h debug.h \
 		  testOOG.cpp testOOG.h \
 		  tests.cpp tests.h \
+		  testLogin.cpp testLogin.h \
 		  testCharacter.cpp testCharacter.h \
 		  testIG.cpp testIG.h \
 		  pythonInterface.cpp pythonInterface.h

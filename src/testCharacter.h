@@ -12,4 +12,4 @@ void testCharacterCreate(ClientConnection&,
                          ClientConnection&);
 void testInvalidCharacterCreate(ClientConnection &c);    
 
-#endif // PROCESS_TEST_IG_H
+#endif // PROCESS_TEST_CHARACTER_H

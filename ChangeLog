@@ -1,4 +1,15 @@
+2003-10-30  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/testLogin.h, src/testLogin.cpp, src/process.cpp:
+	  Move login code into its own file.
+
+	* src/testCharacter.h: Fix guard names.
+
+	* src/tests.h, src/tests.cpp: Change testLogout() API as we don't
+	  need to pass in the account name.
+
 2003-10-30  James Turner <james@worldforge.org>
+
 	* Add new files to the ProjectBuilder file
 	* Remove no-longer-useful validator and
 	  atlasUtils files.
