@@ -8,9 +8,6 @@ echo aclocal...
 
 aclocal $ACLOCAL_FLAGS
 
-autoheader
-
-
 echo autoheader...
 (autoheader --version) < /dev/null > /dev/null 2>&1 || {
     echo autoheader not found

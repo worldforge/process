@@ -3,6 +3,11 @@ dnl Initialise autoconf
 AC_INIT(src/process.cpp)
 AM_CONFIG_HEADER(config.h)
 
+dnl Detect the canonical host and target environment
+
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
 dnl Initialise automake
 
 AM_INIT_AUTOMAKE(process, 0.0.0)

@@ -1,3 +1,7 @@
+2003-12-02  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* Clean up autogen.sh a little more. Add canonical macros.
+
 2003-11-10  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/tests.cpp: Check for the correct refno when expecting
