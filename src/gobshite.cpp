@@ -4,6 +4,8 @@
 
 #include "ClientConnection.h"
 
+#include <Atlas/Objects/loadDefaults.h>
+
 #include <iostream>
 
 bool verbose_flag = false;
@@ -21,6 +23,8 @@ int main(int argc, char ** argv)
         usage(argv[0]);
         return 1;
     }
+
+    Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
 
     ClientConnection c1;
 
