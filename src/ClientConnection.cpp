@@ -210,7 +210,7 @@ void ClientConnection::ObjectArrived(const Touch& op)
 void ClientConnection::objectInfoArrived(const Info & op)
 {
     debug(std::cout << "Info" << std::endl << std::flush;);
-    push(op);
+    // push(op);
         
     if (accountId.empty() && (op->getRefno() == oogActivationRefno)) {
         try {
@@ -231,7 +231,7 @@ void ClientConnection::objectArrived(const Root & op)
 {
     debug( std::cout << "Got something" << std::endl << std::flush; );
     if (op->getClassNo() == Atlas::Objects::Operation::INFO_NO) {
-        objectInfoArrived(Atlas::Objects::smart_dynamic_cast<InfoData>(op));
+        objectInfoArrived(Atlas::Objects::smart_dynamic_cast<Info>(op));
     }
     push(op);
 }
@@ -304,7 +304,7 @@ int ClientConnection::login(const std::string & account,
     reply_flag = false;
     error_flag = false;
     oogActivationRefno = send(l);
-        return oogActivationRefno;
+    return oogActivationRefno;
 }
 
 int ClientConnection::create(const std::string & account,
@@ -596,7 +596,7 @@ bool ClientConnection::pending()
 void ClientConnection::push(const Atlas::Objects::Root & op)
 {
     reply_flag = true;
-    RootOperation new_op = Atlas::Objects::smart_dynamic_cast<Atlas::Objects::Operation::RootOperationData>(op); 
+    RootOperation new_op = Atlas::Objects::smart_dynamic_cast<Atlas::Objects::Operation::RootOperation>(op); 
     if (!new_op) {
         verbose( std::cout << "Recived message which is not an op"
                            << std::endl << std::flush; );

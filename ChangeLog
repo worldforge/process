@@ -1,3 +1,8 @@
+2003-10-28  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/ClientConnection.cpp: Eliminate duplicating of Info ops,
+	  and update usage of Atlas::Objects casts.
+
 2003-10-12  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/gobshite.cpp: Add code to load atlas.xml before running, as
