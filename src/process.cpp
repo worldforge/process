@@ -277,7 +277,7 @@ int main(int argc, char ** argv)
                   << std::endl << std::flush;
     }
 
-    verbose( std::cout << "Sending out-of-game (OOG) talk on primary connection"
+    verbose( std::cout << "Sending out-of-game (OOG) talk without TO on primary connection"
                        << std::endl << std::flush; );
 
     Talk t(Talk::Instantiate());
@@ -288,6 +288,43 @@ int main(int argc, char ** argv)
     t.SetArgs(Object::ListType(1, say));
     connection1.send(t);
 
+    verbose( std::cout << "Waiting for sound response to talk on primary connection"
+                       << std::endl << std::flush; );
+
+    if (connection1.waitFor("sound", t.AsObject().AsMap())) {
+        std::cerr << "WARNING: Out-of-game Talk did not result in sound"
+                  << std::endl << "WARNING: Server may require TO"
+                  << std::endl << std::flush;
+    }
+
+    if (connection2.isOpen()) {
+        verbose( std::cout << "Waiting for sound response to talk on second connection"
+                           << std::endl << std::flush; );
+
+        if (connection2.waitFor("sound", t.AsObject().AsMap())) {
+            std::cerr << "WARNING: Out-of-game Talk was not heard by connection 2"
+                      << std::endl << "WARNING: Server may require TO"
+                      << std::endl << std::flush;
+        }
+    }
+
+    if (connection3.isOpen()) {
+        verbose( std::cout << "Waiting for sound response to talk on third connection"
+                           << std::endl << std::flush; );
+
+        if (connection3.waitFor("sound", t.AsObject().AsMap())) {
+            std::cerr << "WARNING: Out-of-game Talk was not heard by connection 3"
+                      << std::endl << "WARNING: Server may require TO"
+                      << std::endl << std::flush;
+        }
+    }
+
+    verbose( std::cout << "Sending out-of-game (OOG) talk on primary connection"
+                       << std::endl << std::flush; );
+
+    t.SetTo("lobby");
+    connection1.send(t);
+    
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
@@ -315,6 +352,7 @@ int main(int argc, char ** argv)
                       << std::endl << std::flush;
         }
     }
+
     
     if (connection2.isOpen()) {
         verbose( std::cout << "Sending out-of-game (OOG) talk on second connection"

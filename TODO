@@ -1,3 +1,6 @@
 Add tests for appearance and disappearance ops in lobby
 
 Modify waitFor so it is tolerant of operation order, and does not discard ops.
+
+Add TO attr to Talk ops. Add test to ensure everything still works if TO
+is not set. Add test to see whether server detect misset TO.
