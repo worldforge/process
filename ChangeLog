@@ -1,3 +1,7 @@
+2002-01-14  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* C++ compliance fixes for gcc 3.
+
 Wednesday, December 19 2001, James Turner
 
 	* Three simple tests of type-queries. Attempts to

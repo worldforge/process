@@ -352,7 +352,7 @@ bool ClientConnection::waitFor(const std::string & opParent,
             return true;
         }
         opP = op->GetParents().front().AsString();
-        verbose( cout << "Got op of type " << opP << std::endl << std::flush;);
+        verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
     } while (opP != opParent);
     //const std::string & p = op->GetParents().front().AsString();
     //if (p != opParent) {
@@ -422,7 +422,7 @@ void ClientConnection::send(Atlas::Objects::Operation::RootOperation & op)
 {
     op.SetSerialno(++serialNo);
     encoder->StreamMessage(&op);
-    ios << flush;
+    ios << std::flush;
 }
 
 void ClientConnection::error(const std::string & message)
