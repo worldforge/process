@@ -11,6 +11,7 @@ class Character : public SigC::Object, public Schedulable
 {
 public:
     Character(Eris::Avatar* av);
+    virtual ~Character();
     
     virtual void tick();
     

@@ -19,6 +19,10 @@ Character::Character(Eris::Avatar* av) :
     av->GotCharacterEntity.connect(SigC::slot(*this, &Character::onGotEntity));
 }
 
+Character::~Character()
+{
+}
+
 void Character::onGotEntity(Eris::Entity*)
 {
     m_avatar->Hear.connect(SigC::slot(*this, &Character::onHear));

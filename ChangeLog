@@ -1,3 +1,10 @@
+2005-04-05  James Turner  <james@worldforge.org>
+
+	* loadtool/Character.cpp, loadtool/Character.h: add virtual dtor to
+	  Character, to silence warnings on GCC 3.4
+	  
+	* configure.in: add -Wno-unknown-pragmas to CXXFLAGS
+
 2005-04-04  James Turner  <james@worldforge.org>
 
 	* loadtool/User.h, loadtool/User.cpp: if creating an account fails,
