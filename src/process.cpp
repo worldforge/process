@@ -772,7 +772,6 @@ void testInGameLook(ClientConnection& con)
 
     Element::MapType game_entity_template;
     game_entity_template["id"] = std::string();
-    game_entity_template["name"] = std::string();
     game_entity_template["parents"] = Element::ListType();
     game_entity_template["objtype"] = std::string();
     
