@@ -1,5 +1,10 @@
 2004-11-20  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/ClientConnection.cpp, src/ClientConnection.h, src/debug.h,
+	  src/process_debug.h, src/pythonInterface.h: Clean up header guards.
+
+2004-11-20  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* configure.in: Update python check to catch latest version.
 
 	* acinclude.m4: Clean out obsolete out of data macros.

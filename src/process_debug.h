@@ -10,6 +10,7 @@ extern bool regress_flag;
 
 extern int exit_status;
 
+#define debug(prg) { if (debug_flag) { prg } }
 #define regress(prg) { if (regress_flag) { prg } }
 #define verbose(prg) { if (verbose_flag || regress_flag) { prg } }
 #define verbose_only(prg) { if (verbose_flag && !regress_flag) { prg } }

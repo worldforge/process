@@ -2,8 +2,8 @@
 // the GNU General Public License (See COPYING for details).
 // Copyright (C) 2000-2003 Alistair Riddoch
 
-#ifndef RULESETS_PY_OPERATION_H
-#define RULESETS_PY_OPERATION_H
+#ifndef PROCESS_PYTHON_INTERFACE_H
+#define PROCESS_PYTHON_INTERFACE_H
 
 #include <Python.h>
 
@@ -57,4 +57,4 @@ void init_python_api();
 bool runScript(const std::string &,
            const std::set<ClientConnection *> & = std::set<ClientConnection*>());
 
-#endif // RULESETS_PY_OPERATION_H
+#endif // PROCESS_PYTHON_INTERFACE_H

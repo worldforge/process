@@ -2,8 +2,8 @@
 // the GNU Lesser General Public License (See COPYING for details).
 // Copyright (C) 2001-2003 Alistair Riddoch
 
-#ifndef CLIENT_CONNECTION_H
-#define CLIENT_CONNECTION_H
+#ifndef PROCESS_CLIENT_CONNECTION_H
+#define PROCESS_CLIENT_CONNECTION_H
 
 #include <Atlas/Objects/Decoder.h>
 
@@ -128,4 +128,4 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
 
 ClientConnection* getConnectionBySpec(const std::string &spec);
 
-#endif // CLIENT_CONNECTION_H
+#endif // PROCESS_CLIENT_CONNECTION_H
