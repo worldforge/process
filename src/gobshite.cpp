@@ -6,13 +6,22 @@
 
 #include <iostream>
 
-using Atlas::Message::Object;
-
 bool verbose_flag = false;
 bool regress_flag = false;
-
-int main()
+    
+void usage(const char * progname)
 {
+    std::cerr << "usage: " << progname << std::endl << std::flush;
+
+}
+
+int main(int argc, char ** argv)
+{
+    if (argc != 1) {
+        usage(argv[0]);
+        return 1;
+    }
+
     ClientConnection c1;
 
     if (!c1.connect("localhost")) {

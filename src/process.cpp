@@ -129,7 +129,7 @@ int main(int argc, char ** argv)
 
     std::stringstream ac1, ac2, ac3;
 
-    verbose_only( std::cout << "Creating account of name " << ac1.str()
+    verbose_only( std::cout << "Creating account with name " << ac1.str()
                             << " on primary connection"
                             << std::endl << std::flush; );
     verbose_regress( std::cout << "Creating test account on primary connection"
@@ -153,10 +153,10 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    	if (connection1.getAccountId().empty()) {
-		std::cerr << "FATAL: connection's 1 account ID not set by INFO response" << std::endl;
-		return 1;
-	}
+        if (connection1.getAccountId().empty()) {
+                std::cerr << "FATAL: connection's 1 account ID not set by INFO response" << std::endl;
+                return 1;
+        }
 
     ac2 << getpid() << "testac" << 2;
 
@@ -177,11 +177,11 @@ int main(int argc, char ** argv)
         connection2.close();
     }
 
-	if (connection2.getAccountId().empty()) {
-		std::cerr << "FATAL: connection's 2 account ID not set by INFO response" << std::endl;
-		return 1;
-	}
-	
+        if (connection2.getAccountId().empty()) {
+                std::cerr << "FATAL: connection's 2 account ID not set by INFO response" << std::endl;
+                return 1;
+        }
+        
     Object::MapType appearance_template;
     appearance_template["id"] = std::string();
     appearance_template["loc"] = std::string();
@@ -213,11 +213,11 @@ int main(int argc, char ** argv)
         connection3.close();
     }
 
-	if (connection3.getAccountId().empty()) {
-		std::cerr << "FATAL: connection's 3 account ID not set by INFO response" << std::endl;
-		return 1;
-	}
-	
+        if (connection3.getAccountId().empty()) {
+                std::cerr << "FATAL: connection's 3 account ID not set by INFO response" << std::endl;
+                return 1;
+        }
+        
     verbose( std::cout << "Waiting for appearance of account 3 on connections 1 & 2"
                        << std::endl << std::flush; );
 
@@ -439,7 +439,7 @@ int main(int argc, char ** argv)
     // t->SetFrom(connection1.getAccountId());
     // Try out some OOG stuff, like looking, talking and private messages
 
-	// send private chats from 2 -> 1 and 2 -> 3 
+        // send private chats from 2 -> 1 and 2 -> 3 
 
     if (connection2.isOpen()) {
         verbose( std::cout << "Sending private out-of-game (OOG) talk on secondary connection"
@@ -532,8 +532,8 @@ int main(int argc, char ** argv)
     }
 
     if (connection3.isOpen()) {
-	testInvalidCharacterCreate(connection3);
-	
+        testInvalidCharacterCreate(connection3);
+        
         verbose( std::cout << "Creating character on third connection"
                            << std::endl << std::flush; );
 
@@ -573,7 +573,7 @@ void testTypeQueries(ClientConnection &c)
     info["parents"] = Object::ListType(1, "info");    
     
     if (c.waitFor("info", info, sno)) {
-	std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
+        std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
     arg["id"] = "game_entity";
@@ -583,7 +583,7 @@ void testTypeQueries(ClientConnection &c)
     
     verbose( std::cout << "Waiting for info response to game_entity type query" << std::endl; );
     if (c.waitFor("info", info, sno)) {
-	std::cerr << "ERROR: Type-query for game_entity did not resut in info" << std::endl;
+        std::cerr << "ERROR: Type-query for game_entity did not resut in info" << std::endl;
     }
     
     // try a broken one (unless by some miracle is exists?)
@@ -594,7 +594,7 @@ void testTypeQueries(ClientConnection &c)
     
     verbose( std::cout << "Waiting for error response to _bad_type_ type query" << std::endl; );
     if (c.waitForError(sno)) {
-	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << std::endl;
+        std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << std::endl;
     }
 }
 
@@ -603,27 +603,27 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     Logout lg = Logout::Instantiate();
     lg.SetFrom(c.getAccountId());
     verbose( std::cout << "Sending logout for connection 2 (" 
-		<< c.getAccountId() << std::endl; );
+                << c.getAccountId() << std::endl; );
     int sno = c.send(lg);
     
     verbose( std::cout << "Waiting for disappearance of connection 2" << std::endl; );
     Object::MapType disap;
     disap["id"] = Object(acc);  
     if (watcher.waitFor("disappearance", disap)) {
-	std::cerr << "ERROR: didn't get a disappearance of account 2" << std::endl;
+        std::cerr << "ERROR: didn't get a disappearance of account 2" << std::endl;
     }
     
     verbose( std::cout << "Waiting for info(logout) of connection 2" << std::endl; );
     Object::MapType info;
     info["parents"] = Object::ListType(1, "logout");  
     if (c.waitFor("info", info, sno)) {
-	std::cerr << "NOTE: LOGOUT did not produce an INFO response; this is okay could be fixed" << std::endl;
+        std::cerr << "NOTE: LOGOUT did not produce an INFO response; this is okay could be fixed" << std::endl;
     }
     
     c.close();
     
     if (!c.connect("localhost")) {
-	std::cerr << "ERROR: Unable to re-connect to server"
+        std::cerr << "ERROR: Unable to re-connect to server"
                   << std::endl << std::flush;
         return;
     }
@@ -632,7 +632,7 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     
     verbose( std::cout << "Waiting for info(player) of connection 2" << std::endl; );
     if (c.waitFor("info", info, sno)) {
-	std::cerr << "ERROR: login did not produce an INFO response" << std::endl;
+        std::cerr << "ERROR: login did not produce an INFO response" << std::endl;
     }
     
 }
@@ -657,8 +657,8 @@ void testInvalidCharacterCreate(ClientConnection &c)
                            << std::endl << std::flush; );
 
     if (c.waitForError(sno)) {
-	std::cerr << "ERROR: Invalid Character creation did not result in error"
-	          << std::endl << std::flush;
+        std::cerr << "ERROR: Invalid Character creation did not result in error"
+                  << std::endl << std::flush;
     }
 }
 
@@ -674,7 +674,7 @@ void testRooms(ClientConnection &cl, const std::string &acc)
     cr.SetTo(lobby);
     
     Object::MapType room;
-    room["name"] = "test_room_" + acc;	// make sure it's unique (ish)
+    room["name"] = "test_room_" + acc;  // make sure it's unique (ish)
     room["loc"] = lobby;
     
     cl.send(cr);
@@ -713,7 +713,7 @@ void testDuplicateLogin(const std::string &account, const std::string &pass)
 {
     ClientConnection dup;
     if (!dup.connect("localhost")) {
-	std::cerr << "ERROR: Unable to connect to server"
+        std::cerr << "ERROR: Unable to connect to server"
                   << std::endl << std::flush;
         return;
     }
@@ -721,10 +721,10 @@ void testDuplicateLogin(const std::string &account, const std::string &pass)
     dup.login(account, pass);
     
     verbose( std::cout << "Waiting for ERROR on duplication login to account " 
-	<< account << std::endl; );
+        << account << std::endl; );
     
     if (dup.waitForError()) {
-	std::cerr << "ERROR: duplicate login did not produce an ERROR response" << std::endl;
+        std::cerr << "ERROR: duplicate login did not produce an ERROR response" << std::endl;
     }
     
     dup.close();

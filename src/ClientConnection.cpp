@@ -81,8 +81,8 @@ void ClientConnection::ObjectArrived(const Info & op)
 {
     debug(std::cout << "Info" << std::endl << std::flush;);
     push(op);
-	
-	if (accountId.empty() && (op.GetRefno() == oogActivationRefno)) {
+        
+        if (accountId.empty() && (op.GetRefno() == oogActivationRefno)) {
         try {
             const Object & ac = op.GetArgs().front();
             reply = ac.AsMap();
@@ -240,15 +240,15 @@ int ClientConnection::read() {
 bool ClientConnection::connect(const std::string & server)
 {
     if (ios.is_open()) {
-	std::cerr << "Conection is already connected!" << std::endl;
-	return false;
+        std::cerr << "Attempt to connect when already connected." << std::endl;
+        return false;
     }
     
     ios.clear(); // clear any lingering errors (necessary for re-conncections)
     ios.open(server, 6767);
     if (!ios.is_open()) {
-	std::cerr << "failed to open socket" << std::endl;
-	return false;
+        std::cerr << "Failed to create TCP socket for connection." << std::endl;
+        return false;
     }
     
     Atlas::Net::StreamConnect conn("cyphesis_aiclient", ios, this);
@@ -258,7 +258,8 @@ bool ClientConnection::connect(const std::string & server)
     }
   
     if (conn.GetState() == Atlas::Net::StreamConnect::FAILED) {
-	std::cerr << "atlas negotiation failed" << std::endl;
+        std::cerr << "Atlas protocol negotiation with server failed."
+                  << std::endl;
         return false;
     }
 
@@ -294,7 +295,7 @@ int ClientConnection::login(const std::string & account,
     reply_flag = false;
     error_flag = false;
     oogActivationRefno = send(l);
-	return oogActivationRefno;
+        return oogActivationRefno;
 }
 
 int ClientConnection::create(const std::string & account,
@@ -315,7 +316,7 @@ int ClientConnection::create(const std::string & account,
     reply_flag = false;
     error_flag = false;
     oogActivationRefno = send(c);
-	return oogActivationRefno;
+        return oogActivationRefno;
 }
 
 bool ClientConnection::wait(int time, bool error_expected, int refNo)
@@ -326,16 +327,16 @@ bool ClientConnection::wait(int time, bool error_expected, int refNo)
     reply_flag = false;
     debug( std::cout << "WAITing" << std::endl << std::flush; );
     if (!poll(time)) {
-        std::cerr << "ERROR: Timeout waiting for reply"
+        std::cerr << "ERROR: Timeout waiting for reply from server."
                   << std::endl << std::flush;
-        regress( std::cout << "Timeout while waiting for reply"
+        regress( std::cout << "Timeout while waiting for reply from server."
                            << std::endl << std::flush;);
         return true;
     }
     if (!reply_flag) {
-        std::cerr << "ERROR: Reply was not decoded as an operation"
+        std::cerr << "ERROR: Reply from server was not decoded as an operation."
                   << std::endl << std::flush;
-        regress( std::cout << "Invalid reply received"
+        regress( std::cout << "Invalid reply received from server."
                            << std::endl << std::flush;);
         return true;
     }
@@ -349,10 +350,10 @@ bool ClientConnection::waitFor(const std::string & opParent,
                                int refNo)
 {
     if (refNo == -1) {
-	verbose(std::cout << "Waiting for " << opParent << " op" << std::endl;);
+        verbose(std::cout << "Waiting for " << opParent << " op" << std::endl;);
     } else {
-	verbose(std::cout << "Waiting for " << opParent << " op with refno "
-		          << refNo << std::endl;);
+        verbose(std::cout << "Waiting for " << opParent << " op with refno "
+                          << refNo << std::endl;);
     }
     OperationDeque::iterator I = checkQueue(opParent, refNo);
     int remainingTime = timeOut;
@@ -370,7 +371,7 @@ bool ClientConnection::waitFor(const std::string & opParent,
     }
         
     if (I == operationQueue.end()) {
-        return true;	// we failed miserably
+        return true;    // we failed miserably
     }
     
     RootOperation *op = *I;
@@ -384,23 +385,23 @@ bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::Map
     const Object::ListType & args = op->GetArgs();
     if (arg.empty()) {
         if (!args.empty()) {
-            std::cerr << "ERROR: Response to operation has args "
-                      << "but no args expected"
+            std::cerr << "ERROR: Response from server has args "
+                      << "but no args expected."
                       << std::endl << std::flush;
             return true;
         }
-        debug(std::cout << "No arg expected, and none given"
+        debug(std::cout << "Response from server has no args as expected."
                         << std::endl << std::flush;);
         return false;
     } else {
         if (args.empty()) {
-            std::cerr << "ERROR: Response to operation has no args "
-                      << "but args are expected"
+            std::cerr << "ERROR: Response from server has no args "
+                      << "but args are expected."
                       << std::endl << std::flush;
             return true;
         }
-        debug(std::cout << "Arg expected, and provided" << std::endl
-                        << std::flush;);
+        debug(std::cout << "Response from server has args as expected."
+                        << std::endl << std::flush;);
     }
     
     const Object::MapType & a = args.front().AsMap();
@@ -409,8 +410,8 @@ bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::Map
     for (J = arg.begin(); J != arg.end(); J++) {
         K = a.find(J->first);
         if (K == a.end()) {
-            std::cerr << "ERROR: Response to operation args should have "
-                      << "attribute '" << J->first << "' of type "
+            std::cerr << "ERROR: Response from server should have an argument "
+                      << " with attribute '" << J->first << "' of type "
                       << typeAsString(J->second) << " but it is missing"
                       << std::endl << std::flush;
             error = true;
@@ -421,16 +422,16 @@ bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::Map
         }
         if (J->second.GetType() != K->second.GetType()) {
             if (J->second.IsNum() && K->second.IsNum()) {
-                std::cerr << "WARNING: Response to operation args should have "
-                          << "attribute '" << J->first << "' of type "
-                          << typeAsString(J->second) << " but it is of type "
-                          << typeAsString(K->second)
+                std::cerr << "WARNING: Response from server should have an "
+                          << " argument with attribute '" << J->first
+                          << "' of type " << typeAsString(J->second)
+                          << " but it is of type " << typeAsString(K->second)
                           << std::endl << std::flush;
             } else {
-                std::cerr << "ERROR: Response to operation args should have "
-                          << "attribute '" << J->first << "' of type "
-                          << typeAsString(J->second) << " but it is of type "
-                          << typeAsString(K->second)
+                std::cerr << "ERROR: Response from server should have an "
+                          << " argument with attribute '" << J->first
+                          << "' of type " << typeAsString(J->second)
+                          << " but it is of type " << typeAsString(K->second)
                           << std::endl << std::flush;
                 error = true;
             }
@@ -449,17 +450,17 @@ RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
     ::gettimeofday(&initialTm, NULL);
     
     while (I == operationQueue.end()) {
-	poll(remainingTime);
-	I = checkQueue(opParent, refno);
-	
-	// update the remaining time (roughly, since we only use seconds .. millsecs would be easy)
-	::gettimeofday(&tm, NULL);
-	int elapsed = tm.tv_sec - initialTm.tv_sec;
-	remainingTime = timeOut - elapsed;
+        poll(remainingTime);
+        I = checkQueue(opParent, refno);
+        
+        // update the remaining time (roughly, since we only use seconds .. millsecs would be easy)
+        ::gettimeofday(&tm, NULL);
+        int elapsed = tm.tv_sec - initialTm.tv_sec;
+        remainingTime = timeOut - elapsed;
     }
     
     if (I == operationQueue.end())
-	return NULL;	// we failed miserably
+        return NULL;    // we failed miserably
     
     RootOperation *ret = *I;
     operationQueue.erase(I);
@@ -471,10 +472,10 @@ RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
 bool ClientConnection::waitForError(int refNo)
 {
     if (refNo == -1) {
-	verbose(std::cout << "Waiting for error op" << std::endl;);
+        verbose(std::cout << "Waiting for error op" << std::endl;);
     } else {
-	verbose(std::cout << "Waiting for error op with refno "
-		          << refNo << std::endl;);
+        verbose(std::cout << "Waiting for error op with refno "
+                          << refNo << std::endl;);
     }
     OperationDeque::iterator I = checkQueue("error", refNo);
     int remainingTime = timeOut;
@@ -510,16 +511,16 @@ ClientConnection::checkQueue(const std::string &opType, int refno)
 {
     OperationDeque::iterator I;
     for (I=operationQueue.begin(); I != operationQueue.end(); ++I) {
-	// if a defined refno is being used, it has to match
-	if ((refno > 0) && ((*I)->GetRefno() != refno))
-	    continue;
-	
-	Object::ListType parents = (*I)->GetParents();
-	if (parents.empty())
-	    continue;	// isn't this very bad?
-	
-	if (opType == parents.front().AsString())
-	    return I;
+        // if a defined refno is being used, it has to match
+        if ((refno > 0) && ((*I)->GetRefno() != refno))
+            continue;
+        
+        Object::ListType parents = (*I)->GetParents();
+        if (parents.empty())
+            continue;   // isn't this very bad?
+        
+        if (opType == parents.front().AsString())
+            return I;
     }
     
     return I;
@@ -588,8 +589,8 @@ void ClientConnection::push(const O & op)
     operationQueue.push_back(new_op);
     const std::string & opP = op.GetParents().front().AsString();
     int refNo = op.GetRefno();
-    verbose( std::cout << "Got op of type " << opP << " with refno "
-	               << refNo << std::endl << std::flush;);
+    verbose( std::cout << "Received op of type " << opP << " with refno "
+                       << refNo << std::endl << std::flush;);
 }
 
 
@@ -608,7 +609,7 @@ std::string ClientConnection::getTag(const std::string &t)
 {
     StringMap::iterator T=m_tags.find(t);
     if (T != m_tags.end())
-	return T->second;
+        return T->second;
     
     return "";
 }
@@ -617,23 +618,23 @@ class TokenRemover
 {
 public:
     TokenRemover(const std::string& pair) :
-	m_valueValid(false)
+        m_valueValid(false)
     {
-	size_t eqPos = pair.find('='), len = pair.length();
-	if (eqPos < len) {
-	    m_valueValid = true;
-	    m_value = pair.substr(eqPos + 1, len - (eqPos + 1));
-	}
-	
-	m_tag = pair.substr(0, eqPos);
+        size_t eqPos = pair.find('='), len = pair.length();
+        if (eqPos < len) {
+            m_valueValid = true;
+            m_value = pair.substr(eqPos + 1, len - (eqPos + 1));
+        }
+        
+        m_tag = pair.substr(0, eqPos);
     }
     
     bool operator()(ClientConnection *con)
     {
-	if (m_valueValid) {
-	    return !(con->hasTag(m_tag) && (con->getTag(m_tag) == m_value));
-	} else
-	    return !con->hasTag(m_tag);
+        if (m_valueValid) {
+            return !(con->hasTag(m_tag) && (con->getTag(m_tag) == m_value));
+        } else
+            return !con->hasTag(m_tag);
     }
 private:
     std::string m_tag, m_value;
@@ -644,22 +645,22 @@ ClientConnection* getConnectionBySpec(const std::string &spec)
 {
     StringVec toks = tokenize(spec, ',');
     if (toks.empty())
-	return NULL;
+        return NULL;
     
     ConnectionList valid(static_allConnections);
     
     for (unsigned int T=0;T<toks.size();++T) {
-	if (valid.empty())
-	    return NULL;	// no possible matches, we==boned
+        if (valid.empty())
+            return NULL;        // no possible matches, we==boned
 
-	TokenRemover trm(toks[T]);
-	std::remove_if(valid.begin(), valid.end(), trm);
+        TokenRemover trm(toks[T]);
+        std::remove_if(valid.begin(), valid.end(), trm);
     }
     
     if (valid.empty())
-	return NULL;
+        return NULL;
     else
-	return valid.front();
+        return valid.front();
 }
 
 StringVec tokenize(const std::string &s, const char t)
@@ -668,11 +669,11 @@ StringVec tokenize(const std::string &s, const char t)
     
     unsigned int pos = 0, back = pos;
     while (pos < s.size()) {
-	pos = s.find(t, back);
-	// addthe next part
-	ret.push_back(s.substr(back, pos - back));
-	back = pos + 1;
+        pos = s.find(t, back);
+        // addthe next part
+        ret.push_back(s.substr(back, pos - back));
+        back = pos + 1;
     }
-	    
+            
     return ret;
 }
