@@ -30,7 +30,7 @@ extern "C" {
 
 #include "debug.h"
 
-static bool debug_flag = true;
+static const bool debug_flag = false;
 
 using Atlas::Message::Object;
 
@@ -68,7 +68,7 @@ ClientConnection::~ClientConnection()
 
 void ClientConnection::ObjectArrived(const Error&op)
 {
-    debug(cout << "ERROR" << std::endl << std::flush;);
+    debug(std::cout << "Error" << std::endl << std::flush;);
     push(op);
     reply_flag = true;
     error_flag = true;
@@ -76,7 +76,7 @@ void ClientConnection::ObjectArrived(const Error&op)
 
 void ClientConnection::ObjectArrived(const Info & op)
 {
-    debug(cout << "INFO" << std::endl << std::flush;);
+    debug(std::cout << "Info" << std::endl << std::flush;);
     push(op);
     const std::string & from = op.GetFrom();
     if (from.empty()) {
@@ -324,11 +324,11 @@ bool ClientConnection::wait()
 {
     error_flag = false;
     reply_flag = false;
-    debug(cout << "WAITing" << std::endl << std::flush;);
+    debug(std::cout << "WAITing" << std::endl << std::flush;);
     while (!reply_flag) {
         codec->Poll();
     }
-    debug(cout << "WAIT finished" << std::endl << std::flush;);
+    debug(std::cout << "WAIT finished" << std::endl << std::flush;);
     return error_flag;
 }
 

@@ -762,13 +762,13 @@ void init_python_api()
     }
 }
 
-bool runScript()
+bool runScript(const std::string & script)
 {
-    PyObject * package_name = PyString_FromString("process");
+    PyObject * package_name = PyString_FromString(script.c_str());
     PyObject * mod_dict = PyImport_Import(package_name);
     Py_DECREF(package_name);
     if (mod_dict == NULL) {
-        std::cerr << "Cld not find python module process"
+        std::cerr << "Cld not find python module " << script
                   << std::endl << std::flush;
         PyErr_Print();
         return false;

@@ -1,0 +1,14 @@
+2001-09-24  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/pythonInterface.h, src/pythonInterface.cpp: Made python
+	  interface take an argument, so that script to be run
+	  can be specified.
+
+	* src/ClientConnection.cpp: Removed debugging output, and make
+	  it clearer.
+
+	* src/process.cpp: Implemented processing of options, including
+	  verbose option. Pass name of script through to python code.
+	  Re-add C++ standard test which is run if no script is given,
+	  now with full verbose output available, or silent success
+	  if required.

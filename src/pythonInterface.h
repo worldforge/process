@@ -51,6 +51,6 @@ Atlas::Message::Object::MapType PyDictObject_asMapType(PyObject * dict);
 Atlas::Message::Object PyObject_asObject(PyObject * o);
 
 void init_python_api();
-bool runScript();
+bool runScript(const std::string &);
 
 #endif // RULESETS_PY_OPERATION_H
