@@ -1,4 +1,4 @@
-2003-08-22  Al Riddoch  <ajr@ecs.soton.ac.uk>
+2003-10-12  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/gobshite.cpp: Add code to load atlas.xml before running, as
 	  is required.
