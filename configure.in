@@ -18,7 +18,7 @@ AC_REQUIRE_CPP
 
 dnl Test for WorldForge Atlas Libraries
 
-PKG_CHECK_MODULES(WF, skstream-0.3 >= 0.2.4 atlascpp-0.6 ,
+PKG_CHECK_MODULES(WF, skstream-0.3 atlascpp-0.6 ,
     [
         CPPFLAGS="$CPPFLAGS $WF_CFLAGS"
         LIBS="$LIBS $WF_LIBS"

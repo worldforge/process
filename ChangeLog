@@ -1,5 +1,9 @@
 2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* Switch to skstream-0.3, which is effectively a null change.
+
+2003-08-21  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* configure.in: Clean up help for python prefix option, add check
 	  for python 2.3 and use latest pthread check.
 
