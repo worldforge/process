@@ -1,5 +1,12 @@
 2002-11-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* configure.in: Clean up configure script.
+
+	* src/pythonInterface.cpp: Re-organise headers, and use ISO C++
+	  header names.
+
+2002-11-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/ClientConnection.cpp, src/ClientConnection.h: Pass through
 	  serialno when logging in, or creating account. Report refno of
 	  incoming ops, and refno expected when waiting.

@@ -2,10 +2,6 @@
 // the GNU General Public License (See COPYING for details).
 // Copyright (C) 2000 Alistair Riddoch
 
-#include <stdio.h>
-#include <unistd.h>
-#include <iostream.h>
-
 #include "pythonInterface.h"
 #include "ClientConnection.h"
 
@@ -19,6 +15,11 @@
 #include <Atlas/Objects/Operation/Talk.h>
 #include <Atlas/Objects/Operation/Touch.h>
 #include <Atlas/Objects/Operation/RootOperation.h>
+
+#include <iostream>
+
+#include <stdio.h>
+#include <unistd.h>
 
 using Atlas::Message::Object;
 using Atlas::Objects::Root;
