@@ -18,18 +18,18 @@
 
 typedef std::map<std::string, std::string> StringMap;
 
-typedef std::deque<Atlas::Objects::Operation::RootOperation *> OperationDeque;
+typedef std::deque<Atlas::Objects::Operation::RootOperation> OperationDeque;
 
-class ClientConnection : public Atlas::Objects::Decoder {
+class ClientConnection : public Atlas::Objects::ObjectsDecoder {
   private:
     bool reply_flag;
     bool error_flag;
     tcp_socket_stream ios;
-    Atlas::Codec<std::iostream> * codec;
-    Atlas::Objects::Encoder * encoder;
+    Atlas::Codec * codec;
+    Atlas::Objects::ObjectsEncoder * encoder;
     std::string accountId;
     
-    Atlas::Message::Object::MapType reply;
+    Atlas::Message::Element::MapType reply;
     static int serialNoBase;
     int serialNo;
 
@@ -43,11 +43,11 @@ class ClientConnection : public Atlas::Objects::Decoder {
 
     OperationDeque::iterator checkQueue(const std::string &opType, int refno);
   
-    template<class O>
-    void push(const O &);
+    void push(const Atlas::Objects::Root &);
 
+    virtual void objectInfoArrived(const Atlas::Objects::Operation::Info&);
+#if 0
     virtual void ObjectArrived(const Atlas::Objects::Operation::Error&);
-    virtual void ObjectArrived(const Atlas::Objects::Operation::Info&);
 
     virtual void ObjectArrived(const Atlas::Objects::Operation::Action&);
     virtual void ObjectArrived(const Atlas::Objects::Operation::Appearance&);
@@ -75,6 +75,9 @@ class ClientConnection : public Atlas::Objects::Decoder {
     virtual void ObjectArrived(const Atlas::Objects::Operation::Sound&);
     virtual void ObjectArrived(const Atlas::Objects::Operation::Talk&);
     virtual void ObjectArrived(const Atlas::Objects::Operation::Touch&);
+#else
+    virtual void objectArrived(const Atlas::Objects::Root &);
+#endif
 
     StringMap m_tags;
 
@@ -89,13 +92,13 @@ class ClientConnection : public Atlas::Objects::Decoder {
     int create(const std::string &, const std::string &);
     bool wait(int time = 0, bool error_expected = false, int refNo = -1);
     bool waitFor(const std::string &,
-                 const Atlas::Message::Object::MapType &,
+                 const Atlas::Message::Element::MapType &,
                  int refNo = -1);
   
     bool waitForError(int refNo = -1);
 
-    bool compareArgToTemplate(Atlas::Objects::Operation::RootOperation* op, 
-        const Atlas::Message::Object::MapType & arg);
+    bool compareArgToTemplate(const Atlas::Objects::Operation::RootOperation & op, 
+        const Atlas::Message::Element::MapType & arg);
 
     void setTag(const std::string &tag, const std::string &value);
     bool hasTag(const std::string &t)
@@ -104,13 +107,13 @@ class ClientConnection : public Atlas::Objects::Decoder {
     std::string getTag(const std::string &t);
     
     // check the queue / wait for the specific op, and return it
-    Atlas::Objects::Operation::RootOperation*
-    recv(const std::string & opParent, int refno);
+    const Atlas::Objects::Operation::RootOperation recv(
+                   const std::string & opParent, int refno);
   
-    int send(Atlas::Objects::Operation::RootOperation & op);
+    int send(Atlas::Objects::Operation::RootOperation msg);
     void error(const std::string & message);
     bool poll(int time);
-    RootOperation * pop();
+    RootOperation pop();
     bool pending();
 
     const std::string getAccount()
@@ -135,7 +138,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
     int get_fd() {
         return ios.getSocket();
     }
-    const Atlas::Message::Object::MapType & getReply() {
+    const Atlas::Message::Element::MapType & getReply() {
         return reply;
     }
     const bool isOpen() const;

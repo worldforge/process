@@ -19,7 +19,7 @@ public:
     void testCharacterLook();
     void testTakeCharacter();
 
-    Atlas::Message::Object retrieveAccount(ClientConnection &con);
+    Atlas::Objects::Root retrieveAccount(ClientConnection &con);
 private:
     ClientConnection c;
 };

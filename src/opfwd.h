@@ -9,8 +9,9 @@
 // of this file reduces complexities in the dependency tree, and speeds up
 // compile time.
 
-#include <Atlas/Objects/Operation/RootOperation.h>
+#include <Atlas/Objects/Operation.h>
 
+#if 0
 namespace Atlas {
     namespace Objects {
         namespace Operation {
@@ -38,6 +39,9 @@ namespace Atlas {
         }
     }
 }
+#endif
+
+using Atlas::Objects::Root;
 
 using Atlas::Objects::Operation::RootOperation;
 
@@ -50,6 +54,7 @@ using Atlas::Objects::Operation::Delete;
 using Atlas::Objects::Operation::Divide;
 using Atlas::Objects::Operation::Imaginary;
 using Atlas::Objects::Operation::Info;
+using Atlas::Objects::Operation::InfoData;
 using Atlas::Objects::Operation::Move;
 using Atlas::Objects::Operation::Set;
 using Atlas::Objects::Operation::Get;

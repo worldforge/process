@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
     }
 
     std::cout << "Blah blah blah!" << std::endl << std::flush;
-    Get g(Get::Instantiate());
+    Get g;
     for (;;) {
         c1.send(g);
     }

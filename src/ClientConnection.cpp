@@ -10,7 +10,6 @@
 #include <iostream>
 
 #include <Atlas/Codec.h>
-#include <Atlas/Message/Object.h>
 #include <Atlas/Net/Stream.h>
 #include <Atlas/Objects/Decoder.h>
 #include <Atlas/Objects/Encoder.h>
@@ -29,22 +28,22 @@ StringVec tokenize(const std::string &s, const char t);
 
 int ClientConnection::serialNoBase = 0;
 
-using Atlas::Message::Object;
+using Atlas::Message::Element;
 
-static inline const std::string typeAsString(const Object & o)
+static inline const std::string typeAsString(const Element & o)
 {
-    switch (o.GetType()) {
-        case Object::TYPE_NONE:
+    switch (o.getType()) {
+        case Element::TYPE_NONE:
             return "none";
-        case Object::TYPE_INT:
+        case Element::TYPE_INT:
             return "integer";
-        case Object::TYPE_FLOAT:
+        case Element::TYPE_FLOAT:
             return "float";
-        case Object::TYPE_STRING:
+        case Element::TYPE_STRING:
             return "string";
-        case Object::TYPE_MAP:
+        case Element::TYPE_MAP:
             return "map";
-        case Object::TYPE_LIST:
+        case Element::TYPE_LIST:
             return "list";
         default:
             return "unknown";
@@ -69,33 +68,13 @@ ClientConnection::~ClientConnection()
     static_allConnections.remove(this);
 }
 
+#if 0
 void ClientConnection::ObjectArrived(const Error&op)
 {
     debug(std::cout << "Error" << std::endl << std::flush;);
     push(op);
     reply_flag = true;
     error_flag = true;
-}
-
-void ClientConnection::ObjectArrived(const Info & op)
-{
-    debug(std::cout << "Info" << std::endl << std::flush;);
-    push(op);
-        
-        if (accountId.empty() && (op.GetRefno() == oogActivationRefno)) {
-        try {
-            const Object & ac = op.GetArgs().front();
-            reply = ac.AsMap();
-            Object::MapType::const_iterator I = reply.find("id");
-            if ((I != reply.end()) && I->second.IsString()) {
-                accountId = I->second.AsString();
-                verbose_only( std::cout << "Got account id of " << accountId
-                                        << std::endl << std::flush; );
-            }
-        }
-        catch (...) {
-        }
-    }
 }
 
 void ClientConnection::ObjectArrived(const Action& op)
@@ -227,10 +206,40 @@ void ClientConnection::ObjectArrived(const Touch& op)
 {
     push(op);
 }
+#else
+void ClientConnection::objectInfoArrived(const Info & op)
+{
+    debug(std::cout << "Info" << std::endl << std::flush;);
+    push(op);
+        
+    if (accountId.empty() && (op->getRefno() == oogActivationRefno)) {
+        try {
+            Root ac = op->getArgs().front();
+            const std::string & id = ac->getId();
+            if (!id.empty()) {
+                accountId = id;
+                verbose_only( std::cout << "Got account id of " << accountId
+                                        << std::endl << std::flush; );
+            }
+        }
+        catch (...) {
+        }
+    }
+}
+
+void ClientConnection::objectArrived(const Root & op)
+{
+    debug( std::cout << "Got something" << std::endl << std::flush; );
+    if (op->getClassNo() == Atlas::Objects::Operation::INFO_NO) {
+        objectInfoArrived(Atlas::Objects::smart_dynamic_cast<InfoData>(op));
+    }
+    push(op);
+}
+#endif
 
 int ClientConnection::read() {
     if (ios.is_open()) {
-        codec->Poll();
+        codec->poll();
         return 0;
     } else {
         return -1;
@@ -253,21 +262,21 @@ bool ClientConnection::connect(const std::string & server)
     
     Atlas::Net::StreamConnect conn("cyphesis_aiclient", ios, this);
 
-    while (conn.GetState() == Atlas::Net::StreamConnect::IN_PROGRESS) {
-      conn.Poll();
+    while (conn.getState() == Atlas::Net::StreamConnect::IN_PROGRESS) {
+      conn.poll();
     }
   
-    if (conn.GetState() == Atlas::Net::StreamConnect::FAILED) {
+    if (conn.getState() == Atlas::Net::StreamConnect::FAILED) {
         std::cerr << "Atlas protocol negotiation with server failed."
                   << std::endl;
         return false;
     }
 
-    codec = conn.GetCodec();
+    codec = conn.getCodec();
 
-    encoder = new Atlas::Objects::Encoder(codec);
+    encoder = new Atlas::Objects::ObjectsEncoder(*codec);
 
-    codec->StreamBegin();
+    codec->streamBegin();
 
     return true;
 }
@@ -280,17 +289,17 @@ void ClientConnection::close()
 int ClientConnection::login(const std::string & account,
                              const std::string & password)
 {
-    Atlas::Objects::Operation::Login l = Atlas::Objects::Operation::Login::Instantiate();
-    Object::MapType acmap;
+    Atlas::Objects::Operation::Login l; // = Atlas::Objects::Operation::Login::Instantiate();
+    Element::MapType acmap;
     acmap["username"] = account;
     acmap["password"] = password;
-    acmap["parents"] = Object::ListType(1,"account");
+    acmap["parents"] = Element::ListType(1,"account");
     acmap["objtype"] = "object";
 
     setTag("account", account);
     setTag("pass", password);
     
-    l.SetArgs(Object::ListType(1,Object(acmap)));
+    l->setArgsAsList(Element::ListType(1,Element(acmap)));
 
     reply_flag = false;
     error_flag = false;
@@ -301,17 +310,17 @@ int ClientConnection::login(const std::string & account,
 int ClientConnection::create(const std::string & account,
                               const std::string & password)
 {
-    Atlas::Objects::Operation::Create c = Atlas::Objects::Operation::Create::Instantiate();
-    Object::MapType acmap;
+    Atlas::Objects::Operation::Create c; // = Atlas::Objects::Operation::Create::Instantiate();
+    Element::MapType acmap;
     acmap["username"] = account;
     acmap["password"] = password;
-    acmap["parents"] = Object::ListType(1,"account");
+    acmap["parents"] = Element::ListType(1,"account");
     acmap["objtype"] = "object";
 
     setTag("account", account);
     setTag("pass", password);
 
-    c.SetArgs(Object::ListType(1,Object(acmap)));
+    c->setArgsAsList(Element::ListType(1,Element(acmap)));
 
     reply_flag = false;
     error_flag = false;
@@ -340,13 +349,13 @@ bool ClientConnection::wait(int time, bool error_expected, int refNo)
                            << std::endl << std::flush;);
         return true;
     }
-    // codec->Poll();
+    // codec->poll();
     debug(std::cout << "WAIT finished" << std::endl << std::flush;);
     return error_expected ? !error_flag : error_flag;
 }
 
 bool ClientConnection::waitFor(const std::string & opParent,
-                               const Object::MapType & arg,
+                               const Element::MapType & arg,
                                int refNo)
 {
     if (refNo == -1) {
@@ -374,15 +383,15 @@ bool ClientConnection::waitFor(const std::string & opParent,
         return true;    // we failed miserably
     }
     
-    RootOperation *op = *I;
+    RootOperation op = *I;
     operationQueue.erase(I);
 
     return compareArgToTemplate(op, arg);
 }
 
-bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::MapType & arg)
+bool ClientConnection::compareArgToTemplate(const RootOperation & op, const Element::MapType & arg)
 {
-    const Object::ListType & args = op->GetArgs();
+    const Element::ListType args = op->getArgsAsList();
     if (arg.empty()) {
         if (!args.empty()) {
             std::cerr << "ERROR: Response from server has args "
@@ -404,8 +413,8 @@ bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::Map
                         << std::endl << std::flush;);
     }
     
-    const Object::MapType & a = args.front().AsMap();
-    Object::MapType::const_iterator J, K;
+    const Element::MapType & a = args.front().asMap();
+    Element::MapType::const_iterator J, K;
     bool error = false;
     for (J = arg.begin(); J != arg.end(); J++) {
         K = a.find(J->first);
@@ -417,11 +426,11 @@ bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::Map
             error = true;
             continue;
         }
-        if (J->second.IsNone()) {
+        if (J->second.isNone()) {
             continue;
         }
-        if (J->second.GetType() != K->second.GetType()) {
-            if (J->second.IsNum() && K->second.IsNum()) {
+        if (J->second.getType() != K->second.getType()) {
+            if (J->second.isNum() && K->second.isNum()) {
                 std::cerr << "WARNING: Response from server should have an "
                           << " argument with attribute '" << J->first
                           << "' of type " << typeAsString(J->second)
@@ -441,7 +450,8 @@ bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::Map
 
 }
 
-RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
+const RootOperation ClientConnection::recv(const std::string & opParent,
+                                           int refno)
 {
     OperationDeque::iterator I = checkQueue(opParent, refno);
     int remainingTime = timeOut;
@@ -462,7 +472,7 @@ RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
     if (I == operationQueue.end())
         return NULL;    // we failed miserably
     
-    RootOperation *ret = *I;
+    RootOperation ret = *I;
     operationQueue.erase(I);
     return ret;
 }
@@ -512,24 +522,26 @@ ClientConnection::checkQueue(const std::string &opType, int refno)
     OperationDeque::iterator I;
     for (I=operationQueue.begin(); I != operationQueue.end(); ++I) {
         // if a defined refno is being used, it has to match
-        if ((refno > 0) && ((*I)->GetRefno() != refno))
+        if ((refno > 0) && ((*I)->getRefno() != refno))
             continue;
         
-        Object::ListType parents = (*I)->GetParents();
-        if (parents.empty())
-            continue;   // isn't this very bad?
+        const std::list<std::string> & parents = (*I)->getParents();
+        if (parents.empty()) {
+            continue;   // isn't this very bad? Yes
+        }
         
-        if (opType == parents.front().AsString())
+        if (opType == parents.front()) {
             return I;
+        }
     }
     
     return I;
 }
 
-int ClientConnection::send(Atlas::Objects::Operation::RootOperation & op)
+int ClientConnection::send(Atlas::Objects::Operation::RootOperation op)
 {
-    op.SetSerialno(++serialNo);
-    encoder->StreamMessage(&op);
+    op->setSerialno(++serialNo);
+    encoder->streamObjectsMessage(op);
     ios << std::flush;
     return serialNo;
 }
@@ -558,20 +570,20 @@ bool ClientConnection::poll(int time)
         if (ios.peek() == -1) {
             return false;
         }
-        codec->Poll();
+        codec->poll();
         return true;
     }
     return false;
 
 }
 
-RootOperation * ClientConnection::pop()
+RootOperation ClientConnection::pop()
 {
     poll(0);
     if (operationQueue.empty()) {
         return NULL;
     }
-    RootOperation * op = operationQueue.front();
+    RootOperation op = operationQueue.front();
     operationQueue.pop_front();
     return op;
 }
@@ -581,18 +593,21 @@ bool ClientConnection::pending()
     return !operationQueue.empty();
 }
 
-template<class O>
-void ClientConnection::push(const O & op)
+void ClientConnection::push(const Atlas::Objects::Root & op)
 {
     reply_flag = true;
-    RootOperation * new_op = new O(op); 
+    RootOperation new_op = Atlas::Objects::smart_dynamic_cast<Atlas::Objects::Operation::RootOperationData>(op); 
+    if (!new_op) {
+        verbose( std::cout << "Recived message which is not an op"
+                           << std::endl << std::flush; );
+        return;
+    }
     operationQueue.push_back(new_op);
-    const std::string & opP = op.GetParents().front().AsString();
-    int refNo = op.GetRefno();
+    const std::string & opP = op->getParents().front();
+    int refNo = new_op->getRefno();
     verbose( std::cout << "Received op of type " << opP << " with refno "
                        << refNo << std::endl << std::flush;);
 }
-
 
 const bool ClientConnection::isOpen() const
 {

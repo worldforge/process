@@ -16,7 +16,7 @@ class ClientConnection;
 typedef struct {
     PyObject_HEAD
     PyObject			* Object_attr;	// Attributes dictionary
-    Atlas::Message::Object	* m_obj;
+    Atlas::Message::Element	* m_obj;
 } AtlasObject;
 
 typedef struct {
@@ -45,10 +45,10 @@ AtlasObject * newAtlasObject(PyObject *arg);
 // Utility functions to munge between Object related types and python types
 //
 
-PyObject * Object_asPyObject(const Atlas::Message::Object & obj);
-Atlas::Message::Object::ListType PyListObject_asListType(PyObject * list);
-Atlas::Message::Object::MapType PyDictObject_asMapType(PyObject * dict);
-Atlas::Message::Object PyObject_asObject(PyObject * o);
+PyObject * Object_asPyObject(const Atlas::Message::Element & obj);
+Atlas::Message::Element::ListType PyListObject_asListType(PyObject * list);
+Atlas::Message::Element::MapType PyDictObject_asMapType(PyObject * dict);
+Atlas::Message::Element PyObject_asObject(PyObject * o);
 
 void init_python_api();
 bool runScript(const std::string &);

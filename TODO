@@ -1,3 +1,11 @@
+Make Connection::recv a template, so it can check for an specific
+op, instead of messing about checking by id string.
+
+Order Effective from amazon or somewhere.
+
+Sort how some thoughts on type conversions in Atlas::Objects. Particularly, what happens
+when someone does a dynamic cast down the tree illegally.
+
 Make the waitFor code all use serial/ref no.s properlly.
 
 Add tests for appearance and disappearance ops in lobby

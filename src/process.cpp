@@ -6,6 +6,8 @@
 #include "pythonInterface.h"
 #include "process_debug.h"
 
+#include <Atlas/Objects/loadDefaults.h>
+
 #if defined(__GNUC__) && __GNUC__ < 3
 #include "sstream.h"
 #else
@@ -15,7 +17,7 @@
 #include <unistd.h>
 #include <iostream>
 
-using Atlas::Message::Object;
+using Atlas::Message::Element;
 
 void testTypeQueries(ClientConnection &c);
 
@@ -31,7 +33,7 @@ void usage(const char * progname)
 
 }
 
-Object makeAtlasVec(double x, double y, double z);
+Element makeAtlasVec(double x, double y, double z);
 
 bool verbose_flag = false;
 bool regress_flag = false;
@@ -40,6 +42,8 @@ int exit_status = 0;
 
 int main(int argc, char ** argv)
 {
+    Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
+
     int opt;
     while ((opt = getopt(argc, argv, "vr")) != -1) {
         switch (opt) {
@@ -60,13 +64,13 @@ int main(int argc, char ** argv)
         }
     };
     if (argc == (optind + 1)) {
-        init_python_api();
-        if (runScript(argv[optind])) {
-            return exit_status;
-        } else {
+        // init_python_api();
+        // if (runScript(argv[optind])) {
+            // return exit_status;
+        // } else {
             exit_status = 1;
             return exit_status;
-        }
+        // }
     } else if (argc != optind) {
         usage(argv[0]);
         return 1;
@@ -104,11 +108,11 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Sending Get on primary connection to get server description"
                        << std::endl << std::flush; );
 
-    Get g(Get::Instantiate());
-    int sno = connection1.send(g);
-    Object::MapType server_template;
+    Get g;
+    int sno = connection1.send(RootOperation(g));
+    Element::MapType server_template;
     // server_template["id"] = std::string();
-    server_template["parents"] = Object::ListType();
+    server_template["parents"] = Element::ListType();
     server_template["name"] = std::string();
     server_template["server"] = std::string();
     server_template["clients"] = 0;
@@ -138,10 +142,10 @@ int main(int argc, char ** argv)
     ac1 << getpid() << "testac" << 1;
     sno = connection1.create(ac1.str(), "ptacpw1pc");
 
-    Object::MapType account_template;
+    Element::MapType account_template;
     account_template["id"] = std::string();
-    account_template["parents"] = Object::ListType();
-    account_template["characters"] = Object::ListType();
+    account_template["parents"] = Element::ListType();
+    account_template["characters"] = Element::ListType();
     account_template["objtype"] = std::string();
 
     verbose( std::cout << "Waiting for response to account creation on primary connection"
@@ -182,7 +186,7 @@ int main(int argc, char ** argv)
                 return 1;
         }
         
-    Object::MapType appearance_template;
+    Element::MapType appearance_template;
     appearance_template["id"] = std::string();
     appearance_template["loc"] = std::string();
 
@@ -297,46 +301,46 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Sending out-of-game (OOG) look on primary connection"
                        << std::endl << std::flush; );
 
-    Look l(Look::Instantiate());
-    l.SetFrom(connection1.getAccountId());
+    Look l;
+    l->setFrom(connection1.getAccountId());
     sno = connection1.send(l);
 
     verbose( std::cout << "Waiting for look response on primary connection"
                        << std::endl << std::flush; );
 
-    Object::MapType room_template;
+    Element::MapType room_template;
     room_template["id"] = std::string();
     room_template["name"] = std::string();
-    room_template["parents"] = Object::ListType();
-    room_template["people"] = Object::ListType();
-    room_template["rooms"] = Object::ListType();
+    room_template["parents"] = Element::ListType();
+    room_template["people"] = Element::ListType();
+    room_template["rooms"] = Element::ListType();
     room_template["objtype"] = std::string();
     
-    RootOperation *anonLookResponse = connection1.recv("sight", sno);
+    RootOperation anonLookResponse = connection1.recv("sight", sno);
     if (!anonLookResponse || connection1.compareArgToTemplate(anonLookResponse, room_template)) {
         std::cerr << "ERROR: Out-of-game Look failed"
                   << std::endl << std::flush;
     }
     
-    std::string lobbyId = anonLookResponse->GetArgs().front().AsMap()["id"].AsString();
+    std::string lobbyId = anonLookResponse->getArgs().front()->getId();
 
     verbose( std::cout << "Sending out-of-game (OOG) talk without TO on primary connection"
                        << std::endl << std::flush; );
 
-    Talk t(Talk::Instantiate());
-    Object::MapType say;
+    Talk t;
+    Element::MapType say;
     say["say"] = "Hello";
     say["loc"] = lobbyId;
-    t.SetFrom(connection1.getAccountId());
-    t.SetArgs(Object::ListType(1, say));
+    t->setFrom(connection1.getAccountId());
+    t->setArgsAsList(Element::ListType(1, say));
     sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
-    Object::MapType talkTemplate;
+    Element::MapType talkTemplate;
     talkTemplate["from"] = connection1.getAccountId();
-    talkTemplate["args"] = Object::ListType(1, say);
+    talkTemplate["args"] = Element::ListType(1, say);
 
     if (connection1.waitFor("sound", talkTemplate, sno)) {
         std::cerr << "WARNING: Out-of-game Talk did not result in sound"
@@ -369,7 +373,7 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Sending out-of-game (OOG) talk on primary connection"
                        << std::endl << std::flush; );
 
-    t.SetTo(lobbyId);
+    t->setTo(lobbyId);
     sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
@@ -405,7 +409,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Sending out-of-game (OOG) talk on second connection"
                            << std::endl << std::flush; );
 
-        t.SetFrom(connection2.getAccountId());
+        t->setFrom(connection2.getAccountId());
         sno = connection2.send(t);
 
         verbose( std::cout << "Waiting for sound response to talk on primary connection"
@@ -435,7 +439,7 @@ int main(int argc, char ** argv)
         }
     }
 
-    // Talk t(Talk::Instantiate());
+    // Talk t();
     // t->SetFrom(connection1.getAccountId());
     // Try out some OOG stuff, like looking, talking and private messages
 
@@ -445,13 +449,13 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Sending private out-of-game (OOG) talk on secondary connection"
                            << std::endl << std::flush; );
 
-        t.SetTo(connection1.getAccountId());
-        t.SetFrom(connection2.getAccountId());
-        Object::MapType say;
+        t->setTo(connection1.getAccountId());
+        t->setFrom(connection2.getAccountId());
+        Element::MapType say;
         say["say"] = "Private_2_1";
-        t.SetArgs(Object::ListType(1, say));
+        t->setArgsAsList(Element::ListType(1, say));
 
-        talkTemplate["args"] = t.GetArgs();
+        talkTemplate["args"] = t->getArgsAsList();
         talkTemplate["from"] = connection2.getAccountId();
         talkTemplate["to"] = connection1.getAccountId();
             
@@ -469,12 +473,12 @@ int main(int argc, char ** argv)
             verbose( std::cout << "Sending private out-of-game (OOG) talk on secondary connection"
                                << std::endl << std::flush; );
 
-            t.SetTo(connection3.getAccountId());
+            t->setTo(connection3.getAccountId());
             say["say"] = "Private_2_3";
-            t.SetArgs(Object::ListType(1, say));
+            t->setArgsAsList(Element::ListType(1, say));
             sno = connection2.send(t);
 
-            talkTemplate["args"] = t.GetArgs();
+            talkTemplate["args"] = t->getArgsAsList();
             talkTemplate["from"] = connection2.getAccountId();
             talkTemplate["to"] = connection3.getAccountId();
         
@@ -493,14 +497,14 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Creating character on primary connection"
                        << std::endl << std::flush; );
 
-    Object::MapType character;
+    Element::MapType character;
     character["objtype"] = "object";
-    character["parents"] = Object::ListType(1,"settler");
+    character["parents"] = Element::ListType(1,"settler");
     character["name"] = "Nivek";
 
-    Create create = Create::Instantiate();
-    create.SetFrom(connection1.getAccountId());
-    create.SetArgs(Object::ListType(1,character));
+    Create create;
+    create->setFrom(connection1.getAccountId());
+    create->setArgsAsList(Element::ListType(1,character));
 
     sno = connection1.send(create);
 
@@ -517,8 +521,8 @@ int main(int argc, char ** argv)
                            << std::endl << std::flush; );
 
         character["name"] = "Cevin";
-        create.SetFrom(connection2.getAccountId());
-        create.SetArgs(Object::ListType(1,character));
+        create->setFrom(connection2.getAccountId());
+        create->setArgsAsList(Element::ListType(1,character));
 
         sno = connection2.send(create);
 
@@ -538,8 +542,8 @@ int main(int argc, char ** argv)
                            << std::endl << std::flush; );
 
         character["name"] = "Dwayne";
-        create.SetFrom(connection3.getAccountId());
-        create.SetArgs(Object::ListType(1,character));
+        create->setFrom(connection3.getAccountId());
+        create->setArgsAsList(Element::ListType(1,character));
 
         sno = connection3.send(create);
 
@@ -561,23 +565,23 @@ void testTypeQueries(ClientConnection &c)
     assert(c.isOpen());
     verbose( std::cout << "Requesting root-type" << std::endl; );
     
-    Get query = Get::Instantiate();
-    Object::MapType arg;
+    Get query;
+    Element::MapType arg;
     arg["id"] = "root";
-    query.SetArgs(Object::ListType(1, arg));
+    query->setArgsAsList(Element::ListType(1, arg));
     
     int sno = c.send(query);
     verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
     
-    Object::MapType info;
-    info["parents"] = Object::ListType(1, "info");    
+    Element::MapType info;
+    info["parents"] = Element::ListType(1, "info");    
     
     if (c.waitFor("info", info, sno)) {
         std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
     arg["id"] = "game_entity";
-    query.SetArgs(Object::ListType(1, arg));
+    query->setArgsAsList(Element::ListType(1, arg));
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
     sno = c.send(query);
     
@@ -588,7 +592,7 @@ void testTypeQueries(ClientConnection &c)
     
     // try a broken one (unless by some miracle is exists?)
     arg["id"] = "_bad_type_";
-    query.SetArgs(Object::ListType(1, arg));
+    query->setArgsAsList(Element::ListType(1, arg));
     verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
     sno = c.send(query);
     
@@ -600,22 +604,22 @@ void testTypeQueries(ClientConnection &c)
 
 void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher)
 {
-    Logout lg = Logout::Instantiate();
-    lg.SetFrom(c.getAccountId());
+    Logout lg;
+    lg->setFrom(c.getAccountId());
     verbose( std::cout << "Sending logout for connection 2 (" 
                 << c.getAccountId() << std::endl; );
     int sno = c.send(lg);
     
     verbose( std::cout << "Waiting for disappearance of connection 2" << std::endl; );
-    Object::MapType disap;
-    disap["id"] = Object(acc);  
+    Element::MapType disap;
+    disap["id"] = Element(acc);  
     if (watcher.waitFor("disappearance", disap)) {
         std::cerr << "ERROR: didn't get a disappearance of account 2" << std::endl;
     }
     
     verbose( std::cout << "Waiting for info(logout) of connection 2" << std::endl; );
-    Object::MapType info;
-    info["parents"] = Object::ListType(1, "logout");  
+    Element::MapType info;
+    info["parents"] = Element::ListType(1, "logout");  
     if (c.waitFor("info", info, sno)) {
         std::cerr << "NOTE: LOGOUT did not produce an INFO response; this is okay could be fixed" << std::endl;
     }
@@ -642,14 +646,14 @@ void testInvalidCharacterCreate(ClientConnection &c)
     verbose( std::cout << "Testing character creation with invalid type"
                            << std::endl << std::flush; );
 
-    Object::MapType character;
+    Element::MapType character;
     character["objtype"] = "object";
-    character["parents"] = Object::ListType(1,"__bad__type__");
+    character["parents"] = Element::ListType(1,"__bad__type__");
     character["name"] = "Dwayne";
 
-    Create create = Create::Instantiate();
-    create.SetFrom(c.getAccountId());
-    create.SetArgs(Object::ListType(1,character));
+    Create create;
+    create->setFrom(c.getAccountId());
+    create->setArgsAsList(Element::ListType(1,character));
     
     int sno = c.send(create);
 
@@ -669,11 +673,11 @@ void testInvalidCharacterCreate(ClientConnection &c)
 void testRooms(ClientConnection &cl, const std::string &acc)
 {
     Create cr;
-    cr.SetFrom(cl.getAccountId());
+    cr->setFrom(cl.getAccountId());
     
-    cr.SetTo(lobby);
+    cr->setTo(lobby);
     
-    Object::MapType room;
+    Element::MapType room;
     room["name"] = "test_room_" + acc;  // make sure it's unique (ish)
     room["loc"] = lobby;
     
@@ -685,14 +689,14 @@ void testRooms(ClientConnection &cl, const std::string &acc)
 void testInGame(ClientConnection &a, ClientConnection &b, ClientConnection &c)
 {
     // movement
-    Move mv = Move::Instantiate();
-    mv.SetFrom(a.getAccountId());
-    mv.SetTo(ac1Char);
+    Move mv;
+    mv->setFrom(a.getAccountId());
+    mv->setTo(ac1Char);
     
-    Object::MapType move;
+    Element::MapType move;
     move["id"] = ac1Char;
     move["pos"] = makeAtlasVec(10.0, 0.0, 0.0);
-    mv.SetArgs(Object::ListType(1, move));
+    mv->setArgsAsList(Element::ListType(1, move));
 
     // velocity movement
 
@@ -700,13 +704,13 @@ void testInGame(ClientConnection &a, ClientConnection &b, ClientConnection &c)
 }
 */
 
-Object makeAtlasVec(double x, double y, double z)
+Element makeAtlasVec(double x, double y, double z)
 {
-    Object::ListType vec;
+    Element::ListType vec;
     vec.push_back(x);
     vec.push_back(y);
     vec.push_back(z);
-    return Object(vec);
+    return Element(vec);
 }
 
 void testDuplicateLogin(const std::string &account, const std::string &pass)
