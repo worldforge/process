@@ -4,6 +4,8 @@
 
 #include "ClientConnection.h"
 
+#include <iostream>
+
 using Atlas::Message::Object;
 
 bool verbose_flag = false;
