@@ -1,0 +1,119 @@
+dnl Initialise autoconf
+
+AC_INIT(src/process.cpp)
+
+dnl Initialise automake
+
+AM_INIT_AUTOMAKE(process, 0.0.0)
+
+dnl Need libtool
+
+AM_PROG_LIBTOOL
+
+dnl Test for C++ compiler
+
+AC_PROG_CC
+AC_PROG_CXX
+
+CFLAGS='-Wall -g'
+CXXFLAGS='-Wall -g'
+
+AC_PREFIX_DEFAULT("/usr/local")
+
+AC_LANG_CPLUSPLUS
+AC_REQUIRE_CPP
+
+dnl Test for WorldForge Atlas Libraries
+
+ATLAS_VERSION=0.3.10
+AM_PATH_ATLAS($ATLAS_VERSION)
+CFLAGS="$CFLAGS $ATLAS_CFLAGS"
+CPPFLAGS="$CPPFLAGS $ATLAS_CFLAGS"
+CXXFLAGS="$CXXFLAGS $ATLAS_CFLAGS"
+LIBS="$LIBS $ATLAS_LIBS"
+
+AC_CHECK_LIB(dl,main)
+AC_CHECK_LIB(pthread,main)
+
+dnl allow the user to provide the directory where python is installed in
+dnl
+AC_CACHE_CHECK(for location of python, python_prefix,
+[
+	python_prefix=/usr
+	AC_ARG_WITH(python,
+	[ --with-python=DIR          directory python is installed in [default=/usr]],
+	[
+		if test $withval != yes; then
+			python_prefix=$withval
+		fi
+	])
+])
+
+dnl then check for the header file Python.h and set
+dnl python_include_path and python_version
+dnl appropriately to what we have found
+dnl
+dnl if found define HAVE_PYTHON_H
+dnl
+
+AC_CHECK_HEADER(python2.1/Python.h,
+	[ python_include_path=-I${python_prefix}/include/python2.1
+	  python_version=python2.1
+        ],[
+	AC_CHECK_HEADER(python2.0/Python.h,
+		[ python_include_path=-I${python_prefix}/include/python2.0
+		  python_version=python2.0
+                ],[
+		AC_CHECK_HEADER(python1.6/Python.h, 
+			[ python_include_path=-I${python_prefix}/include/python1.6
+			  python_version=python1.6
+                        ],[
+			AC_CHECK_HEADER(python1.5/Python.h, 
+				[ python_include_path=-I${python_prefix}/include/python1.5
+				  python_version=python1.5
+                                ])
+			])
+		])
+	])
+
+
+				
+PYTHON_INCLUDES=${python_include_path}
+CPPFLAGS="$CPPFLAGS ${PYTHON_INCLUDES}"
+CXXFLAGS="$CXXFLAGS ${PYTHON_INCLUDES}"
+
+dnl build the library path from the found version
+python_lib_path=${python_prefix}/lib/${python_version}/config
+
+dnl check for libpythonx.y
+dnl if found define HAVE_PYTHON_LIB 
+dnl
+AC_CHECK_LIB(python2.1, Py_Initialize, 
+	[ python_libs="-L${python_lib_path} -lpython2.1 -lutil"	  
+	],[
+	AC_CHECK_LIB(python2.0, Py_Initialize, 
+		[ python_libs="-L${python_lib_path} -lpython2.0 -lutil"	  
+		],[
+		AC_CHECK_LIB(python1.6, Py_Initialize, 
+			[ python_libs="-L${python_lib_path} -lpython1.6"
+			],[
+			AC_CHECK_LIB(python1.5, Py_Initialize, 
+				[ python_libs="-L${python_lib_path} -lpython1.5"
+				],,-L${python_lib_path})
+			],-L${python_lib_path})
+		],-L${python_lib_path} -lutil)
+	],-L${python_lib_path} -lutil)
+
+PYTHON_LIBS=${python_libs}
+LIBS="$LIBS $PYTHON_LIBS"
+
+dnl ... done with python checks
+dnl -----------------------------------------------------------------
+
+AC_CHECK_LIB(skstream,main)
+
+dnl Generate files
+AC_OUTPUT([
+	Makefile
+	src/Makefile
+])
