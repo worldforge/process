@@ -27,6 +27,8 @@ static const bool debug_flag = false;
 typedef std::vector<std::string> StringVec;
 StringVec tokenize(const std::string &s, const char t);
 
+int ClientConnection::serialNoBase = 0;
+
 using Atlas::Message::Object;
 
 static inline const std::string typeAsString(const Object & o)
@@ -53,7 +55,7 @@ typedef std::list<ClientConnection*>  ConnectionList;
 static ConnectionList static_allConnections;
 
 ClientConnection::ClientConnection() :
-    encoder(NULL), serialNo(512)
+    encoder(NULL), serialNo(serialNoBase += 512)
 {
     static_allConnections.push_back(this);
 }
@@ -312,7 +314,7 @@ bool ClientConnection::create(const std::string & account,
     return true;
 }
 
-bool ClientConnection::wait(int time, bool error_expected)
+bool ClientConnection::wait(int time, bool error_expected, int refNo)
 // Waits for response from server. Used when we are expecting a login response
 // Return whether or not an error occured
 {
@@ -340,24 +342,30 @@ bool ClientConnection::wait(int time, bool error_expected)
 
 bool ClientConnection::waitFor(const std::string & opParent,
                                const Object::MapType & arg,
-                               bool error_expected)
+                               int refNo)
 {
-    if (wait(timeOut, error_expected)) {
-        return true;
+    OperationDeque::iterator I = checkQueue(opParent, refNo);
+    int remainingTime = timeOut;
+    struct timeval tm, initialTm;
+    
+    ::gettimeofday(&initialTm, NULL);
+    
+    while ((I == operationQueue.end()) && (remainingTime > 0)) {
+	poll(remainingTime);
+	I = checkQueue(opParent, refNo);
+	
+	::gettimeofday(&tm, NULL);
+	int elapsed = tm.tv_sec - initialTm.tv_sec;
+	remainingTime = timeOut - elapsed;
     }
-    RootOperation * op;
-    std::string opP;
-    do {
-        poll(0);
-        op = pop();
-        if (op == NULL) {
-            std::cerr << "ERROR: No response to operation"
-                      << std::endl << std::flush;
-            return true;
-        }
-        opP = op->GetParents().front().AsString();
-        verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
-    } while (opP != opParent);
+    
+    if (I == operationQueue.end()) {
+	return true;	// we failed miserably
+    }
+    
+    RootOperation *op = *I;
+    operationQueue.erase(I);
+
     //const std::string & p = op->GetParents().front().AsString();
     //if (p != opParent) {
         //std::cerr << "ERROR: Response to operation has parent " << p
@@ -387,33 +395,33 @@ bool ClientConnection::waitFor(const std::string & opParent,
                         << std::flush;);
     }
     const Object::MapType & a = args.front().AsMap();
-    Object::MapType::const_iterator I, J;
+    Object::MapType::const_iterator J, K;
     bool error = false;
-    for (I = arg.begin(); I != arg.end(); I++) {
-        J = a.find(I->first);
-        if (J == a.end()) {
+    for (J = arg.begin(); J != arg.end(); J++) {
+        K = a.find(J->first);
+        if (K == a.end()) {
             std::cerr << "ERROR: Response to operation args should have "
-                      << "attribute '" << I->first << "' of type "
-                      << typeAsString(I->second) << " but it is missing"
+                      << "attribute '" << J->first << "' of type "
+                      << typeAsString(J->second) << " but it is missing"
                       << std::endl << std::flush;
             error = true;
             continue;
         }
-        if (I->second.IsNone()) {
+        if (J->second.IsNone()) {
             continue;
         }
-        if (I->second.GetType() != J->second.GetType()) {
-            if (I->second.IsNum() && J->second.IsNum()) {
+        if (J->second.GetType() != K->second.GetType()) {
+            if (J->second.IsNum() && K->second.IsNum()) {
                 std::cerr << "WARNING: Response to operation args should have "
-                          << "attribute '" << I->first << "' of type "
-                          << typeAsString(I->second) << " but it is of type "
-                          << typeAsString(J->second)
+                          << "attribute '" << J->first << "' of type "
+                          << typeAsString(J->second) << " but it is of type "
+                          << typeAsString(K->second)
                           << std::endl << std::flush;
             } else {
                 std::cerr << "ERROR: Response to operation args should have "
-                          << "attribute '" << I->first << "' of type "
-                          << typeAsString(I->second) << " but it is of type "
-                          << typeAsString(J->second)
+                          << "attribute '" << J->first << "' of type "
+                          << typeAsString(J->second) << " but it is of type "
+                          << typeAsString(K->second)
                           << std::endl << std::flush;
                 error = true;
             }
@@ -450,74 +458,31 @@ RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
 
 /* wait for an error operation; the provided arg will be the op that caused the error,
  i.e args[1] of the ERROR op */
-bool ClientConnection::waitForError(const Object::MapType & arg)
+bool ClientConnection::waitForError(int refNo)
 {
-    if (wait(timeOut, true)) {
-        return true;
+    OperationDeque::iterator I = checkQueue("error", refNo);
+    int remainingTime = timeOut;
+    struct timeval tm, initialTm;
+    
+    ::gettimeofday(&initialTm, NULL);
+    
+    while ((I == operationQueue.end()) && (remainingTime > 0)) {
+        poll(remainingTime);
+        I = checkQueue("error", refNo);
+        
+        ::gettimeofday(&tm, NULL);
+        int elapsed = tm.tv_sec - initialTm.tv_sec;
+        remainingTime = timeOut - elapsed;
     }
-    RootOperation * op;
-    std::string opP;
-    do {
-        poll(0);
-        op = pop();
-        if (op == NULL) {
-            std::cerr << "ERROR: No response to operation"
-                      << std::endl << std::flush;
-            return true;
-        }
-        opP = op->GetParents().front().AsString();
-        verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
-    } while (opP != "error");
+    
+    if (I == operationQueue.end()) {
+        return true;    // we failed miserably
+    }
+    
+    // RootOperation *op = *I; // Not needed right now
+    operationQueue.erase(I);
 
-    const Object::ListType & args = op->GetArgs();
-    if (arg.empty()) {
-        debug(std::cout << "No arg expected"
-                        << std::endl << std::flush;);
-        return false;
-    } else {
-        if (args.empty()) {
-            std::cerr << "ERROR: Response to operation has no args "
-                      << "but args are expected"
-                      << std::endl << std::flush;
-            return true;
-        }
-        debug(std::cout << "Arg expected, and provided" << std::endl
-                        << std::flush;);
-    }
-    const Object::MapType & a = args[1].AsMap();
-    Object::MapType::const_iterator I, J;
-    bool error = false;
-    for (I = arg.begin(); I != arg.end(); I++) {
-        J = a.find(I->first);
-        if (J == a.end()) {
-            std::cerr << "ERROR: Response to operation args should have "
-                      << "attribute '" << I->first << "' of type "
-                      << typeAsString(I->second) << " but it is missing"
-                      << std::endl << std::flush;
-            error = true;
-            continue;
-        }
-        if (I->second.IsNone()) {
-            continue;
-        }
-        if (I->second.GetType() != J->second.GetType()) {
-            if (I->second.IsNum() && J->second.IsNum()) {
-                std::cerr << "WARNING: Response to operation args should have "
-                          << "attribute '" << I->first << "' of type "
-                          << typeAsString(I->second) << " but it is of type "
-                          << typeAsString(J->second)
-                          << std::endl << std::flush;
-            } else {
-                std::cerr << "ERROR: Response to operation args should have "
-                          << "attribute '" << I->first << "' of type "
-                          << typeAsString(I->second) << " but it is of type "
-                          << typeAsString(J->second)
-                          << std::endl << std::flush;
-                error = true;
-            }
-        }
-    }
-    return error;
+    return false;
 }
 
 /** determine whether a requested operation is in the queue already; if so, return an
@@ -544,11 +509,12 @@ ClientConnection::checkQueue(const std::string &opType, int refno)
     return I;
 }
 
-void ClientConnection::send(Atlas::Objects::Operation::RootOperation & op)
+int ClientConnection::send(Atlas::Objects::Operation::RootOperation & op)
 {
     op.SetSerialno(++serialNo);
     encoder->StreamMessage(&op);
     ios << std::flush;
+    return serialNo;
 }
 
 void ClientConnection::error(const std::string & message)
@@ -604,6 +570,8 @@ void ClientConnection::push(const O & op)
     reply_flag = true;
     RootOperation * new_op = new O(op); 
     operationQueue.push_back(new_op);
+    const std::string & opP = op.GetParents().front().AsString();
+    verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
 }
 
 

@@ -557,11 +557,8 @@ void testTypeQueries(ClientConnection &c)
     verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
     c.send(query);
     
-    Object::MapType error;
-    error["message"] = std::string();
-    
     verbose( std::cout << "Waiting for error response to _bad_type_ type query" << std::endl; );
-    if (c.waitFor("error", error, true)) {
+    if (c.waitForError()) {
 	std::cerr << "ERROR: Type-query for _bad_type did not resut in error" << std::endl;
     }
 }
@@ -623,12 +620,7 @@ void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc)
     verbose( std::cout << "Waiting for ERROR response to invlaid character create"
                            << std::endl << std::flush; );
 
-    Object::MapType cr;
-    cr["objtype"] = "op";
-    cr["parents"] = Object::ListType(1, "create");
-    cr["from"] =  acc;
-    
-    if (c.waitForError(cr)) {
+    if (c.waitForError()) {
 	std::cerr << "ERROR: Invalid Character creation did not result in ERROR"
 	    << std::endl << std::flush;
     }
@@ -695,10 +687,7 @@ void testDuplicateLogin(const std::string &account, const std::string &pass)
     verbose( std::cout << "Waiting for ERROR on duplication login to account " 
 	<< account << std::endl; );
     
-    Object::MapType info;
-    info["parents"] = Object::ListType(1,"login");
-    
-    if (dup.waitForError(info)) {
+    if (dup.waitForError()) {
 	std::cerr << "ERROR: duplicate login did not produce an ERROR response" << std::endl;
     }
     

@@ -28,7 +28,8 @@ class ClientConnection : public Atlas::Objects::Decoder {
     Atlas::Codec<std::iostream> * codec;
     Atlas::Objects::Encoder * encoder;
     
-  Atlas::Message::Object::MapType reply;
+    Atlas::Message::Object::MapType reply;
+    static int serialNoBase;
     int serialNo;
 
     OperationDeque operationQueue;
@@ -80,12 +81,12 @@ class ClientConnection : public Atlas::Objects::Decoder {
     void close();
     bool login(const std::string &, const std::string &);
     bool create(const std::string &, const std::string &);
-    bool wait(int time = 0, bool error_expected = false);
+    bool wait(int time = 0, bool error_expected = false, int refNo = -1);
     bool waitFor(const std::string &,
                  const Atlas::Message::Object::MapType &,
-                 bool error_expected = false);
+                 int refNo = -1);
   
-    bool waitForError(const Atlas::Message::Object::MapType & arg);
+    bool waitForError(int refNo = -1);
 
     void setTag(const std::string &tag, const std::string &value);
     bool hasTag(const std::string &t)
@@ -97,7 +98,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
     Atlas::Objects::Operation::RootOperation*
     recv(const std::string & opParent, int refno);
   
-    void send(Atlas::Objects::Operation::RootOperation & op);
+    int send(Atlas::Objects::Operation::RootOperation & op);
     void error(const std::string & message);
     bool poll(int time);
     RootOperation * pop();
