@@ -513,7 +513,9 @@ void testTypeQueries(ClientConnection &c)
     verbose( std::cout << "Requesting root-type" << std::endl; );
     
     Get query = Get::Instantiate();
-    query.SetArgs(Object::ListType(1, "root"));
+    Object::MapType arg;
+    arg["id"] = "root";
+    query.SetArgs(Object::ListType(1, arg));
     
     c.send(query);
     verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
@@ -525,7 +527,8 @@ void testTypeQueries(ClientConnection &c)
 	std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
-    query.SetArgs(Object::ListType(1, "game_entity"));
+    arg["id"] = "game_entity";
+    query.SetArgs(Object::ListType(1, arg));
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
     c.send(query);
     
@@ -535,7 +538,8 @@ void testTypeQueries(ClientConnection &c)
     }
     
     // try a broken one (unless by some miracle is exists?)
-    query.SetArgs(Object::ListType(1, "_bad_type_"));
+    arg["id"] = "_bad_type_";
+    query.SetArgs(Object::ListType(1, arg));
     verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
     c.send(query);
     
