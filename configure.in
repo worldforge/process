@@ -18,7 +18,7 @@ AC_REQUIRE_CPP
 
 dnl Test for WorldForge Atlas Libraries
 
-PKG_CHECK_MODULES(WF, skstream-0.2 >= 0.2.4 atlascpp-0.6 ,
+PKG_CHECK_MODULES(WF, skstream-0.3 >= 0.2.4 atlascpp-0.6 ,
     [
         CPPFLAGS="$CPPFLAGS $WF_CFLAGS"
         LIBS="$LIBS $WF_LIBS"
@@ -31,14 +31,14 @@ dnl allow the user to provide the directory where python is installed in
 dnl
 AC_CACHE_CHECK(for location of python, python_prefix,
 [
-	python_prefix=/usr
-	AC_ARG_WITH(python,
-	[ --with-python=DIR          directory python is installed in [default=/usr]],
-	[
-		if test $withval != yes; then
-			python_prefix=$withval
-		fi
-	])
+    python_prefix=/usr
+    AC_ARG_WITH(python,
+    [  --with-python=DIR       Prefix where python is installed in [default=/usr]],
+    [
+        if test $withval != yes; then
+            python_prefix=$withval
+        fi
+    ])
 ])
 
 dnl then check for the header file Python.h and set
@@ -46,49 +46,70 @@ dnl python_include_path and python_version
 dnl appropriately to what we have found
 dnl
 
-AC_CHECK_HEADER(python2.2/Python.h,
-	[ python_include_path=-I${python_prefix}/include/python2.2
-	  python_version=python2.2
+AC_CHECK_HEADER(python2.3/Python.h,
+[
+    python_include_path=-I${python_prefix}/include/python2.3
+    python_version=python2.3
+],[
+    AC_CHECK_HEADER(python2.2/Python.h,
+    [
+        python_include_path=-I${python_prefix}/include/python2.2
+        python_version=python2.2
+    ],[
+        AC_CHECK_HEADER(python2.1/Python.h,
+        [
+            python_include_path=-I${python_prefix}/include/python2.1
+            python_version=python2.1
         ],[
-	AC_CHECK_HEADER(python2.1/Python.h,
-		[ python_include_path=-I${python_prefix}/include/python2.1
-		  python_version=python2.1
-       		],[
-		AC_CHECK_HEADER(python2.0/Python.h,
-			[ python_include_path=-I${python_prefix}/include/python2.0
-			  python_version=python2.0
-			],[
-			AC_CHECK_HEADER(python1.6/Python.h, 
-				[ python_include_path=-I${python_prefix}/include/python1.6
-				  python_version=python1.6
-        	                ],[
-				AC_CHECK_HEADER(python1.5/Python.h, 
-					[ python_include_path=-I${python_prefix}/include/python1.5
-					  python_version=python1.5
-	                                ])
-				])
-			])
-		])
-	])
-
-AC_CHECK_LIB(dl,main)
-AC_CHECK_LIB(pthread,main)
+            AC_CHECK_HEADER(python2.0/Python.h,
+            [
+                python_include_path=-I${python_prefix}/include/python2.0
+                python_version=python2.0
+            ],[
+                AC_CHECK_HEADER(python1.6/Python.h, 
+                [
+                    python_include_path=-I${python_prefix}/include/python1.6
+                    python_version=python1.6
+                ],[
+                    AC_CHECK_HEADER(python1.5/Python.h, 
+                    [
+                        python_include_path=-I${python_prefix}/include/python1.5
+                        python_version=python1.5
+                    ])
+                ])
+            ])
+        ])
+    ])
+])
 
 PYTHON_INCLUDES=${python_include_path}
 CPPFLAGS="$CPPFLAGS ${PYTHON_INCLUDES}"
 
-dnl Check for libutil, which Python requires on some
-dnl platforms. If libutil is missing, obviously Python
-dnl won't depend on it.
-AC_CHECK_LIB(util, openpty, [LIBS="$LIBS -lutil"])
-
 dnl build the library path from the found version
 python_lib_path=${python_prefix}/lib/${python_version}/config
 
-AC_CHECK_LIB(${python_version},
+AC_CHECK_LIB(dl,main)
+AC_CHECK_LIB(util,openpty)
+
+AC_CHECK_FUNC(pthread_mutex_trylock, ,
+[
+    ac_save_CXXFLAGS="$CXXFLAGS"
+    CXXFLAGS="$CXXFLAGS -pthread"
+    AC_CHECK_FUNC(pthread_create, ,
+    [
+        CXXFLAGS="$ac_save_CXXFLAGS"
+        AC_CHECK_LIB(pthread, pthread_create, ,
+        [
+            AC_MSG_WARN([Couldn't find pthread library. Python lib check may fail])
+        ])
+    ])
+])
+
+AC_CHECK_LIB(${python_version}, 
     Py_Initialize,
-    [python_libs="-L${python_lib_path} -l${python_version}"],
-    AC_MSG_ERROR(Couldn't find Python library),
+    [
+        python_libs="-L${python_lib_path} -l${python_version}"
+    ],AC_MSG_ERROR([Couldn't find python libraries. Do you have python development installed]),
     [-L${python_lib_path}]
 )
 
@@ -100,11 +121,11 @@ dnl -----------------------------------------------------------------
 
 AM_PATH_CPPUNIT(1.6.1,
     [
-	CFLAGS="$CFLAGS $CPPUNIT_CFLAGS"
-	CPPFLAGS="$CPPFLAGS $CPPUNIT_CFLAGS"
-	LIBS="$LIBS $CPPUNIT_LIBS"
+        CFLAGS="$CFLAGS $CPPUNIT_CFLAGS"
+        CPPFLAGS="$CPPFLAGS $CPPUNIT_CFLAGS"
+        LIBS="$LIBS $CPPUNIT_LIBS"
     ], [
-	AC_MSG_ERROR(Couldn't Find CppUnit)
+        AC_MSG_ERROR(Couldn't Find CppUnit)
     ]
 )
 CPPFLAGS="$CPPFLAGS $CPPUNIT_CFLAGS"
@@ -112,6 +133,6 @@ LIBS="$LIBS $CPPUNIT_LIBS"
 
 dnl Generate files
 AC_OUTPUT([
-	Makefile
-	src/Makefile
+        Makefile
+        src/Makefile
 ])
