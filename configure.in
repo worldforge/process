@@ -77,18 +77,18 @@ AC_CHECK_LIB(pthread,main)
 PYTHON_INCLUDES=${python_include_path}
 CPPFLAGS="$CPPFLAGS ${PYTHON_INCLUDES}"
 
+dnl Check for libutil, which Python requires on some
+dnl platforms. If libutil is missing, obviously Python
+dnl won't depend on it.
+AC_CHECK_LIB(util, openpty, [LIBS="$LIBS -lutil"])
+
 dnl build the library path from the found version
 python_lib_path=${python_prefix}/lib/${python_version}/config
-
-dnl ugly check for Python, need to see if Python needs -lutil to link
 
 AC_CHECK_LIB(${python_version},
     Py_Initialize,
     [python_libs="-L${python_lib_path} -l${python_version}"],
-    AC_CHECK_LIB(${python_version}, Py_Initialize,
-        [python_libs="-L${python_lib_path} -l${python_version} -lutil"],
-        ,[-L${python_lib_path} -lutil]
-    ),
+    AC_MSG_ERROR(Couldn't find Python library),
     [-L${python_lib_path}]
 )
 
