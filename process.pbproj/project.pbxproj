@@ -27,6 +27,8 @@
 				C4858136054ECF2800A800CF,
 				C48581700550714600A800CF,
 				C48581710550714600A800CF,
+				C48581AA0551A8F300A800CF,
+				C48581AB0551A8F300A800CF,
 			);
 			isa = PBXGroup;
 			path = src;
@@ -291,6 +293,30 @@
 			settings = {
 			};
 		};
+		C48581AA0551A8F300A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testLogin.cpp;
+			refType = 4;
+		};
+		C48581AB0551A8F300A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testLogin.h;
+			refType = 4;
+		};
+		C48581AC0551A8F300A800CF = {
+			fileRef = C48581AA0551A8F300A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C48581AD0551A8F300A800CF = {
+			fileRef = C48581AB0551A8F300A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		C491F583054952C800A800CF = {
 			children = (
 				C485815B054FD82200A800CF,
@@ -346,6 +372,7 @@
 				C485819805513FD300A800CF,
 				C485819A05513FD300A800CF,
 				C485819C0551402200A800CF,
+				C48581AD0551A8F300A800CF,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -360,6 +387,7 @@
 				C485819705513FD300A800CF,
 				C485819905513FD300A800CF,
 				C485819B0551402100A800CF,
+				C48581AC0551A8F300A800CF,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;

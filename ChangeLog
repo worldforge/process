@@ -1,3 +1,9 @@
+2003-11-03 James Turner <james@worldforge.org>
+
+        * Add more IG look tests - at the character, i.e a self look,
+          and at two random children of the world and character. Also
+          validate the LOC attribute of the recived entities.
+
 2003-10-30  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/testLogin.h, src/testLogin.cpp, src/process.cpp:
