@@ -33,6 +33,11 @@ class ClientConnection : public Atlas::Objects::Decoder {
     static int serialNoBase;
     int serialNo;
 
+	/** the serialno of the OOG activation op, either account
+	creation or longin. We watch for an INFO whose REFNO
+	matches this to determine our account ID. */
+	int oogActivationRefno;
+  
     OperationDeque operationQueue;
 
 
@@ -88,6 +93,9 @@ class ClientConnection : public Atlas::Objects::Decoder {
                  int refNo = -1);
   
     bool waitForError(int refNo = -1);
+
+    bool compareArgToTemplate(Atlas::Objects::Operation::RootOperation* op, 
+        const Atlas::Message::Object::MapType & arg);
 
     void setTag(const std::string &tag, const std::string &value);
     bool hasTag(const std::string &t)

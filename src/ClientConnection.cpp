@@ -55,7 +55,7 @@ typedef std::list<ClientConnection*>  ConnectionList;
 static ConnectionList static_allConnections;
 
 ClientConnection::ClientConnection() :
-    encoder(NULL), serialNo(serialNoBase += 512)
+    encoder(NULL), serialNo(serialNoBase += 512), oogActivationRefno(-1)
 {
     static_allConnections.push_back(this);
 }
@@ -81,19 +81,17 @@ void ClientConnection::ObjectArrived(const Info & op)
 {
     debug(std::cout << "Info" << std::endl << std::flush;);
     push(op);
-    const std::string & from = op.GetFrom();
-    if (from.empty()) {
+	
+	if (accountId.empty() && (op.GetRefno() == oogActivationRefno)) {
         try {
             const Object & ac = op.GetArgs().front();
             reply = ac.AsMap();
             Object::MapType::const_iterator I = reply.find("id");
-            if ((I != reply.end()) && I->second.IsString() && accountId.empty()) {
+            if ((I != reply.end()) && I->second.IsString()) {
                 accountId = I->second.AsString();
                 verbose_only( std::cout << "Got account id of " << accountId
                                         << std::endl << std::flush; );
             }
-            // const std::string & acid = reply["id"].AsString();
-            // objects[acid] = new ClientAccount(acid, *this);
         }
         catch (...) {
         }
@@ -295,7 +293,8 @@ int ClientConnection::login(const std::string & account,
 
     reply_flag = false;
     error_flag = false;
-    return send(l);
+    oogActivationRefno = send(l);
+	return oogActivationRefno;
 }
 
 int ClientConnection::create(const std::string & account,
@@ -315,7 +314,8 @@ int ClientConnection::create(const std::string & account,
 
     reply_flag = false;
     error_flag = false;
-    return send(c);
+    oogActivationRefno = send(c);
+	return oogActivationRefno;
 }
 
 bool ClientConnection::wait(int time, bool error_expected, int refNo)
@@ -361,28 +361,26 @@ bool ClientConnection::waitFor(const std::string & opParent,
     ::gettimeofday(&initialTm, NULL);
     
     while ((I == operationQueue.end()) && (remainingTime > 0)) {
-	poll(remainingTime);
-	I = checkQueue(opParent, refNo);
-	
-	::gettimeofday(&tm, NULL);
-	int elapsed = tm.tv_sec - initialTm.tv_sec;
-	remainingTime = timeOut - elapsed;
+        poll(remainingTime);
+        I = checkQueue(opParent, refNo);
+        
+        ::gettimeofday(&tm, NULL);
+        int elapsed = tm.tv_sec - initialTm.tv_sec;
+        remainingTime = timeOut - elapsed;
     }
-    
+        
     if (I == operationQueue.end()) {
-	return true;	// we failed miserably
+        return true;	// we failed miserably
     }
     
     RootOperation *op = *I;
     operationQueue.erase(I);
 
-    //const std::string & p = op->GetParents().front().AsString();
-    //if (p != opParent) {
-        //std::cerr << "ERROR: Response to operation has parent " << p
-                  //<< "but it should have parent " << opParent
-                  //<< std::endl << std::flush;
-        //return true;
-    //}
+    return compareArgToTemplate(op, arg);
+}
+
+bool ClientConnection::compareArgToTemplate(RootOperation *op, const Object::MapType & arg)
+{
     const Object::ListType & args = op->GetArgs();
     if (arg.empty()) {
         if (!args.empty()) {
@@ -404,6 +402,7 @@ bool ClientConnection::waitFor(const std::string & opParent,
         debug(std::cout << "Arg expected, and provided" << std::endl
                         << std::flush;);
     }
+    
     const Object::MapType & a = args.front().AsMap();
     Object::MapType::const_iterator J, K;
     bool error = false;
@@ -438,6 +437,7 @@ bool ClientConnection::waitFor(const std::string & opParent,
         }
     }
     return error;
+
 }
 
 RootOperation* ClientConnection::recv(const std::string & opParent, int refno)

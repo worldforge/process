@@ -123,6 +123,10 @@ int main(int argc, char ** argv)
                   << std::endl << std::flush;
     }
 
+    if (!connection1.getAccountId().empty()) {
+        std::cerr << "ERROR: server description query should not set connection ID" << std::endl;
+    }
+
     std::stringstream ac1, ac2, ac3;
 
     verbose_only( std::cout << "Creating account of name " << ac1.str()
@@ -149,6 +153,11 @@ int main(int argc, char ** argv)
         return 1;
     }
 
+    	if (connection1.getAccountId().empty()) {
+		std::cerr << "FATAL: connection's 1 account ID not set by INFO response" << std::endl;
+		return 1;
+	}
+
     ac2 << getpid() << "testac" << 2;
 
     verbose_only( std::cout << "Creating account of name " << ac2.str()
@@ -168,6 +177,11 @@ int main(int argc, char ** argv)
         connection2.close();
     }
 
+	if (connection2.getAccountId().empty()) {
+		std::cerr << "FATAL: connection's 2 account ID not set by INFO response" << std::endl;
+		return 1;
+	}
+	
     Object::MapType appearance_template;
     appearance_template["id"] = std::string();
     appearance_template["loc"] = std::string();
@@ -199,6 +213,11 @@ int main(int argc, char ** argv)
         connection3.close();
     }
 
+	if (connection3.getAccountId().empty()) {
+		std::cerr << "FATAL: connection's 3 account ID not set by INFO response" << std::endl;
+		return 1;
+	}
+	
     verbose( std::cout << "Waiting for appearance of account 3 on connections 1 & 2"
                        << std::endl << std::flush; );
 
@@ -292,10 +311,14 @@ int main(int argc, char ** argv)
     room_template["people"] = Object::ListType();
     room_template["rooms"] = Object::ListType();
     room_template["objtype"] = std::string();
-    if (connection1.waitFor("sight", room_template, sno)) {
+    
+    RootOperation *anonLookResponse = connection1.recv("sight", sno);
+    if (!anonLookResponse || connection1.compareArgToTemplate(anonLookResponse, room_template)) {
         std::cerr << "ERROR: Out-of-game Look failed"
                   << std::endl << std::flush;
     }
+    
+    std::string lobbyId = anonLookResponse->GetArgs().front().AsMap()["id"].AsString();
 
     verbose( std::cout << "Sending out-of-game (OOG) talk without TO on primary connection"
                        << std::endl << std::flush; );
@@ -303,7 +326,7 @@ int main(int argc, char ** argv)
     Talk t(Talk::Instantiate());
     Object::MapType say;
     say["say"] = "Hello";
-    say["loc"] = "lobby";
+    say["loc"] = lobbyId;
     t.SetFrom(connection1.getAccountId());
     t.SetArgs(Object::ListType(1, say));
     sno = connection1.send(t);
@@ -311,7 +334,11 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
+    Object::MapType talkTemplate;
+    talkTemplate["from"] = connection1.getAccountId();
+    talkTemplate["args"] = Object::ListType(1, say);
+
+    if (connection1.waitFor("sound", talkTemplate, sno)) {
         std::cerr << "WARNING: Out-of-game Talk did not result in sound"
                   << std::endl << "WARNING: Server may require TO"
                   << std::endl << std::flush;
@@ -321,7 +348,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection2.waitFor("sound",talkTemplate, sno)) {
             std::cerr << "WARNING: Out-of-game Talk was not heard by connection 2"
                       << std::endl << "WARNING: Server may require TO"
                       << std::endl << std::flush;
@@ -332,7 +359,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on third connection"
                            << std::endl << std::flush; );
 
-        if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection3.waitFor("sound",talkTemplate, sno)) {
             std::cerr << "WARNING: Out-of-game Talk was not heard by connection 3"
                       << std::endl << "WARNING: Server may require TO"
                       << std::endl << std::flush;
@@ -342,13 +369,13 @@ int main(int argc, char ** argv)
     verbose( std::cout << "Sending out-of-game (OOG) talk on primary connection"
                        << std::endl << std::flush; );
 
-    t.SetTo("lobby");
+    t.SetTo(lobbyId);
     sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
                        << std::endl << std::flush; );
 
-    if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
+    if (connection1.waitFor("sound", talkTemplate, sno)) {
         std::cerr << "ERROR: Out-of-game Talk did not result in sound"
                   << std::endl << std::flush;
     }
@@ -357,7 +384,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection2.waitFor("sound",talkTemplate, sno)) {
             std::cerr << "ERROR: Out-of-game Talk was not heard by connection 2"
                       << std::endl << std::flush;
         }
@@ -367,7 +394,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on third connection"
                            << std::endl << std::flush; );
 
-        if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection3.waitFor("sound",talkTemplate, sno)) {
             std::cerr << "ERROR: Out-of-game Talk was not heard by connection 3"
                       << std::endl << std::flush;
         }
@@ -384,7 +411,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on primary connection"
                            << std::endl << std::flush; );
 
-        if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection1.waitFor("sound",talkTemplate, sno)) {
             std::cerr << "ERROR: Out-of-game Talk was not heard by connection 1"
                       << std::endl << std::flush;
         }
@@ -392,7 +419,7 @@ int main(int argc, char ** argv)
         verbose( std::cout << "Waiting for sound response to talk on second connection"
                            << std::endl << std::flush; );
 
-        if (connection2.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection2.waitFor("sound", talkTemplate, sno)) {
             std::cerr << "ERROR: Out-of-game Talk did not result in sound"
                       << std::endl << std::flush;
         }
@@ -401,7 +428,7 @@ int main(int argc, char ** argv)
             verbose( std::cout << "Waiting for sound response to talk on third connection"
                                << std::endl << std::flush; );
 
-            if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
+            if (connection3.waitFor("sound", talkTemplate, sno)) {
                 std::cerr << "ERROR: Out-of-game Talk was not heard by connection 3"
                           << std::endl << std::flush;
             }
@@ -424,12 +451,16 @@ int main(int argc, char ** argv)
         say["say"] = "Private_2_1";
         t.SetArgs(Object::ListType(1, say));
 
+        talkTemplate["args"] = t.GetArgs();
+        talkTemplate["from"] = connection2.getAccountId();
+        talkTemplate["to"] = connection1.getAccountId();
+            
         sno = connection2.send(t);
 
         verbose( std::cout << "Waiting for sound response to private chat on first connection"
                            << std::endl << std::flush; );
 
-        if (connection1.waitFor("sound", t.AsObject().AsMap(), sno)) {
+        if (connection1.waitFor("sound",talkTemplate, sno)) {
             std::cerr << "ERROR: Out-of-game private chat did not result in sound"
                       << std::endl << std::flush;
         }
@@ -443,10 +474,14 @@ int main(int argc, char ** argv)
             t.SetArgs(Object::ListType(1, say));
             sno = connection2.send(t);
 
+            talkTemplate["args"] = t.GetArgs();
+            talkTemplate["from"] = connection2.getAccountId();
+            talkTemplate["to"] = connection3.getAccountId();
+        
             verbose( std::cout << "Waiting for sound response to private chat on third connection"
                                << std::endl << std::flush; );
 
-            if (connection3.waitFor("sound", t.AsObject().AsMap(), sno)) {
+            if (connection3.waitFor("sound", talkTemplate, sno)) {
                 std::cerr << "ERROR: Out-of-game private chat did not result in sound"
                           << std::endl << std::flush;
             }
@@ -567,7 +602,8 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
 {
     Logout lg = Logout::Instantiate();
     lg.SetFrom(c.getAccountId());
-    verbose( std::cout << "Sending logut for connection 2" << std::endl; );
+    verbose( std::cout << "Sending logout for connection 2 (" 
+		<< c.getAccountId() << std::endl; );
     int sno = c.send(lg);
     
     verbose( std::cout << "Waiting for disappearance of connection 2" << std::endl; );
