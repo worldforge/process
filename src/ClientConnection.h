@@ -70,10 +70,13 @@ class ClientConnection : public Atlas::Objects::Decoder {
     void close();
     bool login(const std::string &, const string &);
     bool create(const std::string &, const string &);
-    bool wait();
+    bool wait(int time = 0);
     bool waitFor(const std::string &, const Atlas::Message::Object::MapType &);
     void send(Atlas::Objects::Operation::RootOperation & op);
     void error(const std::string & message);
+    bool poll(int time);
+    RootOperation * pop();
+    bool pending();
 
     int peek() {
         return ios.peek();
@@ -88,10 +91,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
         return reply;
     }
 
-    int setup();
-    void poll();
-    RootOperation * pop();
-    bool pending();
+    static const int timeOut = 5;
 };
 
 #endif // CLIENT_CONNECTION_H

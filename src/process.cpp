@@ -4,6 +4,7 @@
 
 #include "ClientConnection.h"
 #include "pythonInterface.h"
+#include "process.h"
 
 #include "sstream.h"
 
@@ -13,22 +14,26 @@ using Atlas::Message::Object;
 
 void usage(const char * progname)
 {
-    std::cerr << "usage: " << progname << " [-v] [ script ]"
+    std::cerr << "usage: " << progname << " [-vr] [ script ]"
               << std::endl << std::flush;
 
 }
 
 bool verbose_flag = false;
+bool regress_flag = false;
 
-#define verbose(prg) { if (verbose_flag) { prg } }
+int exit_status = 0;
 
 int main(int argc, char ** argv)
 {
     int opt;
-    while ((opt = getopt(argc, argv, "v")) != -1) {
+    while ((opt = getopt(argc, argv, "vr")) != -1) {
         switch (opt) {
             case 'v':
                 verbose_flag = true;
+                break;
+            case 'r':
+                regress_flag = true;
                 break;
             case '?':
                 return 1;
@@ -43,9 +48,10 @@ int main(int argc, char ** argv)
     if (argc == (optind + 1)) {
         init_python_api();
         if (runScript(argv[optind])) {
-            return 0;
+            return exit_status;
         } else {
-            return 1;
+            exit_status = 1;
+            return exit_status;
         }
     } else if (argc != optind) {
         usage(argv[0]);
@@ -105,8 +111,11 @@ int main(int argc, char ** argv)
 
     std::stringstream ac1, ac2, ac3;
 
-    verbose( std::cout << "Creating account of name " << ac1.str()
-                       << " on primary connection" << std::endl << std::flush; );
+    verbose_only( std::cout << "Creating account of name " << ac1.str()
+                            << " on primary connection"
+                            << std::endl << std::flush; );
+    verbose_regress( std::cout << "Creating test account on primary connection"
+                               << std::endl << std::flush; );
 
     ac1 << getpid() << "testac" << 1;
     connection1.create(ac1.str(), "ptacpw1pc");
@@ -128,8 +137,11 @@ int main(int argc, char ** argv)
 
     ac2 << getpid() << "testac" << 2;
 
-    verbose( std::cout << "Creating account of name " << ac2.str()
-                       << " on second connection" << std::endl << std::flush; );
+    verbose_only( std::cout << "Creating account of name " << ac2.str()
+                            << " on second connection"
+                            << std::endl << std::flush; );
+    verbose_regress( std::cout << "Creating test account on second connection"
+                               << std::endl << std::flush; );
 
     connection2.create(ac2.str(), "ptacpw2pc");
 
@@ -144,8 +156,11 @@ int main(int argc, char ** argv)
 
     ac3 << getpid() << "testac" << 3;
 
-    verbose( std::cout << "Creating account of name " << ac3.str()
-                       << " on third connection" << std::endl << std::flush; );
+    verbose_only( std::cout << "Creating account of name " << ac3.str()
+                            << " on third connection"
+                            << std::endl << std::flush; );
+    verbose_regress( std::cout << "Creating test account on third connection"
+                               << std::endl << std::flush; );
 
     connection3.create(ac3.str(), "ptacpw3pc");
 
@@ -172,8 +187,11 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    verbose( std::cout << "Logging in to account name " << ac1.str()
-                       << " on primary connection" << std::endl << std::flush; );
+    verbose_only( std::cout << "Logging in to account name " << ac1.str()
+                            << " on primary connection"
+                            << std::endl << std::flush; );
+    verbose_regress( std::cout << "Logging test account on third connection"
+                               << std::endl << std::flush; );
 
     connection1.login(ac1.str(), "ptacpw1pc");
 
@@ -213,5 +231,5 @@ int main(int argc, char ** argv)
     // Try out some OOG stuff, like looking, talking and private messages
 
     // Try out some IG stuff, like creating looking, talking and moving
-    return 0;
+    return exit_status;
 }

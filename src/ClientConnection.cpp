@@ -12,29 +12,16 @@
 
 #include <skstream.h>
 
-extern "C" {
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <errno.h>
-    #include <fcntl.h>
-    #include <sys/time.h>
-    #include <sys/types.h>
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #include <sys/stat.h>
-    #include <unistd.h>
-    #include <netdb.h>
-}
-
 #include "ClientConnection.h"
 
 #include "debug.h"
+#include "process.h"
 
 static const bool debug_flag = false;
 
 using Atlas::Message::Object;
 
-static inline std::string typeAsString(const Object & o)
+static inline const std::string typeAsString(const Object & o)
 {
     switch (o.GetType()) {
         case Object::TYPE_NONE:
@@ -91,17 +78,17 @@ void ClientConnection::ObjectArrived(const Info & op)
     }
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Action& op)
+void ClientConnection::ObjectArrived(const Action& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Appearance& op)
+void ClientConnection::ObjectArrived(const Appearance& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Combine& op)
+void ClientConnection::ObjectArrived(const Combine& op)
 {
     push(op);
 }
@@ -111,22 +98,22 @@ void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Communicat
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Create& op)
+void ClientConnection::ObjectArrived(const Create& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Delete& op)
+void ClientConnection::ObjectArrived(const Delete& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Disappearance& op)
+void ClientConnection::ObjectArrived(const Disappearance& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Divide& op)
+void ClientConnection::ObjectArrived(const Divide& op)
 {
     push(op);
 }
@@ -136,12 +123,12 @@ void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Feel& op)
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Get& op)
+void ClientConnection::ObjectArrived(const Get& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Imaginary& op)
+void ClientConnection::ObjectArrived(const Imaginary& op)
 {
     push(op);
 }
@@ -151,22 +138,22 @@ void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Listen& op
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Login& op)
+void ClientConnection::ObjectArrived(const Login& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Logout& op)
+void ClientConnection::ObjectArrived(const Logout& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Look& op)
+void ClientConnection::ObjectArrived(const Look& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Move& op)
+void ClientConnection::ObjectArrived(const Move& op)
 {
     push(op);
 }
@@ -181,17 +168,17 @@ void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Perception
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::RootOperation& op)
+void ClientConnection::ObjectArrived(const RootOperation& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Set& op)
+void ClientConnection::ObjectArrived(const Set& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Sight& op)
+void ClientConnection::ObjectArrived(const Sight& op)
 {
     push(op);
 }
@@ -206,17 +193,17 @@ void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Sniff& op)
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Sound& op)
+void ClientConnection::ObjectArrived(const Sound& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Talk& op)
+void ClientConnection::ObjectArrived(const Talk& op)
 {
     push(op);
 }
 
-void ClientConnection::ObjectArrived(const Atlas::Objects::Operation::Touch& op)
+void ClientConnection::ObjectArrived(const Touch& op)
 {
     push(op);
 }
@@ -318,16 +305,28 @@ bool ClientConnection::create(const std::string & account,
     return true;
 }
 
-bool ClientConnection::wait()
+bool ClientConnection::wait(int time)
 // Waits for response from server. Used when we are expecting a login response
 // Return whether or not an error occured
 {
     error_flag = false;
     reply_flag = false;
-    debug(std::cout << "WAITing" << std::endl << std::flush;);
-    while (!reply_flag) {
-        codec->Poll();
+    debug( std::cout << "WAITing" << std::endl << std::flush; );
+    if (!poll(time)) {
+        std::cerr << "ERROR: Timeout waiting for reply"
+                  << std::endl << std::flush;
+        regress( std::cout << "Timeout while waiting for reply"
+                           << std::endl << std::flush;);
+        return true;
     }
+    if (!reply_flag) {
+        std::cerr << "ERROR: Reply was not decoded as an operation"
+                  << std::endl << std::flush;
+        regress( std::cout << "Invalid reply received"
+                           << std::endl << std::flush;);
+        return true;
+    }
+    // codec->Poll();
     debug(std::cout << "WAIT finished" << std::endl << std::flush;);
     return error_flag;
 }
@@ -335,7 +334,7 @@ bool ClientConnection::wait()
 bool ClientConnection::waitFor(const std::string & opParent,
                                const Object::MapType & arg)
 {
-    if (wait()) {
+    if (wait(timeOut)) {
         return true;
     }
     RootOperation * op = pop();
@@ -359,7 +358,8 @@ bool ClientConnection::waitFor(const std::string & opParent,
                       << std::endl << std::flush;
             return true;
         }
-        debug(std::cout << "No arg expected, and none given" << std::endl << std::flush;);
+        debug(std::cout << "No arg expected, and none given"
+                        << std::endl << std::flush;);
         return false;
     } else {
         if (args.empty()) {
@@ -368,7 +368,8 @@ bool ClientConnection::waitFor(const std::string & opParent,
                       << std::endl << std::flush;
             return true;
         }
-        debug(std::cout << "Arg expected, and provided" << std::endl << std::flush;);
+        debug(std::cout << "Arg expected, and provided" << std::endl
+                        << std::flush;);
     }
     const Object::MapType & a = args.front().AsMap();
     Object::MapType::const_iterator I, J;
@@ -405,11 +406,12 @@ void ClientConnection::send(Atlas::Objects::Operation::RootOperation & op)
     ios << flush;
 }
 
-void ClientConnection::error(const std::string & message) {
+void ClientConnection::error(const std::string & message)
+{
     // FIXME Need operation based error function
 }
 
-void ClientConnection::poll()
+bool ClientConnection::poll(int time)
 {
     fd_set infds;
     struct timeval tv;
@@ -418,25 +420,25 @@ void ClientConnection::poll()
 
     FD_SET(client_fd, &infds);
 
-    tv.tv_sec = 0;
+    tv.tv_sec = time;
     tv.tv_usec = 0;
 
     int retval = select(client_fd+1, &infds, NULL, NULL, &tv);
 
-    if (retval && (FD_ISSET(client_fd, &infds))) {
+    if ((retval > 0) && (FD_ISSET(client_fd, &infds))) {
         if (ios.peek() == -1) {
-            return;
+            return false;
         }
         codec->Poll();
-        return;
+        return true;
     }
-    return;
+    return false;
 
 }
 
 RootOperation * ClientConnection::pop()
 {
-    poll();
+    poll(0);
     if (operationQueue.empty()) {
         return NULL;
     }
