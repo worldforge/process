@@ -71,4 +71,19 @@ void testCharacterCreate(ClientConnection & connection1,
         verbose(std::cout << "created character with ID " << connection3.getCharacterId() <<
             " on connection 3" << std::endl << std::flush; );
     }
+
+    verbose( std::cout << "Modifying appearance of character on primary connection"
+                       << std::endl << std::flush; );
+
+    MapType charMod;
+    charMod["id"] = connection1.getCharacterId();
+    charMod["height"] = 4;
+    MapType gmap;
+    gmap["foo"] = "bar";
+    charMod["guise"] = gmap;
+    Atlas::Objects::Operation::Set set;
+    set->setFrom(connection1.getAccountId());
+    set->setArgsAsList(ListType(1,charMod));
+
+    connection1.send(set);
 }
