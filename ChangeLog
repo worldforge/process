@@ -1,9 +1,18 @@
+Wednesday, October 17 2001, James Turner <jmtn@blueyonder.co.uk>
+
+	* basic tests for private chat functionality
+
 2001-10-15  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/process.cpp: Added TO to all OOG chat related ops, and
 	  added a test which generates a warning on servers which don't
 	  work without TO.
 
+Sunday, October 14 2001, James Turner <jmtn@blueyonder.co.uk>
+
+	* use a AM_PATH_SIGC in configure.in, for those of us with sigc++ in
+	  weird places. 
+	  
 2001-10-10  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/process.cpp: Modified tests so the "loc" attribute is used

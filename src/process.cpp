@@ -392,6 +392,40 @@ int main(int argc, char ** argv)
     // t->SetFrom(ac1.str());
     // Try out some OOG stuff, like looking, talking and private messages
 
+	// send private chats from 2 -> 1 and 2 -> 3 
+	
+	if (connection2.isOpen()) {
+		t.SetTo(ac1.str());
+		t.SetFrom(ac2.str());
+		Object::MapType say;
+    	say["say"] = "Private_2_1";
+    	t.SetArgs(Object::ListType(1, say));
+		connection2.send(t);
+		
+		t.SetTo(ac3.str());
+    	say["say"] = "Private_2_3";
+    	t.SetArgs(Object::ListType(1, say));
+		connection2.send(t);
+		
+		verbose( std::cout << "Waiting for sound response to private chat on first connection"
+                           << std::endl << std::flush; );
+		
+		if (connection1.waitFor("sound", t.AsObject().AsMap())) {
+			std::cerr << "ERROR: Out-of-game private chat did not result in sound"
+                      << std::endl << std::flush;
+		}
+		
+		verbose( std::cout << "Waiting for sound response to private chat on third connection"
+                           << std::endl << std::flush; );
+		
+		if (connection3.waitFor("sound", t.AsObject().AsMap())) {
+			std::cerr << "ERROR: Out-of-game private chat did not result in sound"
+                      << std::endl << std::flush;
+		}
+		
+		// FIXME  - verify that each connection receieved the correct string. i.e Private_2_x
+	}
+	
     // Try out some IG stuff, like creating looking, talking and moving
     return exit_status;
 }
