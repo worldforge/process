@@ -9,6 +9,7 @@
 #include <Atlas/Objects/Encoder.h>
 
 #include <skstream.h>
+#include <sys/time.h>
 
 #include "ClientConnection.h"
 
@@ -404,84 +405,30 @@ bool ClientConnection::waitFor(const std::string & opParent,
     return error;
 }
 
-bool ClientConnection::waitForGet(const std::string & opParent,
-                               const Object::MapType & arg,
-                               RootOperation* &data)
+RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
 {
-    if (wait(timeOut, false)) {
-        return true;
-    }
-    RootOperation * op;
-    std::string opP;
-    do {
-        poll(0);
-        op = pop();
-        if (op == NULL) {
-            std::cerr << "ERROR: No response to operation"
-                      << std::endl << std::flush;
-            return true;
-        }
-        opP = op->GetParents().front().AsString();
-        verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
-    } while (opP != opParent);
-
-    data = op;
+    OperationDeque::iterator I = checkQueue(opParent, refno);
+    int remainingTime = timeOut;
+    struct timeval tm, initialTm;
     
-    const Object::ListType & args = op->GetArgs();
-    if (arg.empty()) {
-        if (!args.empty()) {
-            std::cerr << "ERROR: Response to operation has args "
-                      << "but no args expected"
-                      << std::endl << std::flush;
-            return true;
-        }
-        debug(std::cout << "No arg expected, and none given"
-                        << std::endl << std::flush;);
-        return false;
-    } else {
-        if (args.empty()) {
-            std::cerr << "ERROR: Response to operation has no args "
-                      << "but args are expected"
-                      << std::endl << std::flush;
-            return true;
-        }
-        debug(std::cout << "Arg expected, and provided" << std::endl
-                        << std::flush;);
+    ::gettimeofday(&initialTm, NULL);
+    
+    while (I == operationQueue.end()) {
+	poll(remainingTime);
+	I = checkQueue(opParent, refno);
+	
+	// update the remaining time (roughly, since we only use seconds .. millsecs would be easy)
+	::gettimeofday(&tm, NULL);
+	int elapsed = tm.tv_sec - initialTm.tv_sec;
+	remainingTime = timeOut - elapsed;
     }
-    const Object::MapType & a = args.front().AsMap();
-    Object::MapType::const_iterator I, J;
-    bool error = false;
-    for (I = arg.begin(); I != arg.end(); I++) {
-        J = a.find(I->first);
-        if (J == a.end()) {
-            std::cerr << "ERROR: Response to operation args should have "
-                      << "attribute '" << I->first << "' of type "
-                      << typeAsString(I->second) << " but it is missing"
-                      << std::endl << std::flush;
-            error = true;
-            continue;
-        }
-        if (I->second.IsNone()) {
-            continue;
-        }
-        if (I->second.GetType() != J->second.GetType()) {
-            if (I->second.IsNum() && J->second.IsNum()) {
-                std::cerr << "WARNING: Response to operation args should have "
-                          << "attribute '" << I->first << "' of type "
-                          << typeAsString(I->second) << " but it is of type "
-                          << typeAsString(J->second)
-                          << std::endl << std::flush;
-            } else {
-                std::cerr << "ERROR: Response to operation args should have "
-                          << "attribute '" << I->first << "' of type "
-                          << typeAsString(I->second) << " but it is of type "
-                          << typeAsString(J->second)
-                          << std::endl << std::flush;
-                error = true;
-            }
-        }
-    }
-    return error;
+    
+    if (I == operationQueue.end())
+	return NULL;	// we failed miserably
+    
+    RootOperation *ret = *I;
+    operationQueue.erase(I);
+    return ret;
 }
 
 /* wait for an error operation; the provided arg will be the op that caused the error,
@@ -554,6 +501,28 @@ bool ClientConnection::waitForError(const Object::MapType & arg)
         }
     }
     return error;
+}
+
+/** determine whether a requested operation is in the queue already; if so, return an
+    iterator to it. */
+OperationDeque::iterator
+ClientConnection::checkQueue(const std::string &opType, int refno)
+{
+    OperationDeque::iterator I;
+    for (I=operationQueue.begin(); I != operationQueue.end(); ++I) {
+	// if a defined refno is being used, it has to match
+	if ((refno > 0) && ((*I)->GetRefno() != refno))
+	    continue;
+	
+	Object::ListType parents = (*I)->GetParents();
+	if (parents.empty())
+	    continue;	// isn't this very bad?
+	
+	if (opType == parents.front().AsString())
+	    return I;
+    }
+    
+    return I;
 }
 
 void ClientConnection::send(Atlas::Objects::Operation::RootOperation & op)

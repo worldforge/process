@@ -1,3 +1,10 @@
 This is process, a regression testing program for WorldForge servers.
-The program has a builtin standard regression test sequence, plus a scripting
-interface using python which allows custom tests to be run.
+The program has a builtin standard regression test sequence, plus a
+scripting interface using python which allows custom tests to be run.
+Note process is a 'black-box' test system; it only knows about
+the formal specifications, nothing about the server implementations.
+Thus, it should be a valid test for any server, implemented in
+any langauge, on any platform. Isn't that cool?
+
+Process now uses CppUnit, so it can produce results in any format
+supported, including an XML one.

@@ -14,6 +14,8 @@
 
 #include "opfwd.h"
 
+typedef std::deque<Atlas::Objects::Operation::RootOperation *> OperationDeque;
+
 class ClientConnection : public Atlas::Objects::Decoder {
   private:
     bool reply_flag;
@@ -21,12 +23,17 @@ class ClientConnection : public Atlas::Objects::Decoder {
     tcp_socket_stream ios;
     Atlas::Codec<std::iostream> * codec;
     Atlas::Objects::Encoder * encoder;
-    std::string acName;
-    Atlas::Message::Object::MapType reply;
+  
+    std::string acName, pass;
+  
+  Atlas::Message::Object::MapType reply;
     int serialNo;
 
-    std::deque<Atlas::Objects::Operation::RootOperation *> operationQueue;
+    OperationDeque operationQueue;
 
+
+    OperationDeque::iterator checkQueue(const std::string &opType, int refno);
+  
     template<class O>
     void push(const O &);
 
@@ -74,17 +81,23 @@ class ClientConnection : public Atlas::Objects::Decoder {
                  const Atlas::Message::Object::MapType &,
                  bool error_expected = false);
   
-    bool waitForGet(const std::string &,
-                 const Atlas::Message::Object::MapType &,
-                 Atlas::Objects::Operation::RootOperation* &data);
-  
     bool waitForError(const Atlas::Message::Object::MapType & arg);
+
+    // check the queue / wait for the specific op, and return it
+    Atlas::Objects::Operation::RootOperation*
+    recv(const std::string & opParent, int refno);
   
     void send(Atlas::Objects::Operation::RootOperation & op);
     void error(const std::string & message);
     bool poll(int time);
     RootOperation * pop();
     bool pending();
+
+    const std::string& getAccount()
+    { return acName; }
+    
+    const std::string& getPassword()
+    { return pass; }
 
     int peek() {
         return ios.peek();

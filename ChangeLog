@@ -1,3 +1,25 @@
+Saturday, May 11, James Turner
+
+	* added acinclude.m4
+	* Now require CppUnit to compile certain tests (not linked in yet,
+	  but soon). The long term goal is to be able to integrate process
+	  into a WorldForge-wide automated test system based on the CppUnit
+	  and JUnit XML output.
+	* Moved the validator logic out into a seperate file
+	* Added some new behaviour to ClientConnection, to handle
+	  'unexpected' (but correct) operations better. The other
+	  upshot is that process will be much stricter about
+	  refno / serialno setting for tests that use the new logic.
+	* Moved one OOG test into a seperate file, converted it to
+	  use CppUnit, the new ClientConnecton methods and the
+	  seperate validator.
+	* Updated TODO so I don't forget to test various things
+	 
+	All of the above is compiled but not actually called, till I
+	decide how to integrate the ClientConnections. Should be done
+	tomorrow, then I'll move over more tests and start adding new
+	ones.
+
 Monday, May 6, James Turner
 
 	* add waitForError and waitForGet to client connection.

@@ -118,15 +118,28 @@ dnl ... done with python checks
 dnl -----------------------------------------------------------------
 
 dnl Check for libskstream library
-AM_PATH_SKSTREAM(0.2.1, [
+AM_PATH_SKSTREAM(0.2.2, [
 	CFLAGS="$CFLAGS $SKSTREAM_CFLAGS"
 	CXXFLAGS="$CXXFLAGS $SKSTREAM_CFLAGS"
 	LIBS="$LIBS $SKSTREAM_LIBS"],
 	AC_MSG_ERROR(Couldn't find skstream or version is insufficent)
 )
 
+AM_PATH_CPPUNIT(1.6.1,
+    [
+	CFLAGS="$CFLAGS $CPPUNIT_CFLAGS"
+	CXXFLAGS="$CXXFLAGS $CPPUNIT_CFLAGS"
+	LIBS="$LIBS $CPPUNIT_LIBS"
+    ], [
+	AC_MSG_ERROR(Couldn't Find CppUnit)
+    ]
+)
+
+
 dnl Generate files
 AC_OUTPUT([
 	Makefile
 	src/Makefile
 ])
+
+

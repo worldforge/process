@@ -20,9 +20,8 @@ void testTypeQueries(ClientConnection &c);
 
 void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher);
 void testDuplicateLogin(const std::string &account, const std::string &pass);
-
-void testCharacterLook(ClientConnection &c, 
-    const std::string &acc, const std::string &pass);
+    
+void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc);    
     
 void usage(const char * progname)
 {
@@ -497,6 +496,8 @@ int main(int argc, char ** argv)
     }
 
     if (connection3.isOpen()) {
+	testInvalidCharacterCreate(connection3, ac3.str());
+	
         verbose( std::cout << "Creating character on third connection"
                            << std::endl << std::flush; );
 
@@ -514,8 +515,6 @@ int main(int argc, char ** argv)
                       << std::endl << std::flush;
         }
     }
-
-    testCharacterLook(connection1, ac1.str(), "ptacpw1pc");
     
     // Try out some IG stuff, like creating looking, talking and moving
     return exit_status;
@@ -604,75 +603,52 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
     
 }
 
-void testCharacterLook(ClientConnection &c, 
-    const std::string &acc, const std::string &pass)
+void testInvalidCharacterCreate(ClientConnection &c, const std::string &acc)
 {
-    c.close();
- 
-    verbose( std::cout << "testCharacterLook: Closing connection" << std::endl; );
+    verbose( std::cout << "Testing character creation with invalid type"
+                           << std::endl << std::flush; );
+
+    Object::MapType character;
+    character["objtype"] = "object";
+    character["parents"] = Object::ListType(1,"__bad__type__");
+    character["name"] = "Dwayne";
+
+    Create create = Create::Instantiate();
+    create.SetFrom(acc);
+    create.SetArgs(Object::ListType(1,character));
     
-    c.connect("localhost");
-    c.login(acc, pass);
+    c.send(create);
+
+    verbose( std::cout << "Waiting for ERROR response to invlaid character create"
+                           << std::endl << std::flush; );
+
+    Object::MapType cr;
+    cr["objtype"] = "op";
+    cr["parents"] = Object::ListType(1, "create");
+    cr["from"] =  acc;
     
-    verbose( std::cout << "testCharacterLook: logged in" << std::endl; );
-    
-    // send an account LOOK, to get it back
-    Look look;
-    look.SetFrom(acc);
-    
-    Object::MapType args;
-    args["id"] = acc;
-    look.SetArgs(Object::ListType(1, args));
-    
-    c.send(look);
-    Object::MapType accountProto;
-    accountProto["parents"] = Object::ListType(1, "account");
-    accountProto["id"] = acc;
-    
-    RootOperation *sight;
-    if (c.waitForGet("sight", accountProto, sight)) {
-	std::cerr << "ERROR: LOOK at account did not produce an SIGHT response" << std::endl;
-    }
-    
-    // get the account out
-    Object account = sight->GetArgs()[0];
-    Object::ListType chars = account.AsMap()["characters"].AsList();
-    
-    if (chars.empty()) {
-	std::cerr << "ERROR: account object from LOOK has empty CHARACTERS attribute" << std::endl;
-	return;
-    }
-    
-    Object::MapType entityProto;
-    entityProto["id"] = chars.front();
-    
-    // issue a look for character zero
-    args["id"] = chars.front();	// first char ID
-    look.SetArgs(Object::ListType(1, args));
-    
-    c.send(look);
-    if (c.waitForGet("sight", entityProto, sight)) {
-	std::cerr << "ERROR: LOOK at charatcer did not produce an SIGHT response" << std::endl;
-    }
-    
-    Object ent = sight->GetArgs()[0];
-    if (ent.AsMap()["parents"] != Object::ListType(1, "farmer")) {
-	std::cerr << "ERROR: entity return from OOG character look has invalid parents" << std::endl;
-    }
-    
-    if (ent.AsMap()["name"] != std::string("Nivek")){
-	std::cerr << "ERROR: entity return from OOG character look has invalid name" << std::endl;
+    if (c.waitForError(cr)) {
+	std::cerr << "ERROR: Invalid Character creation did not result in ERROR"
+	    << std::endl << std::flush;
     }
 }
 
+
+
 /*
+
 void testRooms(ClientConnection &cl, const std::string &acc)
 {
-    Object::MapType create;
-    create["from"] = acc;
-    // create["to"] = ;
+    Create cr;
+    cr.SetFrom(acc);
     
-    Object::MapType 
+    cr.SetTo(lobby);
+    
+    Object::MapType room;
+    room["name"] = "test_room_" + acc;	// make sure it's unique (ish)
+    room["loc"] = lobby;
+    
+    cl.send(cr);
 }
 */
 
