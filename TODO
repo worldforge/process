@@ -1,3 +1,5 @@
+Make the waitFor code all use serial/ref no.s properlly.
+
 Add tests for appearance and disappearance ops in lobby
 
 Add TO attr to Talk ops. Add test to ensure everything still works if TO

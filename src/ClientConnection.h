@@ -103,10 +103,10 @@ class ClientConnection : public Atlas::Objects::Decoder {
     RootOperation * pop();
     bool pending();
 
-    const std::string& getAccount()
+    const std::string getAccount()
     { return getTag("account"); }
     
-    const std::string& getPassword()
+    const std::string getPassword()
     { return getTag("pass"); }
 
     int getLastSerialno()
@@ -132,3 +132,4 @@ class ClientConnection : public Atlas::Objects::Decoder {
 ClientConnection* getConnectionBySpec(const std::string &spec);
 
 #endif // CLIENT_CONNECTION_H
+

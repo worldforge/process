@@ -274,7 +274,7 @@ bool ClientConnection::login(const std::string & account,
 {
     Atlas::Objects::Operation::Login l = Atlas::Objects::Operation::Login::Instantiate();
     Object::MapType acmap;
-    acmap["id"] = account;
+    acmap["username"] = account;
     acmap["password"] = password;
     acmap["parents"] = Object::ListType(1,"account");
     acmap["objtype"] = "object";
@@ -295,7 +295,7 @@ bool ClientConnection::create(const std::string & account,
 {
     Atlas::Objects::Operation::Create c = Atlas::Objects::Operation::Create::Instantiate();
     Object::MapType acmap;
-    acmap["id"] = account;
+    acmap["username"] = account;
     acmap["password"] = password;
     acmap["parents"] = Object::ListType(1,"account");
     acmap["objtype"] = "object";
@@ -451,7 +451,7 @@ RootOperation* ClientConnection::recv(const std::string & opParent, int refno)
  i.e args[1] of the ERROR op */
 bool ClientConnection::waitForError(const Object::MapType & arg)
 {
-    if (wait(timeOut, false)) {
+    if (wait(timeOut, true)) {
         return true;
     }
     RootOperation * op;
