@@ -1,3 +1,10 @@
+2002-06-26  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/ClientConnection.h, src/ClientConnection.cpp:
+	  Switch to new skstream header location.
+
+	* src/atlasUtils.cpp: Fix config.h typo.
+
 Sunday, May 12, James Turner
 
 	* Updated the validator to check values as well as types

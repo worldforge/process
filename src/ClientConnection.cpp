@@ -14,7 +14,6 @@
 #include <Atlas/Objects/Decoder.h>
 #include <Atlas/Objects/Encoder.h>
 
-#include <skstream.h>
 #include <sys/time.h>
 
 #include "ClientConnection.h"

@@ -9,7 +9,8 @@
 #include <Atlas/Objects/Encoder.h>
 #include <Atlas/Codec.h>
 
-#include <skstream.h>
+#include <skstream/skstream.h>
+
 #include <deque>
 #include <map>
 
