@@ -154,6 +154,18 @@ int main(int argc, char ** argv)
         connection2.close();
     }
 
+    Object::MapType appearance_template;
+    appearance_template["id"] = std::string();
+    appearance_template["loc"] = std::string();
+
+    verbose( std::cout << "Waiting for appearance of account 2 on connection 1"
+                       << std::endl << std::flush; );
+
+    if (connection1.waitFor("appearance", appearance_template)) {
+        std::cerr << "ERROR: First connection did not get appearance of second account creation"
+                  << std::endl << std::flush;
+    }
+
     ac3 << getpid() << "testac" << 3;
 
     verbose_only( std::cout << "Creating account of name " << ac3.str()
@@ -173,10 +185,36 @@ int main(int argc, char ** argv)
         connection3.close();
     }
 
+    verbose( std::cout << "Waiting for appearance of account 3 on connections 1 & 2"
+                       << std::endl << std::flush; );
+
+    if (connection1.waitFor("appearance", appearance_template)) {
+        std::cerr << "ERROR: First connection did not get appearance of third account creation"
+                  << std::endl << std::flush;
+    }
+
+    if (connection2.waitFor("appearance", appearance_template)) {
+        std::cerr << "ERROR: Second connection did not get appearance of third account creation"
+                  << std::endl << std::flush;
+    }
+
     verbose( std::cout << "Closing primary connection to server"
                        << std::endl << std::flush; );
 
     connection1.close();
+
+    verbose( std::cout << "Waiting for disappearance of account 1 on connections 2 & 3"
+                       << std::endl << std::flush; );
+
+    if (connection2.waitFor("disappearance", appearance_template)) {
+        std::cerr << "ERROR: Second connection did not get disappearance of account 1 logout"
+                  << std::endl << std::flush;
+    }
+
+    if (connection3.waitFor("disappearance", appearance_template)) {
+        std::cerr << "ERROR: Third connection did not get appearance of account 1 logout"
+                  << std::endl << std::flush;
+    }
 
     verbose( std::cout << "Re-opening primary connection to server"
                        << std::endl << std::flush; );
@@ -202,6 +240,19 @@ int main(int argc, char ** argv)
         std::cerr << "FATAL: Unable to login to pre-created account"
                   << std::endl << std::flush;
         return 1;
+    }
+
+    verbose( std::cout << "Waiting for appearance of account 1 on connections 2 & 3"
+                       << std::endl << std::flush; );
+
+    if (connection2.waitFor("appearance", appearance_template)) {
+        std::cerr << "ERROR: Second connection did not get appearance of account 1 login"
+                  << std::endl << std::flush;
+    }
+
+    if (connection3.waitFor("appearance", appearance_template)) {
+        std::cerr << "ERROR: Third connection did not get appearance of account 1 login"
+                  << std::endl << std::flush;
     }
 
     verbose( std::cout << "Sending out-of-game (OOG) look on primary connection"
@@ -232,8 +283,8 @@ int main(int argc, char ** argv)
     Talk t(Talk::Instantiate());
     Object::MapType say;
     say["say"] = "Hello";
+    say["loc"] = "lobby";
     t.SetFrom(ac1.str());
-    t.SetTo("lobby");
     t.SetArgs(Object::ListType(1, say));
     connection1.send(t);
 

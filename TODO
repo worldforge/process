@@ -1,1 +1,3 @@
 Add tests for appearance and disappearance ops in lobby
+
+Modify waitFor so it is tolerant of operation order, and does not discard ops.

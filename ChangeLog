@@ -1,5 +1,11 @@
 2001-10-10  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/process.cpp: Modified tests so the "loc" attribute is used
+	  in OOG ops. Added tests to ensure that appearance and disappearance
+	  ops are created by loggin in and out.
+
+2001-10-10  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/ClientConnection.cpp: Adapted waitFor so it is tolerant
 	  of unexpected ops.
 
