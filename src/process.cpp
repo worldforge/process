@@ -2,8 +2,8 @@
 // the GNU General Public License (See COPYING for details).
 // Copyright (C) 2001-2003 Alistair Riddoch and James Turner
 
-#include "ClientConnection.h"
 #include "pythonInterface.h"
+#include "ClientConnection.h"
 #include "tests.h"
 #include "testLogin.h"
 #include "testOOG.h"

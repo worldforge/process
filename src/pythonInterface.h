@@ -5,13 +5,13 @@
 #ifndef RULESETS_PY_OPERATION_H
 #define RULESETS_PY_OPERATION_H
 
-#include <stdio.h>
-#include <unistd.h>
+#include <Python.h>
 
 #include <string>
 #include <set>
 
-#include <Python.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include "opfwd.h"
 
