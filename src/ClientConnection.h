@@ -70,6 +70,8 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
   
     bool waitForError(int refNo = -1);
 
+    bool createChar(const Atlas::Message::Element& charData);
+    
     bool compareArgToTemplate(const Atlas::Objects::Operation::RootOperation & op, 
         const Atlas::Message::Element::MapType & arg);
 
@@ -94,6 +96,11 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     
     const std::string getPassword()
     { return getTag("pass"); }
+
+    const std::string getCharacterId()
+    {
+        return getTag("character");
+    }
 
     const std::string & getAccountId() const {
         return accountId;

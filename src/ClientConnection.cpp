@@ -13,6 +13,7 @@
 #include <Atlas/Net/Stream.h>
 #include <Atlas/Objects/Decoder.h>
 #include <Atlas/Objects/Encoder.h>
+#include <Atlas/Objects/Entity.h>
 
 #include <sys/time.h>
 
@@ -326,6 +327,47 @@ int ClientConnection::create(const std::string & account,
     error_flag = false;
     oogActivationRefno = send(c);
         return oogActivationRefno;
+}
+
+bool ClientConnection::createChar(const Element& charData)
+{
+    Atlas::Objects::Operation::Create create;
+    create->setFrom(accountId);
+    create->setArgsAsList(Element::ListType(1,charData));
+
+    int serialno = send(create);
+    verbose( std::cout << "Waiting for info response to character creation"
+                       << std::endl << std::flush; );
+
+// wait for the INFO response
+    OperationDeque::iterator I = checkQueue("info", serialno);
+    int remainingTime = timeOut;
+    struct timeval tm, initialTm;
+    ::gettimeofday(&initialTm, NULL);
+    
+    while ((I == operationQueue.end()) && (remainingTime > 0)) {
+        poll(remainingTime);
+        I = checkQueue("info", serialno);
+        
+        ::gettimeofday(&tm, NULL);
+        int elapsed = tm.tv_sec - initialTm.tv_sec;
+        remainingTime = timeOut - elapsed;
+    }
+        
+    if (I == operationQueue.end()) {
+        std::cerr << "no INFO response to character creation" << std::endl;
+        return false;
+    }
+
+// see what we got
+    Atlas::Objects::Operation::RootOperation op = *I;
+    operationQueue.erase(I);
+    
+    Atlas::Objects::Entity::RootEntity ent = 
+        Atlas::Objects::smart_static_cast<Atlas::Objects::Entity::RootEntity>(op->getArgs()[0]);
+    
+    setTag("character",  ent->getId());
+    return true;
 }
 
 bool ClientConnection::wait(int time, bool error_expected, int refNo)

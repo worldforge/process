@@ -1,0 +1,383 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 38;
+	objects = {
+		C4858134054ECED600A800CF = {
+			children = (
+				C491F5900549530B00A800CF,
+				C4858136054ECF2800A800CF,
+				C4858137054ECF2800A800CF,
+				C4858138054ECF2800A800CF,
+				C4858139054ECF2800A800CF,
+				C485813A054ECF2800A800CF,
+				C485813B054ECF2800A800CF,
+				C485813C054ECF2800A800CF,
+				C485813D054ECF2800A800CF,
+				C485813E054ECF2800A800CF,
+				C485813F054ECF2800A800CF,
+				C4858140054ECF2800A800CF,
+				C4858141054ECF2800A800CF,
+				C4858142054ECF2800A800CF,
+				C4858143054ECF2800A800CF,
+				C4858144054ECF2800A800CF,
+				C4858145054ECF2800A800CF,
+				C4858146054ECF2800A800CF,
+			);
+			isa = PBXGroup;
+			path = src;
+			refType = 4;
+		};
+		C4858136054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testOOG.h;
+			refType = 4;
+		};
+		C4858137054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = sstream.cc;
+			refType = 4;
+		};
+		C4858138054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = gobshite.cpp;
+			refType = 4;
+		};
+		C4858139054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = validator.h;
+			refType = 4;
+		};
+		C485813A054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = pythonInterface.h;
+			refType = 4;
+		};
+		C485813B054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = process.cpp;
+			refType = 4;
+		};
+		C485813C054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = testOOG.cpp;
+			refType = 4;
+		};
+		C485813D054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = ClientConnection.cpp;
+			refType = 4;
+		};
+		C485813E054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = process_debug.h;
+			refType = 4;
+		};
+		C485813F054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = validator.cpp;
+			refType = 4;
+		};
+		C4858140054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = sstream.h;
+			refType = 4;
+		};
+		C4858141054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = opfwd.h;
+			refType = 4;
+		};
+		C4858142054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = pythonInterface.cpp;
+			refType = 4;
+		};
+		C4858143054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = debug.h;
+			refType = 4;
+		};
+		C4858144054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = ClientConnection.h;
+			refType = 4;
+		};
+		C4858145054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = atlasUtils.h;
+			refType = 4;
+		};
+		C4858146054ECF2800A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = iotraits.h;
+			refType = 4;
+		};
+		C485814C054ECF2800A800CF = {
+			fileRef = C485813A054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485814D054ECF2800A800CF = {
+			fileRef = C485813B054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485814F054ECF2800A800CF = {
+			fileRef = C485813D054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C4858150054ECF2800A800CF = {
+			fileRef = C485813E054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C4858154054ECF2800A800CF = {
+			fileRef = C4858142054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C4858155054ECF2800A800CF = {
+			fileRef = C4858143054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C4858156054ECF2800A800CF = {
+			fileRef = C4858144054ECF2800A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C4858159054FD76E00A800CF = {
+			isa = PBXFileReference;
+			name = libpython2.2.a;
+			path = /sw/lib/python2.2/config/libpython2.2.a;
+			refType = 0;
+		};
+		C485815A054FD76E00A800CF = {
+			fileRef = C4858159054FD76E00A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485815B054FD82200A800CF = {
+			children = (
+				C485815C054FD84000A800CF,
+			);
+			isa = PBXGroup;
+			name = Resources;
+			refType = 4;
+		};
+		C485815C054FD84000A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			name = atlas.xml;
+			path = /Users/jmt/Worldforge/forge/protocols/atlas/spec/atlas.xml;
+			refType = 0;
+		};
+		C485815E054FD85A00A800CF = {
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 16;
+			files = (
+				C485815F054FD86200A800CF,
+			);
+			isa = PBXCopyFilesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C485815F054FD86200A800CF = {
+			fileRef = C485815C054FD84000A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C485816F055015CA00A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = ChangeLog;
+			refType = 4;
+		};
+		C491F583054952C800A800CF = {
+			children = (
+				C485815B054FD82200A800CF,
+				C4858134054ECED600A800CF,
+				C49DBC08054DD79800A800CF,
+				C491F58E054952D700A800CF,
+				C4858159054FD76E00A800CF,
+				C485816F055015CA00A800CF,
+			);
+			isa = PBXGroup;
+			refType = 4;
+		};
+		C491F585054952C800A800CF = {
+			buildRules = (
+			);
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			isa = PBXBuildStyle;
+			name = Development;
+		};
+		C491F586054952C800A800CF = {
+			buildRules = (
+			);
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			isa = PBXBuildStyle;
+			name = Deployment;
+		};
+		C491F587054952C800A800CF = {
+			buildStyles = (
+				C491F585054952C800A800CF,
+				C491F586054952C800A800CF,
+			);
+			hasScannedForEncodings = 1;
+			isa = PBXProject;
+			mainGroup = C491F583054952C800A800CF;
+			productRefGroup = C491F58E054952D700A800CF;
+			projectDirPath = "";
+			targets = (
+				C491F58C054952D700A800CF,
+			);
+		};
+		C491F588054952D700A800CF = {
+			buildActionMask = 2147483647;
+			files = (
+				C485814C054ECF2800A800CF,
+				C4858150054ECF2800A800CF,
+				C4858155054ECF2800A800CF,
+				C4858156054ECF2800A800CF,
+			);
+			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C491F589054952D700A800CF = {
+			buildActionMask = 2147483647;
+			files = (
+				C485814D054ECF2800A800CF,
+				C485814F054ECF2800A800CF,
+				C4858154054ECF2800A800CF,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C491F58A054952D700A800CF = {
+			buildActionMask = 2147483647;
+			files = (
+				C49DBC0F054DD82200A800CF,
+				C49DBC31054DDB3000A800CF,
+				C485815A054FD76E00A800CF,
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C491F58C054952D700A800CF = {
+			buildPhases = (
+				C491F588054952D700A800CF,
+				C491F589054952D700A800CF,
+				C491F58A054952D700A800CF,
+				C485815E054FD85A00A800CF,
+			);
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "/Users/jmt/Worldforge/forge/libs/Atlas-C++/build /Users/jmt/Worldforge/forge/libs/skstream/build";
+				HEADER_SEARCH_PATHS = /sw/include/python2.2;
+				LIBRARY_SEARCH_PATHS = /sw/lib/python2.2/config;
+				OPTIMIZATION_CFLAGS = "-O0";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = process;
+				REZ_EXECUTABLE = YES;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
+			};
+			dependencies = (
+			);
+			isa = PBXToolTarget;
+			name = process;
+			productInstallPath = /usr/local/bin;
+			productName = process;
+			productReference = C491F58D054952D700A800CF;
+		};
+		C491F58D054952D700A800CF = {
+			isa = PBXExecutableFileReference;
+			path = process;
+			refType = 3;
+		};
+		C491F58E054952D700A800CF = {
+			children = (
+				C491F58D054952D700A800CF,
+			);
+			isa = PBXGroup;
+			name = Products;
+			refType = 4;
+		};
+		C491F5900549530B00A800CF = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			path = atlasUtils.cpp;
+			refType = 4;
+		};
+		C49DBC08054DD79800A800CF = {
+			children = (
+				C49DBC0E054DD82200A800CF,
+				C49DBC30054DDB3000A800CF,
+			);
+			isa = PBXGroup;
+			name = Frameworks;
+			refType = 4;
+		};
+		C49DBC0E054DD82200A800CF = {
+			isa = PBXFrameworkReference;
+			name = Atlas.framework;
+			path = "/Users/jmt/Worldforge/forge/libs/Atlas-C++/build/Atlas.framework";
+			refType = 0;
+		};
+		C49DBC0F054DD82200A800CF = {
+			fileRef = C49DBC0E054DD82200A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		C49DBC30054DDB3000A800CF = {
+			isa = PBXFrameworkReference;
+			name = skstream.framework;
+			path = /Users/jmt/Worldforge/forge/libs/skstream/build/skstream.framework;
+			refType = 0;
+		};
+		C49DBC31054DDB3000A800CF = {
+			fileRef = C49DBC30054DDB3000A800CF;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+	};
+	rootObject = C491F587054952C800A800CF;
+}

@@ -27,6 +27,8 @@ void testDuplicateLogin(const std::string &account, const std::string &pass);
     
 void testInvalidCharacterCreate(ClientConnection &c);    
     
+void testInGameLook(ClientConnection& con);    
+    
 static void usage(const char * progname)
 {
     std::cerr << "usage: " << progname << " [-vrsh] [ script ]"
@@ -553,37 +555,15 @@ int main(int argc, char ** argv)
     character["parents"] = Element::ListType(1,"settler");
     character["name"] = "Nivek";
 
-    Create create;
-    create->setFrom(connection1.getAccountId());
-    create->setArgsAsList(Element::ListType(1,character));
-
-    sno = connection1.send(create);
-
-    verbose( std::cout << "Waiting for info response to character creation on primary connection"
-                       << std::endl << std::flush; );
-
-    if (connection1.waitFor("info", character, sno)) {
-        std::cerr << "ERROR: Character creation did not result in info"
-                  << std::endl << std::flush;
-    }
+    connection1.createChar(character);
+    verbose(std::cout << "created character with ID " << connection1.getCharacterId() <<
+            " on connection 1" << std::endl << std::flush; );
     
     if (connection2.isOpen()) {
-        verbose( std::cout << "Creating character on second connection"
-                           << std::endl << std::flush; );
-
-        character["name"] = "Cevin";
-        create->setFrom(connection2.getAccountId());
-        create->setArgsAsList(Element::ListType(1,character));
-
-        sno = connection2.send(create);
-
-        verbose( std::cout << "Waiting for info response to character creation on second connection"
-                           << std::endl << std::flush; );
-
-        if (connection2.waitFor("info", character, sno)) {
-            std::cerr << "ERROR: Character creation did not result in info"
-                      << std::endl << std::flush;
-        }
+        character["name"] = "Civen";
+        connection2.createChar(character);
+        verbose(std::cout << "created character with ID " << connection2.getCharacterId() <<
+            " on connection 2" << std::endl << std::flush; );
     }
 
     if (connection3.isOpen()) {
@@ -593,18 +573,9 @@ int main(int argc, char ** argv)
                            << std::endl << std::flush; );
 
         character["name"] = "Dwayne";
-        create->setFrom(connection3.getAccountId());
-        create->setArgsAsList(Element::ListType(1,character));
-
-        sno = connection3.send(create);
-
-        verbose( std::cout << "Waiting for info response to character creation on third connection"
-                           << std::endl << std::flush; );
-
-        if (connection3.waitFor("info", character, sno)) {
-            std::cerr << "ERROR: Character creation did not result in info"
-                      << std::endl << std::flush;
-        }
+        connection3.createChar(character);
+        verbose(std::cout << "created character with ID " << connection3.getCharacterId() <<
+            " on connection 3" << std::endl << std::flush; );
     }
 
     if (python_script) {
@@ -620,6 +591,8 @@ int main(int argc, char ** argv)
     }
     
     // Try out some IG stuff, like creating looking, talking and moving
+    testInGameLook(connection1);
+    
     return exit_status;
 }
 
@@ -786,4 +759,26 @@ void testDuplicateLogin(const std::string &account, const std::string &pass)
     }
     
     dup.close();
+}
+
+void testInGameLook(ClientConnection& con)
+{
+    Look l;
+    l->setFrom(con.getCharacterId());
+    int serial = con.send(l);
+    
+    verbose( std::cout << "Waiting for In-game look response on connection "
+                       << con.getAccount() << std::endl << std::flush; );
+
+    Element::MapType game_entity_template;
+    game_entity_template["id"] = std::string();
+    game_entity_template["name"] = std::string();
+    game_entity_template["parents"] = Element::ListType();
+    game_entity_template["objtype"] = std::string();
+    
+    RootOperation anonLookResponse = con.recv("sight", serial);
+    if (!anonLookResponse || con.compareArgToTemplate(anonLookResponse, game_entity_template)) {
+        std::cerr << "ERROR: In-game anonymous Look failed"
+                  << std::endl << std::flush;
+    }
 }
