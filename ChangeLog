@@ -1,5 +1,9 @@
 2004-02-27  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* Remove cppunit configure test.
+
+2004-02-27  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/ClientConnection.cpp, src/ClientConnection.h,
 	  src/process.cpp, src/pythonInterface.cpp, src/pythonInterface.h,
 	  src/testCharacter.cpp, src/testIG.cpp, src/testLogin.cpp,
