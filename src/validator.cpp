@@ -34,6 +34,30 @@ try {
 	    if (validate(S->second, C->second))
 		error = true;
 	}
+    } else {
+	// just use == on the type
+	switch (templ.GetType()) {
+	case Object::TYPE_INT:
+	    CPPUNIT_ASSERT((templ.AsInt() == 0) || (templ == src));
+	    break;
+	
+	case Object::TYPE_FLOAT:
+	    CPPUNIT_ASSERT((templ.AsFloat() == 0.0) || (templ == src));
+	    break;
+	
+	case Object::TYPE_STRING:
+	    CPPUNIT_ASSERT((templ.AsString() == "") || (templ == src));
+	    break;
+	
+	case Object::TYPE_LIST:
+	    CPPUNIT_ASSERT(templ.AsList().empty() || (templ == src));
+	    break;
+	
+	case Object::TYPE_NONE:
+	case Object::TYPE_MAP:
+	    CPPUNIT_ASSERT_MESSAGE("got bad type in validator",false);
+	    return true;
+	}
     }
     
     return error;

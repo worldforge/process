@@ -11,8 +11,11 @@
 
 #include <skstream.h>
 #include <deque>
+#include <map>
 
 #include "opfwd.h"
+
+typedef std::map<std::string, std::string> StringMap;
 
 typedef std::deque<Atlas::Objects::Operation::RootOperation *> OperationDeque;
 
@@ -23,9 +26,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
     tcp_socket_stream ios;
     Atlas::Codec<std::iostream> * codec;
     Atlas::Objects::Encoder * encoder;
-  
-    std::string acName, pass;
-  
+    
   Atlas::Message::Object::MapType reply;
     int serialNo;
 
@@ -67,6 +68,8 @@ class ClientConnection : public Atlas::Objects::Decoder {
     virtual void ObjectArrived(const Atlas::Objects::Operation::Talk&);
     virtual void ObjectArrived(const Atlas::Objects::Operation::Touch&);
 
+    StringMap m_tags;
+
   public:
     ClientConnection();
     ~ClientConnection();
@@ -83,6 +86,12 @@ class ClientConnection : public Atlas::Objects::Decoder {
   
     bool waitForError(const Atlas::Message::Object::MapType & arg);
 
+    void setTag(const std::string &tag, const std::string &value);
+    bool hasTag(const std::string &t)
+    { return m_tags.find(t) != m_tags.end(); }
+    
+    std::string getTag(const std::string &t);
+    
     // check the queue / wait for the specific op, and return it
     Atlas::Objects::Operation::RootOperation*
     recv(const std::string & opParent, int refno);
@@ -94,11 +103,14 @@ class ClientConnection : public Atlas::Objects::Decoder {
     bool pending();
 
     const std::string& getAccount()
-    { return acName; }
+    { return getTag("account"); }
     
     const std::string& getPassword()
-    { return pass; }
+    { return getTag("pass"); }
 
+    int getLastSerialno()
+    { return serialNo; }
+    
     int peek() {
         return ios.peek();
     }
@@ -115,5 +127,7 @@ class ClientConnection : public Atlas::Objects::Decoder {
 
     static const int timeOut = 5;
 };
+
+ClientConnection* getConnectionBySpec(const std::string &spec);
 
 #endif // CLIENT_CONNECTION_H

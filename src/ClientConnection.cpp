@@ -2,6 +2,12 @@
 // the GNU Lesser General Public License (See COPYING for details).
 // Copyright (C) 2001 Alistair Riddoch
 
+#ifdef HAVE_CONFIG_H
+    #include "config.h"
+#endif
+
+#include <algorithm>
+
 #include <Atlas/Codec.h>
 #include <Atlas/Message/Object.h>
 #include <Atlas/Net/Stream.h>
@@ -17,6 +23,9 @@
 #include "process.h"
 
 static const bool debug_flag = false;
+
+typedef std::vector<std::string> StringVec;
+StringVec tokenize(const std::string &s, const char t);
 
 using Atlas::Message::Object;
 
@@ -40,9 +49,13 @@ static inline const std::string typeAsString(const Object & o)
     }
 }
 
+typedef std::list<ClientConnection*>  ConnectionList;
+static ConnectionList static_allConnections;
+
 ClientConnection::ClientConnection() :
     encoder(NULL), serialNo(512)
 {
+    static_allConnections.push_back(this);
 }
 
 ClientConnection::~ClientConnection()
@@ -50,6 +63,8 @@ ClientConnection::~ClientConnection()
     if (encoder != NULL) {
         delete encoder;
     }
+    
+    static_allConnections.remove(this);
 }
 
 void ClientConnection::ObjectArrived(const Error&op)
@@ -265,8 +280,9 @@ bool ClientConnection::login(const std::string & account,
     acmap["parents"] = Object::ListType(1,"account");
     acmap["objtype"] = "object";
 
-    acName = account;
-
+    setTag("account", account);
+    setTag("pass", password);
+    
     l.SetArgs(Object::ListType(1,Object(acmap)));
 
     reply_flag = false;
@@ -285,7 +301,8 @@ bool ClientConnection::create(const std::string & account,
     acmap["parents"] = Object::ListType(1,"account");
     acmap["objtype"] = "object";
 
-    acName = account;
+    setTag("account", account);
+    setTag("pass", password);
 
     c.SetArgs(Object::ListType(1,Object(acmap)));
 
@@ -504,7 +521,9 @@ bool ClientConnection::waitForError(const Object::MapType & arg)
 }
 
 /** determine whether a requested operation is in the queue already; if so, return an
-    iterator to it. */
+    iterator to it. Note we have to be very careful about refno handling, since some ops
+   generate multiple response with identical refnos (IG transitions being an
+  immediate example. */
 OperationDeque::iterator
 ClientConnection::checkQueue(const std::string &opType, int refno)
 {
@@ -591,4 +610,83 @@ void ClientConnection::push(const O & op)
 const bool ClientConnection::isOpen() const
 {
     return ios.is_open();
+}
+
+
+void ClientConnection::setTag(const std::string &tag, const std::string &value)
+{
+    m_tags[tag] = value;
+}
+
+std::string ClientConnection::getTag(const std::string &t)
+{
+    StringMap::iterator T=m_tags.find(t);
+    if (T != m_tags.end())
+	return T->second;
+    
+    return "";
+}
+
+class TokenRemover
+{
+public:
+    TokenRemover(const std::string& pair) :
+	m_valueValid(false)
+    {
+	size_t eqPos = pair.find('='), len = pair.length();
+	if (eqPos < len) {
+	    m_valueValid = true;
+	    m_value = pair.substr(eqPos + 1, len - (eqPos + 1));
+	}
+	
+	m_tag = pair.substr(0, eqPos);
+    }
+    
+    bool operator()(ClientConnection *con)
+    {
+	if (m_valueValid) {
+	    return !(con->hasTag(m_tag) && (con->getTag(m_tag) == m_value));
+	} else
+	    return !con->hasTag(m_tag);
+    }
+private:
+    std::string m_tag, m_value;
+    bool m_valueValid;
+};
+
+ClientConnection* getConnectionBySpec(const std::string &spec)
+{
+    StringVec toks = tokenize(spec, ',');
+    if (toks.empty())
+	return NULL;
+    
+    ConnectionList valid(static_allConnections);
+    
+    for (unsigned int T=0;T<toks.size();++T) {
+	if (valid.empty())
+	    return NULL;	// no possible matches, we==boned
+
+	TokenRemover trm(toks[T]);
+	std::remove_if(valid.begin(), valid.end(), trm);
+    }
+    
+    if (valid.empty())
+	return NULL;
+    else
+	return valid.front();
+}
+
+StringVec tokenize(const std::string &s, const char t)
+{
+    StringVec ret;
+    
+    unsigned int pos = 0, back = pos;
+    while (pos < s.size()) {
+	pos = s.find(t, back);
+	// addthe next part
+	ret.push_back(s.substr(back, pos - back));
+	back = pos + 1;
+    }
+	    
+    return ret;
 }

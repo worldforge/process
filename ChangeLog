@@ -1,3 +1,19 @@
+Sunday, May 12, James Turner
+
+	* Updated the validator to check values as well as types
+	  (not perfect, but better)
+	* Added a getLastSerialno getter to ClientConnection to
+	  work with recv()
+	* Added an IG transition 'take' test (via LOOK) to
+	  testOOG.
+	* Factored out the account look logic into a helper
+	  in testOOG.
+	* Added tags support (map of key/value pairs) to
+	  ClientConnection, and a helper function to retrive a
+	  connection matching a given set of keys and values. This
+	  is to allow the tests to be reasonably independant of
+	  the set of client connections being maintained.
+
 Saturday, May 11, James Turner
 
 	* added acinclude.m4

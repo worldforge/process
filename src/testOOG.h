@@ -18,6 +18,8 @@ public:
 
     void testCharacterLook();
     void testTakeCharacter();
+
+    Atlas::Message::Object retrieveAccount(ClientConnection &con);
 private:
     ClientConnection c;
 };
