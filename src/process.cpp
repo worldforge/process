@@ -19,13 +19,19 @@ using Atlas::Message::Object;
 void testTypeQueries(ClientConnection &c);
 
 void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &watcher);
+void testDuplicateLogin(const std::string &account, const std::string &pass);
 
+void testCharacterLook(ClientConnection &c, 
+    const std::string &acc, const std::string &pass);
+    
 void usage(const char * progname)
 {
     std::cerr << "usage: " << progname << " [-vr] [ script ]"
               << std::endl << std::flush;
 
 }
+
+Object makeAtlasVec(double x, double y, double z);
 
 bool verbose_flag = false;
 bool regress_flag = false;
@@ -263,6 +269,8 @@ int main(int argc, char ** argv)
                   << std::endl << std::flush;
     }
 
+    testDuplicateLogin(ac1.str(), "ptacpw1pc");
+    
     testLogout(connection2, ac2.str(), connection1);
     
     testTypeQueries(connection1);
@@ -468,7 +476,7 @@ int main(int argc, char ** argv)
         std::cerr << "ERROR: Character creation did not result in info"
                   << std::endl << std::flush;
     }
-
+    
     if (connection2.isOpen()) {
         verbose( std::cout << "Creating character on second connection"
                            << std::endl << std::flush; );
@@ -507,6 +515,8 @@ int main(int argc, char ** argv)
         }
     }
 
+    testCharacterLook(connection1, ac1.str(), "ptacpw1pc");
+    
     // Try out some IG stuff, like creating looking, talking and moving
     return exit_status;
 }
@@ -592,4 +602,128 @@ void testLogout(ClientConnection &c, const std::string &acc, ClientConnection &w
 	std::cerr << "ERROR: login did not produce an INFO response" << std::endl;
     }
     
+}
+
+void testCharacterLook(ClientConnection &c, 
+    const std::string &acc, const std::string &pass)
+{
+    c.close();
+ 
+    verbose( std::cout << "testCharacterLook: Closing connection" << std::endl; );
+    
+    c.connect("localhost");
+    c.login(acc, pass);
+    
+    verbose( std::cout << "testCharacterLook: logged in" << std::endl; );
+    
+    // send an account LOOK, to get it back
+    Look look;
+    look.SetFrom(acc);
+    
+    Object::MapType args;
+    args["id"] = acc;
+    look.SetArgs(Object::ListType(1, args));
+    
+    c.send(look);
+    Object::MapType accountProto;
+    accountProto["parents"] = Object::ListType(1, "account");
+    accountProto["id"] = acc;
+    
+    RootOperation *sight;
+    if (c.waitForGet("sight", accountProto, sight)) {
+	std::cerr << "ERROR: LOOK at account did not produce an SIGHT response" << std::endl;
+    }
+    
+    // get the account out
+    Object account = sight->GetArgs()[0];
+    Object::ListType chars = account.AsMap()["characters"].AsList();
+    
+    if (chars.empty()) {
+	std::cerr << "ERROR: account object from LOOK has empty CHARACTERS attribute" << std::endl;
+	return;
+    }
+    
+    Object::MapType entityProto;
+    entityProto["id"] = chars.front();
+    
+    // issue a look for character zero
+    args["id"] = chars.front();	// first char ID
+    look.SetArgs(Object::ListType(1, args));
+    
+    c.send(look);
+    if (c.waitForGet("sight", entityProto, sight)) {
+	std::cerr << "ERROR: LOOK at charatcer did not produce an SIGHT response" << std::endl;
+    }
+    
+    Object ent = sight->GetArgs()[0];
+    if (ent.AsMap()["parents"] != Object::ListType(1, "farmer")) {
+	std::cerr << "ERROR: entity return from OOG character look has invalid parents" << std::endl;
+    }
+    
+    if (ent.AsMap()["name"] != std::string("Nivek")){
+	std::cerr << "ERROR: entity return from OOG character look has invalid name" << std::endl;
+    }
+}
+
+/*
+void testRooms(ClientConnection &cl, const std::string &acc)
+{
+    Object::MapType create;
+    create["from"] = acc;
+    // create["to"] = ;
+    
+    Object::MapType 
+}
+*/
+
+/*
+void testInGame(ClientConnection &a, ClientConnection &b, ClientConnection &c)
+{
+    // movement
+    Move mv = Move::Instantiate();
+    mv.SetFrom(ac1Char);
+    mv.SetTo(ac1Char);
+    
+    Object::MapType move;
+    move["id"] = ac1Char;
+    move["pos"] = makeAtlasVec(10.0, 0.0, 0.0);
+    mv.SetArgs(Object::ListType(1, move));
+
+    // velocity movement
+
+    // stop
+}
+*/
+
+Object makeAtlasVec(double x, double y, double z)
+{
+    Object::ListType vec;
+    vec.push_back(x);
+    vec.push_back(y);
+    vec.push_back(z);
+    return Object(vec);
+}
+
+void testDuplicateLogin(const std::string &account, const std::string &pass)
+{
+    ClientConnection dup;
+    if (!dup.connect("localhost")) {
+	std::cerr << "ERROR: Unable to connect to server"
+                  << std::endl << std::flush;
+        return;
+    }
+    
+    dup.login(account, pass);
+    
+    verbose( std::cout << "Waiting for ERROR on duplication login to account " 
+	<< account << std::endl; );
+    
+    Object::MapType info;
+    info["parents"] = Object::ListType(1,"login");
+    
+    if (dup.waitForError(info)) {
+	std::cerr << "ERROR: duplicate login did not produce an ERROR response" << std::endl;
+    }
+    
+    dup.close();
 }

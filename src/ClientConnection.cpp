@@ -217,6 +217,12 @@ int ClientConnection::read() {
 
 bool ClientConnection::connect(const std::string & server)
 {
+    if (ios.is_open()) {
+	std::cerr << "Conection is already connected!" << std::endl;
+	return false;
+    }
+    
+    ios.clear(); // clear any lingering errors (necessary for re-conncections)
     ios.open(server, 6767);
     if (!ios.is_open()) {
 	cerr << "failed to open socket" << endl;
@@ -363,6 +369,158 @@ bool ClientConnection::waitFor(const std::string & opParent,
                         << std::flush;);
     }
     const Object::MapType & a = args.front().AsMap();
+    Object::MapType::const_iterator I, J;
+    bool error = false;
+    for (I = arg.begin(); I != arg.end(); I++) {
+        J = a.find(I->first);
+        if (J == a.end()) {
+            std::cerr << "ERROR: Response to operation args should have "
+                      << "attribute '" << I->first << "' of type "
+                      << typeAsString(I->second) << " but it is missing"
+                      << std::endl << std::flush;
+            error = true;
+            continue;
+        }
+        if (I->second.IsNone()) {
+            continue;
+        }
+        if (I->second.GetType() != J->second.GetType()) {
+            if (I->second.IsNum() && J->second.IsNum()) {
+                std::cerr << "WARNING: Response to operation args should have "
+                          << "attribute '" << I->first << "' of type "
+                          << typeAsString(I->second) << " but it is of type "
+                          << typeAsString(J->second)
+                          << std::endl << std::flush;
+            } else {
+                std::cerr << "ERROR: Response to operation args should have "
+                          << "attribute '" << I->first << "' of type "
+                          << typeAsString(I->second) << " but it is of type "
+                          << typeAsString(J->second)
+                          << std::endl << std::flush;
+                error = true;
+            }
+        }
+    }
+    return error;
+}
+
+bool ClientConnection::waitForGet(const std::string & opParent,
+                               const Object::MapType & arg,
+                               RootOperation* &data)
+{
+    if (wait(timeOut, false)) {
+        return true;
+    }
+    RootOperation * op;
+    std::string opP;
+    do {
+        poll(0);
+        op = pop();
+        if (op == NULL) {
+            std::cerr << "ERROR: No response to operation"
+                      << std::endl << std::flush;
+            return true;
+        }
+        opP = op->GetParents().front().AsString();
+        verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
+    } while (opP != opParent);
+
+    data = op;
+    
+    const Object::ListType & args = op->GetArgs();
+    if (arg.empty()) {
+        if (!args.empty()) {
+            std::cerr << "ERROR: Response to operation has args "
+                      << "but no args expected"
+                      << std::endl << std::flush;
+            return true;
+        }
+        debug(std::cout << "No arg expected, and none given"
+                        << std::endl << std::flush;);
+        return false;
+    } else {
+        if (args.empty()) {
+            std::cerr << "ERROR: Response to operation has no args "
+                      << "but args are expected"
+                      << std::endl << std::flush;
+            return true;
+        }
+        debug(std::cout << "Arg expected, and provided" << std::endl
+                        << std::flush;);
+    }
+    const Object::MapType & a = args.front().AsMap();
+    Object::MapType::const_iterator I, J;
+    bool error = false;
+    for (I = arg.begin(); I != arg.end(); I++) {
+        J = a.find(I->first);
+        if (J == a.end()) {
+            std::cerr << "ERROR: Response to operation args should have "
+                      << "attribute '" << I->first << "' of type "
+                      << typeAsString(I->second) << " but it is missing"
+                      << std::endl << std::flush;
+            error = true;
+            continue;
+        }
+        if (I->second.IsNone()) {
+            continue;
+        }
+        if (I->second.GetType() != J->second.GetType()) {
+            if (I->second.IsNum() && J->second.IsNum()) {
+                std::cerr << "WARNING: Response to operation args should have "
+                          << "attribute '" << I->first << "' of type "
+                          << typeAsString(I->second) << " but it is of type "
+                          << typeAsString(J->second)
+                          << std::endl << std::flush;
+            } else {
+                std::cerr << "ERROR: Response to operation args should have "
+                          << "attribute '" << I->first << "' of type "
+                          << typeAsString(I->second) << " but it is of type "
+                          << typeAsString(J->second)
+                          << std::endl << std::flush;
+                error = true;
+            }
+        }
+    }
+    return error;
+}
+
+/* wait for an error operation; the provided arg will be the op that caused the error,
+ i.e args[1] of the ERROR op */
+bool ClientConnection::waitForError(const Object::MapType & arg)
+{
+    if (wait(timeOut, false)) {
+        return true;
+    }
+    RootOperation * op;
+    std::string opP;
+    do {
+        poll(0);
+        op = pop();
+        if (op == NULL) {
+            std::cerr << "ERROR: No response to operation"
+                      << std::endl << std::flush;
+            return true;
+        }
+        opP = op->GetParents().front().AsString();
+        verbose( std::cout << "Got op of type " << opP << std::endl << std::flush;);
+    } while (opP != "error");
+
+    const Object::ListType & args = op->GetArgs();
+    if (arg.empty()) {
+        debug(std::cout << "No arg expected"
+                        << std::endl << std::flush;);
+        return false;
+    } else {
+        if (args.empty()) {
+            std::cerr << "ERROR: Response to operation has no args "
+                      << "but args are expected"
+                      << std::endl << std::flush;
+            return true;
+        }
+        debug(std::cout << "Arg expected, and provided" << std::endl
+                        << std::flush;);
+    }
+    const Object::MapType & a = args[1].AsMap();
     Object::MapType::const_iterator I, J;
     bool error = false;
     for (I = arg.begin(); I != arg.end(); I++) {

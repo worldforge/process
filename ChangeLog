@@ -1,3 +1,14 @@
+Monday, May 6, James Turner
+
+	* add waitForError and waitForGet to client connection.
+	  Why? Well waitFor makes it very hard to expect an ERROR op,
+	  where the argument operarion is ARGS[1], not ARGS[0].
+	  waitForGet allows you to retrieve the recived op, for all
+	  kinds of thrilling fun.
+	* Added testCharacterLook, which tests OOG inspection of
+	  characters (and also that the server's account object
+	  correctly lists created characters)
+
 2002-02-20  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/process.cpp: Logout tests added by James.
