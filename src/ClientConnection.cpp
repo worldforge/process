@@ -564,8 +564,12 @@ bool ClientConnection::waitForError(int refNo)
         } else {
             MapType & arg1 = erArgs[0].asMap();
             MapType::const_iterator I = arg1.find("message");
-            if (arg1.size() != 1 || I == arg1.end() || !I->second.isString()) {
-                std::cerr << "Error operation's first arg does not contain a single message string"
+            if (arg1.size() != 1) {
+                std::cerr << "Warning Error operations's first arg has more than one attribute"
+                          << std::endl << std::flush;
+            }
+            if (I == arg1.end() || !I->second.isString()) {
+                std::cerr << "Error operation's first arg does not contain a message string"
                           << std::endl << std::flush;
                 ret = true;
             }

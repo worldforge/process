@@ -1,25 +1,24 @@
 dnl Initialise autoconf
 
-AC_INIT(src/process.cpp)
-AM_CONFIG_HEADER(config.h)
+AC_INIT(process, 0.0.0)
+AC_CONFIG_SRCDIR([src/process.cpp])
+AC_CONFIG_HEADERS([config.h])
 
 dnl Detect the canonical host and target environment
 
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
+AC_CANONICAL_SYSTEM
 
 dnl Initialise automake
 
-AM_INIT_AUTOMAKE(process, 0.0.0)
+AM_INIT_AUTOMAKE([dist-bzip2])
 
 dnl Test for C++ compiler
 
 AC_PROG_CXX
 
-CXXFLAGS="$CXXFLAGS -Wall -Wno-unknown-pragmas -DATLAS_ELEMENT_TYPEDEF_PRIVATE"
+CXXFLAGS="$CXXFLAGS -Wall -Wno-unknown-pragmas"
 
-AC_LANG_CPLUSPLUS
-AC_REQUIRE_CPP
+AC_LANG(C++)
 
 dnl Test for WorldForge Atlas Libraries
 
