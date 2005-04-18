@@ -37,7 +37,7 @@ void testTypeQueries(ClientConnection &c)
     verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
     
     MapType info;
-    info["parents"] = ListType(1, "info");    
+    info["objtype"] = "class";    
     
     if (c.waitFor("info", info, sno)) {
         std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
@@ -48,6 +48,8 @@ void testTypeQueries(ClientConnection &c)
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
     sno = c.send(query);
     
+    info["parents"] = ListType(1, "info");    
+
     verbose( std::cout << "Waiting for info response to game_entity type query" << std::endl; );
     if (c.waitFor("info", info, sno)) {
         std::cerr << "ERROR: Type-query for game_entity did not resut in info" << std::endl;

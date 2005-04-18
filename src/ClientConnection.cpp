@@ -557,6 +557,7 @@ bool ClientConnection::waitForError(int refNo)
                   << std::endl << std::flush;
         ret = true;
     } else {
+        // std::cout << "ERROR arg class is " << erOp->getArgs().front()->getClassNo() << std::endl << std::flush;
         if (!erArgs[0].isMap() || erArgs[0].asMap().empty()) {
             std::cerr << "Error operation's first arg is not a map"
                       << std::endl << std::flush;
