@@ -9,6 +9,8 @@
 #include <iostream>
 #include <Eris/Log.h>
 
+#include <sigc++/slot.h>
+
 using std::cout;
 using std::endl;
 
@@ -42,6 +44,11 @@ static void initSignals()
     sigaction(SIGPIPE, &action, NULL);
 }
 
+void erisLog(Eris::LogLevel level, const std::string & msg)
+{
+    std::cout << "LOG: " << msg << std::endl << std::flush;
+}
+
 int main(int argc, char* argv[])
 {
     int numUsers = 4;
@@ -51,6 +58,9 @@ int main(int argc, char* argv[])
     std::vector<User*> users;
     
     initSignals();
+
+    Eris::Logged.connect(SigC::slot(erisLog));
+    Eris::setLogLevel(Eris::LOG_DEBUG);
     
     while (numUsers-- > 0) {
         std::ostringstream os;

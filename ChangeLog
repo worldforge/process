@@ -1,3 +1,11 @@
+2005-04-27  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* loadtool/main.cpp: Log Eris stuff agressively until we iron out all
+	  the bugs.
+
+	* loadtool/Action.cpp: Make origin area closer to the origin to make
+	  it easier to see the test characters. Add to the quote database.
+
 2005-04-18  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/ClientConnection.cpp: Add some code that is convenient when

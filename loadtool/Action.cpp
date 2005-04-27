@@ -45,7 +45,7 @@ public:
     MoveNearOrigin(Character* c) :
         Action(c)
     {
-        m_dest = WFMath::Point<3>( 100 * (drand48() - 0.5), 100 * (drand48() - 0.5), 0.0);
+        m_dest = WFMath::Point<3>( 10 * (drand48() - 0.5), 10 * (drand48() - 0.5), 0.0);
         c->avatar()->moveToPoint(m_dest);
     }
 
@@ -79,6 +79,22 @@ static const char* static_messages[] = {
     "I loathe the undead",
     "Sweet holy jesus - fruit fucker prime!",
     "Also, it seems like they could fill more things with cream.",
+    "I said Fuck Yeah!",
+    "my nipples nooooooo",
+    "i had sex with a bird and now I caught the asian bird flu",
+    "i know a long word that means squeezed to death by a snake",
+    "Did you hear that shitbag Scott Kurtz was nominated for an Eisner?",
+    "You are the anchor around my neck. You are drowning me.",
+    "Christ? Judas is teamkilling again.",
+    "Cut yourself.",
+    "You could get the fuck out of my face.",
+    "I just baked a cinnamon roll as big as my head!",
+    "I think the main problem I have is that you are a shitfucker.",
+    "Yesterday, I kissed a boy! Does that mean I'm gay?",
+    "The delivery guy from Ikea went poop in our bathroom.",
+    "I smolder with generic rage.",
+    "This game will give you leprosy.",
+    "I am talking about a chunk of metal so far up my ass it's a Goddam tourist attraction.",
     0 // important!
 };
 
