@@ -4,9 +4,9 @@ AC_INIT(process, 0.0.0)
 AC_CONFIG_SRCDIR([src/process.cpp])
 AC_CONFIG_HEADERS([config.h])
 
-dnl Detect the canonical host and target environment
+dnl Detect the canonical host environment
 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_HOST
 
 dnl Initialise automake
 
@@ -122,8 +122,9 @@ PYTHON_LIBS=${python_libs}
 LIBS="$LIBS $PYTHON_LIBS"
 
 dnl Generate files
-AC_OUTPUT([
+AC_CONFIG_FILES([
         Makefile
         src/Makefile
         loadtool/Makefile
 ])
+AC_OUTPUT

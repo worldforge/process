@@ -1,3 +1,9 @@
+2005-04-30  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* acinclude.m4: Add required pkg-config macro.
+
+	* configure.ac: Update autoconf usage.
+
 2005-04-27  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* loadtool/main.cpp: Log Eris stuff agressively until we iron out all
