@@ -1,4 +1,4 @@
-SUBDIRS = src loadtool
+SUBDIRS = src perf loadtool
 
 test:
 	./src/process

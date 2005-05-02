@@ -125,6 +125,7 @@ dnl Generate files
 AC_CONFIG_FILES([
         Makefile
         src/Makefile
+        perf/Makefile
         loadtool/Makefile
 ])
 AC_OUTPUT

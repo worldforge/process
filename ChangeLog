@@ -1,3 +1,8 @@
+2005-05-02  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* perf/minserver.cpp, perf/rawclient.cpp: New tools to test server
+	  raw performance.
+
 2005-04-30  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* acinclude.m4: Add required pkg-config macro.
