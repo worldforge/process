@@ -14,6 +14,7 @@
 
 // tcp_socket_stream - the iostream-based socket class
 #include <skstream/skstream.h>
+#include <skstream/skstream_unix.h>
 
 // cout, cerr
 #include <iostream>
@@ -97,26 +98,85 @@ int getTime()
     return tv.tv_usec / 1000 + tv.tv_sec * 1000;
 }
 
+static void usage(const char * prgname)
+{
+    std::cerr << "usage: " << prgname
+              << " [-u <socket_path> | -p <port> [hostname] ]"
+              << std::endl << std::flush;
+}
+
 int main(int argc, char** argv)
 {
+    enum { SOCKET_TCP, SOCKET_UNIX } option_socket_type = SOCKET_TCP;
+    int option_port = 6767;
+    const char * option_socket = 0;
+
+    basic_socket_stream * connection = 0;
+
+    while (1) {
+        int c = getopt(argc, argv, "u:p:");
+        if (c == -1) {
+            break;
+        } else if (c == ':' || c == '?') {
+           usage(argv[0]);
+           return 1;
+        } else if (c == 'u') {
+            if (connection != 0) {
+                usage(argv[0]);
+                return 1;
+            }
+            option_socket = optarg;
+            option_socket_type = SOCKET_UNIX;
+        } else if (c == 'p') {
+            if (connection != 0) {
+                usage(argv[0]);
+                return 1;
+            }
+            int port = strtol(optarg, 0, 0);
+            if (port < 1 || port > USHRT_MAX) {
+                std::cerr << argv[0] << ": Unknown port \"" << optarg
+                          << "\". Defaulting to " << option_port << "."
+                          << std::endl << std::flush;
+            } else {
+                option_port = port;
+            }
+            option_socket_type = SOCKET_TCP;
+        }
+    }
+
+    if (option_socket_type == SOCKET_TCP) {
+        tcp_socket_stream * tss = new tcp_socket_stream;
+        // Connect to the server
+        if ((argc - optind) == 1) {
+            tss->open(argv[optind], option_port);
+        } if ((argc - optind) == 0) {
+            tss->open("127.0.0.1", option_port);
+        } else {
+            usage(argv[0]);
+            return 1;
+        }
+        connection = tss;
+    } else if (option_socket_type == SOCKET_UNIX) {
+        unix_socket_stream * uss = new unix_socket_stream;
+        uss->open(option_socket);
+        connection = uss;
+    } else {
+        std::cerr << argv[0] << ": Internal Error. No socket type selected."
+                  << std::endl << std::flush;
+        usage(argv[0]);
+        abort();
+    }
+
     signal(SIGPIPE, SIG_IGN);
 
     // The socket that connects us to the server
-    tcp_socket_stream connection;
-
     std::cout << "Connecting..." << std::flush;
     
-    // Connect to the server
-    if(argc>1) {
-      connection.open(argv[1], 6767);
-    } else {
-      connection.open("127.0.0.1", 6767);
-    }
     
     // The DebugBridge puts all that comes through the codec on cout
     NullBridge bridge;
     // Do client negotiation with the server
-    Atlas::Net::StreamConnect conn("simple_client", connection, bridge);
+    Atlas::Net::StreamConnect conn("simple_client", *connection, bridge);
 
     std::cout << "Negotiating... " << std::flush;
     // conn.poll() does all the negotiation
@@ -158,16 +218,16 @@ int main(int argc, char** argv)
     // Say hello to the server
     int i;
     for (i = 0; i < 50000; ++i) {
-        if (poll(connection.getSocket(), *codec)) {
+        if (poll(connection->getSocket(), *codec)) {
             std::cout << "HUPPED" << std::endl << std::flush;
             break;
         }
         // helloWorld(*codec);
-        int count = write(connection.getSocket(), msg_buf, msg_len);
+        int count = write(connection->getSocket(), msg_buf, msg_len);
         if (count > 0) {
             out_count += count;
         }
-        connection << std::flush;
+        *connection << std::flush;
     }
 
     int end_time = getTime();
@@ -186,16 +246,16 @@ int main(int argc, char** argv)
               << " bytes per second" << std::endl << std::flush;
 
     // iosockinet::operator bool() returns false if the connection was broken
-    if (!connection) {
+    if (!*connection) {
         std::cout << "Server exited." << std::endl;
     } else {
         // It was not broken by the server, so we'll close ourselves
         std::cout << "Closing connection... " << std::flush;
         // This should always be sent at the end of a session
         codec->streamEnd();
-        connection << std::flush;
+        *connection << std::flush;
         // Close the socket
-        connection.close();
+        connection->close();
         std::cout << "done." << std::endl;
     }
 

@@ -1,3 +1,8 @@
+2005-05-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* perf/rawclient.cpp: Implement options to use unix sockets, and
+	  to specify port number.
+
 2005-05-02  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* perf/minserver.cpp, perf/rawclient.cpp: New tools to test server
