@@ -6,6 +6,7 @@
 class Schedulable
 {
 public:
+    virtual ~Schedulable() { }
     virtual void tick() = 0;
 };
 

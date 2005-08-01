@@ -16,7 +16,7 @@ public:
     RandomMove(Character* c) : 
         Action(c)
     {
-        int durationMsec = random() % 0x3fff; // 16 seconds max
+        int durationMsec = 2000 + (random() % 0x3fff); // 16 seconds max
         m_finishTime = WFMath::TimeStamp::now() + WFMath::TimeDiff(durationMsec);
         
         WFMath::Quaternion q(2, drand48() * WFMath::Pi * 2); // random heading
@@ -45,7 +45,8 @@ public:
     MoveNearOrigin(Character* c) :
         Action(c)
     {
-        m_dest = WFMath::Point<3>( 10 * (drand48() - 0.5), 10 * (drand48() - 0.5), 0.0);
+        // move to within 40 metres of the origin
+        m_dest = WFMath::Point<3>( 80 * (drand48() - 0.5), 80 * (drand48() - 0.5), 0.0);
         c->avatar()->moveToPoint(m_dest);
     }
 
@@ -145,7 +146,6 @@ private:
 std::auto_ptr<Action> Action::newRandomAction(Character* c)
 {
     switch (random() % 7) {
-    case 1:
     case 2:
         return std::auto_ptr<Action>(new MoveNearOrigin(c));
         

@@ -3,6 +3,9 @@
 #include <Atlas/Objects/Operation.h>
 #include "Action.h"
 #include <iostream>
+#include <Eris/Entity.h>
+#include <Eris/TypeService.h>
+#include <Eris/Connection.h>
 
 using std::cout;
 using std::endl;
@@ -17,6 +20,7 @@ Character::Character(Eris::Avatar* av) :
 {
     m_view = av->getView();
     av->GotCharacterEntity.connect(SigC::slot(*this, &Character::onGotEntity));
+    m_view->Appearance.connect(SigC::slot(*this, &Character::onAppear));
 }
 
 Character::~Character()
@@ -27,6 +31,14 @@ void Character::onGotEntity(Eris::Entity*)
 {
     m_avatar->Hear.connect(SigC::slot(*this, &Character::onHear));
     
+    Eris::TypeService* tysv = m_avatar->getConnection()->getTypeService();
+
+    registerTypeTrigger(tysv->getTypeByName("axe"), SigC::slot(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("pickaxe"), SigC::slot(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("tinderbox"), SigC::slot(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("scythe"), SigC::slot(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("shovel"), SigC::slot(*this, &Character::spotTool));
+
     // start sending actions
     
     Scheduler::instance()->addItem(this);
@@ -47,9 +59,36 @@ void Character::onHear(Eris::Entity* src, const Atlas::Objects::Operation::RootO
     }
 }
 
+void Character::onAppear(Eris::Entity* app)
+{
+    m_memory[app] = 0;
+    
+    spotSomething(app);
+}
+
+void Character::spotSomething(Eris::Entity* app)
+{
+    if (m_triggers.count(app->getType())) {
+        // we have a trigger, run it
+        m_triggers[app->getType()](app);
+    }
+}
+
+void Character::registerTypeTrigger(Eris::TypeInfo* ty, const SpotTypeTrigger& tg)
+{
+    assert(ty);
+    m_triggers[ty].connect(tg);
+}
+
 void Character::tick()
 {
     m_view->update(); // motion prediction
+    
+    MemoryStore::iterator it;
+    for (it = m_memory.begin(); it != m_memory.end(); ++it) {
+        ++(it->second);
+    }
+    
     if (m_action.get()) {
         m_action->run();
         if (m_action->finished()) {
@@ -57,4 +96,9 @@ void Character::tick()
         }
     } else
         m_action = ::Action::newRandomAction(this);
+}
+
+void Character::spotTool(Eris::Entity* toolEnt)
+{
+    cout << "entity spotted tool " << toolEnt->getId() << endl;
 }

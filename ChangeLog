@@ -1,3 +1,15 @@
+2005-08-02  James Turner  <james@worldforge.org>
+
+	* loadtool/Character.cpp, loadtool/Character.h: support for
+	  triggering a slot when entities of a certain type appear. Currently,
+	  a debug message is printed when any of a hard-coded set of tools are
+	  seen.
+	  
+	* loadtool/Schedulable.h: add an explicit destructor to silence a
+	  warning
+	  
+	* loadtool/Action.cpp: tune the parameters for the movement actions.
+
 2005-05-04  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* perf/rawclient.cpp: Implement options to use unix sockets, and
