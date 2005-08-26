@@ -13,6 +13,7 @@
 using Atlas::Message::Element;
 using Atlas::Message::MapType;
 using Atlas::Message::ListType;
+using Atlas::Objects::Entity::Anonymous;
 
 void testOOG(ClientConnection & connection1,
              ClientConnection & connection2,
@@ -50,11 +51,11 @@ void testOOG(ClientConnection & connection1,
                        << std::endl << std::flush; );
 
     Talk t;
-    MapType say;
-    say["say"] = "Hello";
-    say["loc"] = lobbyId;
+    Anonymous say;
+    say->setAttr("say", "Hello");
+    say->setLoc(lobbyId);
     t->setFrom(connection1.getAccountId());
-    t->setArgsAsList(ListType(1, say));
+    t->setArgs1(say);
     sno = connection1.send(t);
 
     verbose( std::cout << "Waiting for sound response to talk on primary connection"
@@ -62,7 +63,7 @@ void testOOG(ClientConnection & connection1,
 
     MapType talkTemplate;
     talkTemplate["from"] = connection1.getAccountId();
-    talkTemplate["args"] = ListType(1, say);
+    talkTemplate["args"] = ListType(1, say->asMessage());
 
     if (connection1.waitFor("sound", talkTemplate, sno)) {
         std::cerr << "WARNING: Out-of-game Talk did not result in sound"
@@ -173,9 +174,9 @@ void testOOG(ClientConnection & connection1,
 
         t->setTo(connection1.getAccountId());
         t->setFrom(connection2.getAccountId());
-        MapType say;
-        say["say"] = "Private_2_1";
-        t->setArgsAsList(ListType(1, say));
+        Anonymous say;
+        say->setAttr("say", "Private_2_1");
+        t->setArgs1(say);
 
         talkTemplate["args"] = t->getArgsAsList();
         talkTemplate["from"] = connection2.getAccountId();
@@ -196,8 +197,8 @@ void testOOG(ClientConnection & connection1,
                                << std::endl << std::flush; );
 
             t->setTo(connection3.getAccountId());
-            say["say"] = "Private_2_3";
-            t->setArgsAsList(ListType(1, say));
+            say->setAttr("say", "Private_2_3");
+            t->setArgs1(say);
             sno = connection2.send(t);
 
             talkTemplate["args"] = t->getArgsAsList();

@@ -6,11 +6,14 @@
 #include "tests.h"
 #include "process_debug.h"
 
+#include <Atlas/Objects/Anonymous.h>
+
 #include <iostream>
 
 using Atlas::Message::Element;
 using Atlas::Message::MapType;
 using Atlas::Message::ListType;
+using Atlas::Objects::Entity::Anonymous;
 
 #if 0
 static Element makeAtlasVec(double x, double y, double z)
@@ -29,9 +32,9 @@ void testTypeQueries(ClientConnection &c)
     verbose( std::cout << "Requesting root-type" << std::endl; );
     
     Get query;
-    MapType arg;
-    arg["id"] = "root";
-    query->setArgsAsList(ListType(1, arg));
+    Anonymous arg;
+    arg->setId("root");
+    query->setArgs1(arg);
     
     int sno = c.send(query);
     verbose( std::cout << "Waiting for info response to root-type query" << std::endl; );
@@ -43,8 +46,8 @@ void testTypeQueries(ClientConnection &c)
         std::cerr << "ERROR: Type-query for root did not resut in info" << std::endl;
     }
     
-    arg["id"] = "game_entity";
-    query->setArgsAsList(ListType(1, arg));
+    arg->setId("game_entity");
+    query->setArgs1(arg);
     verbose( std::cout << "Requesting info for type game_entity" << std::endl; );
     sno = c.send(query);
     
@@ -56,8 +59,8 @@ void testTypeQueries(ClientConnection &c)
     }
     
     // try a broken one (unless by some miracle is exists?)
-    arg["id"] = "_bad_type_";
-    query->setArgsAsList(ListType(1, arg));
+    arg->setId("_bad_type_");
+    query->setArgs1(arg);
     verbose( std::cout << "Requesting info for type _bad_type" << std::endl; );
     sno = c.send(query);
     

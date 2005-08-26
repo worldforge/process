@@ -6,25 +6,28 @@
 #include "testCharacter.h"
 #include "process_debug.h"
 
+#include <Atlas/Objects/Anonymous.h>
+
 #include <iostream>
 
 using Atlas::Message::Element;
 using Atlas::Message::MapType;
 using Atlas::Message::ListType;
+using Atlas::Objects::Entity::Anonymous;
 
 void testInvalidCharacterCreate(ClientConnection &c)
 {
     verbose( std::cout << "Testing character creation with invalid type"
                            << std::endl << std::flush; );
 
-    MapType character;
-    character["objtype"] = "object";
-    character["parents"] = ListType(1,"__bad__type__");
-    character["name"] = "Dwayne";
+    Anonymous character;
+    character->setObjtype("obj");
+    character->setParents(std::list<std::string>(1,"__bad__type__"));
+    character->setName("Dwayne");
 
     Create create;
     create->setFrom(c.getAccountId());
-    create->setArgsAsList(ListType(1,character));
+    create->setArgs1(character);
     
     int sno = c.send(create);
 
@@ -44,17 +47,17 @@ void testCharacterCreate(ClientConnection & connection1,
     verbose( std::cout << "Creating character on primary connection"
                        << std::endl << std::flush; );
 
-    MapType character;
-    character["objtype"] = "object";
-    character["parents"] = ListType(1,"settler");
-    character["name"] = "Nivek";
+    Anonymous character;
+    character->setObjtype("obj");
+    character->setParents(std::list<std::string>(1,"settler"));
+    character->setName("Nivek");
 
     connection1.createChar(character);
     verbose(std::cout << "created character with ID " << connection1.getCharacterId() <<
             " on connection 1" << std::endl << std::flush; );
     
     if (connection2.isOpen()) {
-        character["name"] = "Civen";
+        character->setName("Cevin");
         connection2.createChar(character);
         verbose(std::cout << "created character with ID " << connection2.getCharacterId() <<
             " on connection 2" << std::endl << std::flush; );
@@ -66,7 +69,7 @@ void testCharacterCreate(ClientConnection & connection1,
         verbose( std::cout << "Creating character on third connection"
                            << std::endl << std::flush; );
 
-        character["name"] = "Dwayne";
+        character->setName("Dwayne");
         connection3.createChar(character);
         verbose(std::cout << "created character with ID " << connection3.getCharacterId() <<
             " on connection 3" << std::endl << std::flush; );
@@ -75,15 +78,15 @@ void testCharacterCreate(ClientConnection & connection1,
     verbose( std::cout << "Modifying appearance of character on primary connection"
                        << std::endl << std::flush; );
 
-    MapType charMod;
-    charMod["id"] = connection1.getCharacterId();
-    charMod["height"] = 4;
+    Anonymous charMod;
+    charMod->setId(connection1.getCharacterId());
+    charMod->setAttr("height", 4);
     MapType gmap;
     gmap["foo"] = "bar";
-    charMod["guise"] = gmap;
+    charMod->setAttr("guise", gmap);
     Atlas::Objects::Operation::Set set;
     set->setFrom(connection1.getAccountId());
-    set->setArgsAsList(ListType(1,charMod));
+    set->setArgs1(charMod);
 
     connection1.send(set);
 }

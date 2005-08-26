@@ -1,3 +1,10 @@
+2005-08-26  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/ClientConnection.cpp, src/ClientConnection.h,
+	  src/testCharacter.cpp, src/testIG.cpp, src/testOOG.cpp,
+	  src/tests.cpp: Re-write op arg code to use high level objects
+	  rather than message code.
+
 2005-08-02  James Turner  <james@worldforge.org>
 
 	* loadtool/Character.cpp, loadtool/Character.h: support for

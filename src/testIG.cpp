@@ -6,14 +6,16 @@
 #include "testIG.h"
 #include "process_debug.h"
 
-#include <Atlas/Objects/RootEntity.h>
+#include <Atlas/Objects/Anonymous.h>
 #include <Atlas/Objects/RootOperation.h>
+
 #include <iostream>
 
 using Atlas::Message::Element;
 using Atlas::Message::MapType;
 using Atlas::Message::ListType;
 using Atlas::Objects::Operation::RootOperation;
+using Atlas::Objects::Entity::Anonymous;
 using Atlas::Objects::Entity::RootEntity;
 
 static void lookAtEntity(ClientConnection& con, const std::string & eid,
@@ -21,9 +23,9 @@ static void lookAtEntity(ClientConnection& con, const std::string & eid,
 {
     Look l;
     l->setFrom(con.getCharacterId());
-    MapType lookEnt;
-    lookEnt["id"] = eid;
-    l->setArgsAsList(ListType(1, lookEnt));
+    Anonymous lookEnt;
+    lookEnt->setId(eid);
+    l->setArgs1(lookEnt);
     int serial = con.send(l);
     
     verbose( std::cout << "Waiting for In-game look response on connection "
@@ -76,9 +78,9 @@ static void touchEntity(ClientConnection& con, const std::string& eid)
 {
     Touch t;
     t->setFrom(con.getCharacterId());
-    MapType touchEnt;
-    touchEnt["id"] = eid;
-    t->setArgsAsList(ListType(1, touchEnt));
+    Anonymous touchEnt;
+    touchEnt->setId(eid);
+    t->setArgs1(touchEnt);
 
     con.send(t);
 }
@@ -135,9 +137,9 @@ void testInGameLook(ClientConnection& con)
     }
     
 // let's look at ourselves ....    
-    MapType lookEnt;
-    lookEnt["id"] = con.getCharacterId();
-    l->setArgsAsList(ListType(1, lookEnt));
+    Anonymous lookEnt;
+    lookEnt->setId(con.getCharacterId());
+    l->setArgs1(lookEnt);
     serial = con.send(l);
     
     verbose( std::cout << "Waiting for self IG look response on connection "

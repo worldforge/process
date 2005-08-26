@@ -70,7 +70,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
   
     bool waitForError(int refNo = -1);
 
-    bool createChar(const Atlas::Message::Element& charData);
+    bool createChar(const Atlas::Objects::Root & charData);
     
     bool compareArgToTemplate(const Atlas::Objects::Operation::RootOperation & op, 
         const Atlas::Message::MapType & arg);

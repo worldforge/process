@@ -21,6 +21,8 @@
 
 #include "process_debug.h"
 
+using Atlas::Objects::Entity::Anonymous;
+
 static const bool debug_flag = false;
 
 typedef std::vector<std::string> StringVec;
@@ -31,6 +33,7 @@ int ClientConnection::serialNoBase = 0;
 using Atlas::Message::Element;
 using Atlas::Message::ListType;
 using Atlas::Message::MapType;
+using Atlas::Objects::Root;
 
 static inline const std::string typeAsString(const Element & o)
 {
@@ -289,19 +292,19 @@ void ClientConnection::close()
 }
 
 int ClientConnection::login(const std::string & account,
-                             const std::string & password)
+                            const std::string & password)
 {
-    Atlas::Objects::Operation::Login l; // = Atlas::Objects::Operation::Login::Instantiate();
-    MapType acmap;
-    acmap["username"] = account;
-    acmap["password"] = password;
-    acmap["parents"] = ListType(1,"account");
-    acmap["objtype"] = "object";
+    Atlas::Objects::Operation::Login l;
+    Anonymous account_arg;
+    account_arg->setAttr("username", account);
+    account_arg->setAttr("password", password);
+    account_arg->setParents(std::list<std::string>(1,"account"));
+    account_arg->setObjtype("object");
 
     setTag("account", account);
     setTag("pass", password);
     
-    l->setArgsAsList(ListType(1,Element(acmap)));
+    l->setArgs1(account_arg);
 
     reply_flag = false;
     error_flag = false;
@@ -310,19 +313,19 @@ int ClientConnection::login(const std::string & account,
 }
 
 int ClientConnection::create(const std::string & account,
-                              const std::string & password)
+                             const std::string & password)
 {
-    Atlas::Objects::Operation::Create c; // = Atlas::Objects::Operation::Create::Instantiate();
-    MapType acmap;
-    acmap["username"] = account;
-    acmap["password"] = password;
-    acmap["parents"] = ListType(1,"account");
-    acmap["objtype"] = "object";
+    Atlas::Objects::Operation::Create c;
+    Anonymous account_arg;
+    account_arg->setAttr("username", account);
+    account_arg->setAttr("password", password);
+    account_arg->setParents(std::list<std::string>(1,"account"));
+    account_arg->setObjtype("object");
 
     setTag("account", account);
     setTag("pass", password);
 
-    c->setArgsAsList(ListType(1,Element(acmap)));
+    c->setArgs1(account_arg);
 
     reply_flag = false;
     error_flag = false;
@@ -330,11 +333,11 @@ int ClientConnection::create(const std::string & account,
         return oogActivationRefno;
 }
 
-bool ClientConnection::createChar(const Element& charData)
+bool ClientConnection::createChar(const Root & charData)
 {
     Atlas::Objects::Operation::Create create;
     create->setFrom(accountId);
-    create->setArgsAsList(ListType(1,charData));
+    create->setArgs1(charData);
 
     int serialno = send(create);
     verbose( std::cout << "Waiting for info response to character creation"
@@ -432,10 +435,10 @@ bool ClientConnection::waitFor(const std::string & opParent,
     return compareArgToTemplate(op, arg);
 }
 
-bool ClientConnection::compareArgToTemplate(const RootOperation & op, const MapType & arg)
+bool ClientConnection::compareArgToTemplate(const RootOperation & op, const MapType & templ_arg)
 {
-    const ListType args = op->getArgsAsList();
-    if (arg.empty()) {
+    const std::vector<Root> args = op->getArgs();
+    if (templ_arg.empty()) {
         if (!args.empty()) {
             std::cerr << "ERROR: Response from server has args "
                       << "but no args expected."
@@ -456,10 +459,10 @@ bool ClientConnection::compareArgToTemplate(const RootOperation & op, const MapT
                         << std::endl << std::flush;);
     }
     
-    const MapType & a = args.front().asMap();
+    const MapType & a = args.front()->asMessage();
     MapType::const_iterator J, K;
     bool error = false;
-    for (J = arg.begin(); J != arg.end(); J++) {
+    for (J = templ_arg.begin(); J != templ_arg.end(); J++) {
         K = a.find(J->first);
         if (K == a.end()) {
             std::cerr << "ERROR: Response from server should have an argument "
@@ -551,57 +554,40 @@ bool ClientConnection::waitForError(int refNo)
     
     bool ret = false;
     RootOperation erOp = *I;
-    ListType erArgs = erOp->getArgsAsList();
+    const std::vector<Root> & erArgs = erOp->getArgs();
     if (erArgs.size() != 2) {
         std::cerr << "Error operation does not have 2 args"
                   << std::endl << std::flush;
         ret = true;
     } else {
         // std::cout << "ERROR arg class is " << erOp->getArgs().front()->getClassNo() << std::endl << std::flush;
-        if (!erArgs[0].isMap() || erArgs[0].asMap().empty()) {
-            std::cerr << "Error operation's first arg is not a map"
+        const Root & arg1 = erArgs[0];
+        Element message;
+        if (arg1->getAttr("message", message) != 0) {
+            std::cerr << "Error operation's first arg does not contain a message string"
                       << std::endl << std::flush;
             ret = true;
-        } else {
-            MapType & arg1 = erArgs[0].asMap();
-            MapType::const_iterator I = arg1.find("message");
-            if (arg1.size() != 1) {
-                std::cerr << "Warning Error operations's first arg has more than one attribute"
-                          << std::endl << std::flush;
-            }
-            if (I == arg1.end() || !I->second.isString()) {
-                std::cerr << "Error operation's first arg does not contain a message string"
-                          << std::endl << std::flush;
-                ret = true;
-            }
         }
-        if (!erArgs[1].isMap() || erArgs[1].asMap().empty()) {
-            std::cerr << "Error operation's second arg is not a map"
+        const Root & arg2 = erArgs[1];
+        if (!arg2->hasAttrFlag(Atlas::Objects::OBJTYPE_FLAG)) {
+            std::cerr << "Error operation's second arg does not have an objtype"
                       << std::endl << std::flush;
             ret = true;
-        } else {
-            MapType & arg2 = erArgs[1].asMap();
-            MapType::const_iterator I = arg2.find("objtype");
-            if (I == arg2.end() || !I->second.isString()) {
-                std::cerr << "Error operation's second arg does not have an objtype"
-                          << std::endl << std::flush;
-                ret = true;
-            } else if (I->second.asString() != "op") {
-                std::cerr << "Error operation's second arg does not have objtype=\"op\""
-                          << std::endl << std::flush;
-                ret = true;
-            }
-            I = arg2.find("serialno");
-            if (I == arg2.end() || !I->second.isInt()) {
-                std::cerr << "Error operation's second arg does not have an objtype"
-                          << std::endl << std::flush;
-                ret = true;
-            } else if (I->second.asInt() != refNo) {
-                std::cerr << "Error operation's second arg does not have the serialno we sent "
-                          << I->second.asInt() << " " << refNo
-                          << std::endl << std::flush;
-                ret = true;
-            }
+        } else if (arg2->getObjtype() != "op") {
+            std::cerr << "Error operation's second arg does not have objtype=\"op\""
+                      << std::endl << std::flush;
+            ret = true;
+        }
+        Element serialno;
+        if (arg2->getAttr("serialno", serialno) != 0 || !serialno.isInt()) {
+            std::cerr << "Error operation's second arg does not have an objtype"
+                      << std::endl << std::flush;
+            ret = true;
+        } else if (serialno.asInt() != refNo) {
+            std::cerr << "Error operation's second arg does not have the serialno we sent "
+                      << serialno.asInt() << " " << refNo
+                      << std::endl << std::flush;
+            ret = true;
         }
     }
     operationQueue.erase(I);
