@@ -563,7 +563,7 @@ bool ClientConnection::waitForError(int refNo)
         // std::cout << "ERROR arg class is " << erOp->getArgs().front()->getClassNo() << std::endl << std::flush;
         const Root & arg1 = erArgs[0];
         Element message;
-        if (arg1->getAttr("message", message) != 0) {
+        if (arg1->copyAttr("message", message) != 0) {
             std::cerr << "Error operation's first arg does not contain a message string"
                       << std::endl << std::flush;
             ret = true;
@@ -579,7 +579,7 @@ bool ClientConnection::waitForError(int refNo)
             ret = true;
         }
         Element serialno;
-        if (arg2->getAttr("serialno", serialno) != 0 || !serialno.isInt()) {
+        if (arg2->copyAttr("serialno", serialno) != 0 || !serialno.isInt()) {
             std::cerr << "Error operation's second arg does not have an objtype"
                       << std::endl << std::flush;
             ret = true;
