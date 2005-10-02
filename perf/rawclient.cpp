@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     // The DebugBridge puts all that comes through the codec on cout
     NullBridge bridge;
     // Do client negotiation with the server
-    Atlas::Net::StreamConnect conn("simple_client", *connection, bridge);
+    Atlas::Net::StreamConnect conn("simple_client", *connection);
 
     std::cout << "Negotiating... " << std::flush;
     // conn.poll() does all the negotiation
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
     // Negotiation was successful
 
     // Get the codec that negotiation established
-    Atlas::Codec * codec = conn.getCodec();
+    Atlas::Codec * codec = conn.getCodec(bridge);
 
     if (dynamic_cast<Atlas::Codecs::Packed *>(codec) == 0) {
         std::cerr << "We are not talking to the server using Packed."

@@ -265,10 +265,10 @@ bool ClientConnection::connect(const std::string & server)
         return false;
     }
     
-    Atlas::Net::StreamConnect conn("process", ios, *this);
+    Atlas::Net::StreamConnect conn("process", ios);
 
     while (conn.getState() == Atlas::Net::StreamConnect::IN_PROGRESS) {
-      conn.poll();
+        conn.poll();
     }
   
     if (conn.getState() == Atlas::Net::StreamConnect::FAILED) {
@@ -277,7 +277,7 @@ bool ClientConnection::connect(const std::string & server)
         return false;
     }
 
-    codec = conn.getCodec();
+    codec = conn.getCodec(*this);
 
     encoder = new Atlas::Objects::ObjectsEncoder(*codec);
 
