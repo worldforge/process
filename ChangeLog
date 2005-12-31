@@ -1,3 +1,8 @@
+2005-12-31  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* loadtool/Character.h: Fix C++ includes now that they are no longer
+	  being included in the Eris headers.
+
 2005-10-02  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* perf/minserver.cpp, perf/rawclient.cpp, src/ClientConnection.cpp:

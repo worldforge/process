@@ -5,6 +5,8 @@
 #include <Eris/View.h>
 #include "Scheduler.h"
 
+#include <sigc++/object.h>
+
 class Action;
 
 class Character : public SigC::Object, public Schedulable
