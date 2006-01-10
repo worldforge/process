@@ -78,22 +78,6 @@ int main(int argc, char ** argv)
         }
     };
 
-#if 0
-    try {
-        Atlas::Objects::loadDefaults("../../protocols/atlas/spec/atlas.xml");
-    }
-    catch (Atlas::Objects::DefaultLoadingException d) {
-        try {
-            Atlas::Objects::loadDefaults("atlas.xml");
-        }
-        catch (Atlas::Objects::DefaultLoadingException d) {
-            std::cerr << argv[0] << ": Could not load atlas.xml: "
-                      << d.getDescription() << std::endl << std::flush;
-            return 1;
-        }
-    }
-#endif
-
     bool python_script = false;
     std::string script_name;
 

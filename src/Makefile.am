@@ -1,4 +1,4 @@
-bin_PROGRAMS = process gobshite
+bin_PROGRAMS = process gobshite bint
 
 process_SOURCES = \
 		  ClientConnection.cpp ClientConnection.h \
@@ -13,3 +13,6 @@ process_SOURCES = \
 
 gobshite_SOURCES = gobshite.cpp \
                    ClientConnection.cpp ClientConnection.h
+
+bint_SOURCES = bint.cpp \
+               ClientConnection.cpp ClientConnection.h

@@ -32,9 +32,12 @@ int main(int argc, char ** argv)
         return 1;
     }
 
-    std::cout << "Blah blah blah!" << std::endl << std::flush;
     Get g;
-    for (;;) {
+    for (int i = 0; i < 5; ++i) {
+        std::cout << "Blah blah blah!" << std::endl << std::flush;
         c1.send(g);
     }
+    sleep(1);
+    std::cout << "Ooo, who's that over there?!" << std::endl << std::flush;
+    c1.close();
 }

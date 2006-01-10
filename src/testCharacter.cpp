@@ -38,6 +38,32 @@ void testInvalidCharacterCreate(ClientConnection &c)
         std::cerr << "ERROR: Invalid Character creation did not result in error"
                   << std::endl << std::flush;
     }
+
+    character->setParents(std::list<std::string>());
+    
+    sno = c.send(create);
+
+    verbose( std::cout << "Waiting for error response to empty character create"
+                           << std::endl << std::flush; );
+
+    if (c.waitForError(sno)) {
+        std::cerr << "ERROR: Empty Character creation did not result in error"
+                  << std::endl << std::flush;
+    }
+    
+    Anonymous non_character;
+
+    create->setArgs1(non_character);
+
+    sno = c.send(create);
+
+    verbose( std::cout << "Waiting for error response to non character create"
+                           << std::endl << std::flush; );
+
+    if (c.waitForError(sno)) {
+        std::cerr << "ERROR: Non Character creation did not result in error"
+                  << std::endl << std::flush;
+    }
 }
 
 void testCharacterCreate(ClientConnection & connection1,
