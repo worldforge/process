@@ -7,9 +7,10 @@
 
 class ClientConnection;
 
+void testInvalidCharacterCreate(ClientConnection &c);    
 void testCharacterCreate(ClientConnection&,
                          ClientConnection&,
                          ClientConnection&);
-void testInvalidCharacterCreate(ClientConnection &c);    
+void testCharacterInventory(ClientConnection &c);    
 
 #endif // PROCESS_TEST_CHARACTER_H

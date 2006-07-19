@@ -368,7 +368,12 @@ bool ClientConnection::createChar(const Root & charData)
     operationQueue.erase(I);
     
     Atlas::Objects::Entity::RootEntity ent = 
-        Atlas::Objects::smart_static_cast<Atlas::Objects::Entity::RootEntity>(op->getArgs()[0]);
+        Atlas::Objects::smart_dynamic_cast<Atlas::Objects::Entity::RootEntity>(op->getArgs()[0]);
+
+    if (!ent.isValid()) {
+        std::cerr << "INFO response to character creation does not have an entity argument" << std::endl;
+        return false;
+    }
     
     setTag("character",  ent->getId());
     return true;

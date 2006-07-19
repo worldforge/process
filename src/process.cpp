@@ -166,6 +166,8 @@ int main(int argc, char ** argv)
 
     testCharacterCreate(connection1, connection2, connection3);
 
+    testCharacterInventory(connection1);
+
     // Try out some IG stuff, like creating looking, talking and moving
     testInGameLook(connection1);
     
