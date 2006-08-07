@@ -1,3 +1,7 @@
+2006-08-07  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
+	* src/testIG.cpp: Don't copy args when just inspecting them.
+
 2006-07-19  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/ClientConnection.cpp: Add stiffer checks for reply to

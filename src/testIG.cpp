@@ -121,7 +121,7 @@ void testInGameLook(ClientConnection& con)
     }
     
 // pick some random children and look at them too 
-    std::vector<Atlas::Objects::Root> args = anonLookResponse->getArgs();
+    const std::vector<Atlas::Objects::Root> & args = anonLookResponse->getArgs();
     if (args.empty()) {
         std::cerr << "ERROR: SIGHT of world has no arguments set" << std::endl << std::flush;
     } else {
@@ -151,9 +151,9 @@ void testInGameLook(ClientConnection& con)
     }
 
 // pick some random children and look at them too 
-    args = selfLookResponse->getArgs();
-    if (!args.empty()) {
-        RootEntity ent = Atlas::Objects::smart_static_cast<RootEntity>(args[0]);
+    const std::vector<Atlas::Objects::Root> & sight_args = selfLookResponse->getArgs();
+    if (!sight_args.empty()) {
+        RootEntity ent = Atlas::Objects::smart_static_cast<RootEntity>(sight_args[0]);
 
         if (ent->getId() != con.getCharacterId()) {
             std::cerr << "ERROR: self look entity has incorrect ID value "
