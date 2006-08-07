@@ -1,3 +1,5 @@
+Add test to send non operations.
+
 Make Connection::recv a template, so it can check for an specific op, instead
 of messing about checking by id string.
 

@@ -1,5 +1,14 @@
 2006-08-07  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
+	* src/ClientConnection.cpp, src/ClientConnection.h: Provide a method
+	  to send objects other than operations over the wire for testing.
+
+	* src/process.cpp: Send a root and anonymous entity at the top level
+	  of the protocol stream, to make sure the server can handle and
+	  report it correctly.
+
+2006-08-07  Al Riddoch  <ajr@ecs.soton.ac.uk>
+
 	* src/testIG.cpp: Don't copy args when just inspecting them.
 
 2006-07-19  Al Riddoch  <ajr@ecs.soton.ac.uk>

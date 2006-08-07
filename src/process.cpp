@@ -12,7 +12,7 @@
 #include "process_debug.h"
 
 #include <Atlas/Objects/loadDefaults.h>
-#include <Atlas/Objects/Entity.h>
+#include <Atlas/Objects/Anonymous.h>
 
 #if defined(__GNUC__) && __GNUC__ < 3
 #include "sstream.h"
@@ -25,6 +25,7 @@
 using Atlas::Message::Element;
 using Atlas::Message::ListType;
 using Atlas::Message::MapType;
+using Atlas::Objects::Entity::Anonymous;
 
 static void usage(const char * progname)
 {
@@ -111,6 +112,12 @@ int main(int argc, char ** argv)
                   << std::endl << std::flush;
         return 1;
     }
+
+    Root r;
+    connection1.sendOther(r);
+
+    Anonymous a;
+    connection1.sendOther(a);
 
     verbose( std::cout << "Making second connection to server on localhost"
                        << std::endl << std::flush; );

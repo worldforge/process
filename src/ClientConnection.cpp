@@ -634,6 +634,12 @@ int ClientConnection::send(Atlas::Objects::Operation::RootOperation op)
     return serialNo;
 }
 
+void ClientConnection::sendOther(Atlas::Objects::Root msg)
+{
+    encoder->streamObjectsMessage(msg);
+    ios << std::flush;
+}
+
 void ClientConnection::error(const std::string & message)
 {
     // FIXME Need operation based error function

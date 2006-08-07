@@ -86,6 +86,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
                    const std::string & opParent, int refno);
   
     int send(Atlas::Objects::Operation::RootOperation msg);
+    void sendOther(Atlas::Objects::Root msg);
     void error(const std::string & message);
     bool poll(int time);
     RootOperation pop();
