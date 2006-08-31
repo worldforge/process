@@ -185,6 +185,4 @@ void testCharacterInventory(ClientConnection & connection1)
     combine->setFrom(connection1.getCharacterId());
 
     connection1.send(combine);
-
-    std::cout << "I have seend the characters" << std::endl;
 }
