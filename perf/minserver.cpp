@@ -15,6 +15,7 @@
 #include <Atlas/Codec.h>
 // tcp_socket_server, tcp_socket_stream - the iostream socket classes
 #include <skstream/skserver.h>
+#include <skstream/skstream.h>
 // cout, cerr
 #include <iostream>
 

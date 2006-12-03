@@ -1,3 +1,8 @@
+2006-12-03  Al Riddoch  <ajr@ecs.soton.ac.uk3
+
+	* perf/minserver.cpp: Add skstream include required due to changes
+	  in skstream header dependencies.
+
 2006-08-07  Al Riddoch  <ajr@ecs.soton.ac.uk>
 
 	* src/ClientConnection.cpp, src/ClientConnection.h: Provide a method
