@@ -55,32 +55,38 @@ dnl python_include_path and python_version
 dnl appropriately to what we have found
 dnl
 
-AC_CHECK_HEADER(python2.4/Python.h,
+AC_CHECK_HEADER(python2.5/Python.h,
 [
-    python_include_path=-I${python_prefix}/include/python2.4
-    python_version=python2.4
+    python_include_path=-I${python_prefix}/include/python2.5
+    python_version=2.5
 ],[
-    AC_CHECK_HEADER(python2.3/Python.h,
+    AC_CHECK_HEADER(python2.4/Python.h,
     [
-        python_include_path=-I${python_prefix}/include/python2.3
-        python_version=python2.3
+        python_include_path=-I${python_prefix}/include/python2.4
+        python_version=python2.4
     ],[
-        AC_CHECK_HEADER(python2.2/Python.h,
+        AC_CHECK_HEADER(python2.3/Python.h,
         [
-            python_include_path=-I${python_prefix}/include/python2.2
-            python_version=python2.2
+            python_include_path=-I${python_prefix}/include/python2.3
+            python_version=python2.3
         ],[
-            AC_MSG_WARN([Cannot find Python 2.2 or later. Checking for older versions which may not support cyphesis fully.])
-            AC_CHECK_HEADER(python2.1/Python.h,
+            AC_CHECK_HEADER(python2.2/Python.h,
             [
-                python_include_path=-I${python_prefix}/include/python2.1
-                python_version=python2.1
+                python_include_path=-I${python_prefix}/include/python2.2
+                python_version=python2.2
             ],[
-                AC_CHECK_HEADER(python2.0/Python.h,
+                AC_MSG_WARN([Cannot find Python 2.2 or later. Checking for older versions which may not support cyphesis fully.])
+                AC_CHECK_HEADER(python2.1/Python.h,
                 [
-                    python_include_path=-I${python_prefix}/include/python2.0
-                    python_version=python2.0
-                ],AC_MSG_ERROR([Cannot find python headers. Please install Python. If Python is installed somewhere other than in /usr the please use the --with-python=DIR option to point to the prefix where Python is installed.]))
+                    python_include_path=-I${python_prefix}/include/python2.1
+                    python_version=python2.1
+                ],[
+                    AC_CHECK_HEADER(python2.0/Python.h,
+                    [
+                        python_include_path=-I${python_prefix}/include/python2.0
+                        python_version=python2.0
+                    ],AC_MSG_ERROR([Cannot find python headers. Please install Python. If Python is installed somewhere other than in /usr the please use the --with-python=DIR option to point to the prefix where Python is installed.]))
+                ])
             ])
         ])
     ])
@@ -110,13 +116,21 @@ AC_CHECK_FUNC(pthread_mutex_trylock, ,
     ])
 ])
 
-AC_CHECK_LIB(${python_version}, 
-    Py_Initialize,
+AC_CHECK_LIB(python${python_version}, Py_Initialize,
+[
+    python_libs="-lpython${python_version}"
+    PYTHON_UTIL_LIBS=
+],
+[
+    AC_CHECK_LIB(python${python_version}, Py_Initialize,
     [
-        python_libs="-L${python_lib_path} -l${python_version}"
-    ],AC_MSG_ERROR([Couldn't find python libraries. Do you have python development installed]),
-    [-L${python_lib_path}]
-)
+        python_libs="-L${python_lib_path} -lpython${python_version}"
+        PYTHON_LINKER_FLAGS="-export-dynamic"
+    ],AC_MSG_ERROR([
+Cannot find python libraries. Do you have python development installed? Please
+see http://www.python.org/ for details of how to download and install Python.]),
+    [-L${python_lib_path} ${PYTHON_UTIL_LIBS}])
+])
 
 PYTHON_LIBS=${python_libs}
 LIBS="$LIBS $PYTHON_LIBS"
