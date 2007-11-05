@@ -1,6 +1,6 @@
 dnl Initialise autoconf
 
-AC_INIT(process, 0.0.0)
+AC_INIT([process], [0.0.0], [alriddoch@googlemail.com])
 AC_CONFIG_SRCDIR([src/process.cpp])
 AC_CONFIG_HEADERS([config.h])
 
@@ -19,6 +19,8 @@ AC_PROG_CXX
 CXXFLAGS="$CXXFLAGS -Wall -Wno-unknown-pragmas"
 
 AC_LANG(C++)
+
+PKG_PROG_PKG_CONFIG
 
 dnl Test for WorldForge Atlas Libraries
 
@@ -63,28 +65,28 @@ AC_CHECK_HEADER(python2.5/Python.h,
     AC_CHECK_HEADER(python2.4/Python.h,
     [
         python_include_path=-I${python_prefix}/include/python2.4
-        python_version=python2.4
+        python_version=2.4
     ],[
         AC_CHECK_HEADER(python2.3/Python.h,
         [
             python_include_path=-I${python_prefix}/include/python2.3
-            python_version=python2.3
+            python_version=2.3
         ],[
             AC_CHECK_HEADER(python2.2/Python.h,
             [
                 python_include_path=-I${python_prefix}/include/python2.2
-                python_version=python2.2
+                python_version=2.2
             ],[
                 AC_MSG_WARN([Cannot find Python 2.2 or later. Checking for older versions which may not support cyphesis fully.])
                 AC_CHECK_HEADER(python2.1/Python.h,
                 [
                     python_include_path=-I${python_prefix}/include/python2.1
-                    python_version=python2.1
+                    python_version=2.1
                 ],[
                     AC_CHECK_HEADER(python2.0/Python.h,
                     [
                         python_include_path=-I${python_prefix}/include/python2.0
-                        python_version=python2.0
+                        python_version=2.0
                     ],AC_MSG_ERROR([Cannot find python headers. Please install Python. If Python is installed somewhere other than in /usr the please use the --with-python=DIR option to point to the prefix where Python is installed.]))
                 ])
             ])

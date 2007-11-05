@@ -1,3 +1,7 @@
+2007-11-05  Al Riddoch  <alriddoch@googlemail.com>
+
+	* acinclude.m4, configure.ac: Update to latest pkgconfig macros.
+
 2007-11-02  Al Riddoch  <alriddoch@googlemail.com>
 
 	* configure.ac: Update the python tests to work with recent versions.
