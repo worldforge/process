@@ -217,7 +217,7 @@ int main(int argc, char** argv)
     
     // Say hello to the server
     int i;
-    for (i = 0; i < 50000; ++i) {
+    for (i = 0; i < 500000; ++i) {
         if (poll(connection->getSocket(), *codec)) {
             std::cout << "HUPPED" << std::endl << std::flush;
             break;
