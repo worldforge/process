@@ -25,7 +25,9 @@
 
 // sleep()
 #include <sys/select.h>
+#include <cstdlib>
 #include <unistd.h>
+#include <limits.h>
 #include <signal.h>
 #include <time.h>
 
