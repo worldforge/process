@@ -9,7 +9,7 @@
 #include <iostream>
 #include <Eris/Log.h>
 
-#include <sigc++/slot.h>
+#include <sigc++/functors/ptr_fun.h>
 
 using std::cout;
 using std::endl;
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     
     initSignals();
 
-    Eris::Logged.connect(SigC::slot(erisLog));
+    Eris::Logged.connect(sigc::ptr_fun(erisLog));
     Eris::setLogLevel(Eris::LOG_DEBUG);
     
     while (numUsers-- > 0) {

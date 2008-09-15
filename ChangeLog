@@ -1,5 +1,12 @@
 2008-09-15  Al Riddoch  <alriddoch@googlemail.com>
 
+	* loadtool/Character.cpp, loadtool/Character.h, loadtool/User.cpp,
+	  loadtool/User.h, loadtool/main.cpp: Convert from the legacy
+	  sigc++ API to the 2.0 version which is the only API supported
+	  by recent versions.
+
+2008-09-15  Al Riddoch  <alriddoch@googlemail.com>
+
 	* perf/rawclient.cpp: Add C header includes required by more
 	  recent compilers.
 

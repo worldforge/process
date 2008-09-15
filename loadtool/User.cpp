@@ -1,7 +1,7 @@
 #include "User.h"
 #include "Character.h"
 
-#include <sigc++/object_slot.h>
+#include <sigc++/functors/mem_fun.h>
 #include <Atlas/Objects/Entity.h>
 #include <iostream>
 
@@ -16,8 +16,8 @@ User::User(const std::string& uid, const std::string& host, short port) :
     m_charCount(1)
 {
     m_con = new Eris::Connection("fuckwad", host, port, false);
-    m_con->Connected.connect(SigC::slot(*this, &User::onConnected));
-    m_con->Failure.connect(SigC::slot(*this, &User::onConnectionFail));
+    m_con->Connected.connect(sigc::mem_fun(*this, &User::onConnected));
+    m_con->Failure.connect(sigc::mem_fun(*this, &User::onConnectionFail));
     m_con->connect();
 }
 
@@ -66,9 +66,9 @@ void User::onConnected()
     std::string passwd = "secret-romero-love-hideout";
      
     m_acc->createAccount(username, fullName, passwd);
-    m_acc->LoginSuccess.connect(SigC::slot(*this, &User::onLoggedIn));
-    m_acc->LoginFailure.connect(SigC::slot(*this, &User::onLoginFailure));
-    m_acc->AvatarSuccess.connect(SigC::slot(*this, &User::onCharCreated));
+    m_acc->LoginSuccess.connect(sigc::mem_fun(*this, &User::onLoggedIn));
+    m_acc->LoginFailure.connect(sigc::mem_fun(*this, &User::onLoginFailure));
+    m_acc->AvatarSuccess.connect(sigc::mem_fun(*this, &User::onCharCreated));
     
     m_state = ACC_CREATE;
 }

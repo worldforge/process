@@ -5,11 +5,13 @@
 #include <Eris/View.h>
 #include "Scheduler.h"
 
-#include <sigc++/object.h>
+#include <sigc++/trackable.h>
+
+#include <memory>
 
 class Action;
 
-class Character : public SigC::Object, public Schedulable
+class Character : public sigc::trackable, public Schedulable
 {
 public:
     Character(Eris::Avatar* av);
@@ -27,7 +29,7 @@ private:
     void onGotEntity(Eris::Entity*);
     void onAppear(Eris::Entity*);
     
-    typedef SigC::Slot1<void, Eris::Entity*> SpotTypeTrigger;
+    typedef sigc::slot<void, Eris::Entity*> SpotTypeTrigger;
     
     void spotSomething(Eris::Entity* app);
     void registerTypeTrigger(Eris::TypeInfo* ty, const SpotTypeTrigger& tg);
@@ -42,7 +44,7 @@ private:
     typedef std::map<Eris::Entity*, int> MemoryStore;
     MemoryStore m_memory;
     
-    typedef SigC::Signal1<void, Eris::Entity*> TypeTriggerSig;
+    typedef sigc::signal<void, Eris::Entity*> TypeTriggerSig;
     typedef std::map<Eris::TypeInfo*, TypeTriggerSig > TypeTriggerMap;
     TypeTriggerMap m_triggers;
 };

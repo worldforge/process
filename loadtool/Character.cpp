@@ -19,8 +19,8 @@ Character::Character(Eris::Avatar* av) :
     m_avatar(av)
 {
     m_view = av->getView();
-    av->GotCharacterEntity.connect(SigC::slot(*this, &Character::onGotEntity));
-    m_view->Appearance.connect(SigC::slot(*this, &Character::onAppear));
+    av->GotCharacterEntity.connect(sigc::mem_fun(*this, &Character::onGotEntity));
+    m_view->Appearance.connect(sigc::mem_fun(*this, &Character::onAppear));
 }
 
 Character::~Character()
@@ -29,15 +29,15 @@ Character::~Character()
 
 void Character::onGotEntity(Eris::Entity*)
 {
-    m_avatar->Hear.connect(SigC::slot(*this, &Character::onHear));
+    m_avatar->Hear.connect(sigc::mem_fun(*this, &Character::onHear));
     
     Eris::TypeService* tysv = m_avatar->getConnection()->getTypeService();
 
-    registerTypeTrigger(tysv->getTypeByName("axe"), SigC::slot(*this, &Character::spotTool));
-    registerTypeTrigger(tysv->getTypeByName("pickaxe"), SigC::slot(*this, &Character::spotTool));
-    registerTypeTrigger(tysv->getTypeByName("tinderbox"), SigC::slot(*this, &Character::spotTool));
-    registerTypeTrigger(tysv->getTypeByName("scythe"), SigC::slot(*this, &Character::spotTool));
-    registerTypeTrigger(tysv->getTypeByName("shovel"), SigC::slot(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("axe"), sigc::mem_fun(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("pickaxe"), sigc::mem_fun(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("tinderbox"), sigc::mem_fun(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("scythe"), sigc::mem_fun(*this, &Character::spotTool));
+    registerTypeTrigger(tysv->getTypeByName("shovel"), sigc::mem_fun(*this, &Character::spotTool));
 
     // start sending actions
     

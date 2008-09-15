@@ -3,11 +3,11 @@
 
 #include <Eris/Connection.h>
 #include <Eris/Account.h>
-#include <sigc++/object.h>
+#include <sigc++/trackable.h>
 
 class Character;
 
-class User : public SigC::Object
+class User : public sigc::trackable
 {
 public:
     User(const std::string& uid, const std::string& host, short port);
