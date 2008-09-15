@@ -2,7 +2,7 @@ bin_PROGRAMS = process gobshite bint
 
 process_SOURCES = \
 		  ClientConnection.cpp ClientConnection.h \
-		  process.cpp process_debug.h opfwd.h debug.h \
+		  process.cpp process_debug.h opfwd.h \
 		  testOOG.cpp testOOG.h \
 		  tests.cpp tests.h \
 		  testLogin.cpp testLogin.h \

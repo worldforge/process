@@ -1,5 +1,10 @@
 2008-09-15  Al Riddoch  <alriddoch@googlemail.com>
 
+	* src/Makefile.am: Remove an obsolete header from the distribution
+	  file list.
+
+2008-09-15  Al Riddoch  <alriddoch@googlemail.com>
+
 	* loadtool/Character.cpp, loadtool/Character.h, loadtool/User.cpp,
 	  loadtool/User.h, loadtool/main.cpp: Convert from the legacy
 	  sigc++ API to the 2.0 version which is the only API supported
