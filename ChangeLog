@@ -1,3 +1,8 @@
+2008-09-15  Al Riddoch  <alriddoch@googlemail.com>
+
+	* src/testIG.cpp, src/testLogin.cpp: Add C header includes
+	  required by more recent compilers.
+
 2007-12-10  Al Riddoch  <alriddoch@googlemail.com>
 
 	* perf/rawclient.cpp: Increase the number of operations used

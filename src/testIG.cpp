@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+#include <cstdlib>
+
 using Atlas::Message::Element;
 using Atlas::Message::MapType;
 using Atlas::Message::ListType;
