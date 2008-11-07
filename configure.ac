@@ -10,15 +10,44 @@ AC_CANONICAL_HOST
 
 dnl Initialise automake
 
-AM_INIT_AUTOMAKE([dist-bzip2])
+AM_INIT_AUTOMAKE([nostdinc dist-bzip2])
 
 dnl Test for C++ compiler
 
 AC_PROG_CXX
+AC_PROG_CPP
 
 CXXFLAGS="$CXXFLAGS -Wall -Wno-unknown-pragmas"
 
-AC_LANG(C++)
+AC_MSG_CHECKING(whether gcc needs -fno-strict-aliasing)
+AC_PREPROC_IFELSE([
+#ifdef __GNUC__
+# if defined(__GNUC_MINOR__) && __GNUC__ == 3 && (__GNUC_MINOR__ >= 3)
+#   error -fno-strict-aliasing needed
+# elif __GNUC__ > 3
+#   error -fno-strict-aliasing needed
+# endif
+#endif
+],[
+  GCC_EXTRA_OPT=
+  AC_MSG_RESULT(no)
+],[
+  GCC_EXTRA_OPT=-fno-strict-aliasing
+  AC_MSG_RESULT(yes)
+])
+
+AC_ARG_ENABLE(debug,
+    [  --enable-debug          enable debug information [default=no]],
+    [
+        if test "$enableval" = "yes"; then
+            CXXFLAGS="$CXXFLAGS $GCC_EXTRA_OPT -Wall -DDEBUG"
+        else
+            CXXFLAGS="$CXXFLAGS $GCC_EXTRA_OPT -Wall -DNDEBUG"
+        fi
+    ],[
+        CXXFLAGS="$CXXFLAGS $GCC_EXTRA_OPT -Wall -DNDEBUG"
+    ]
+)
 
 PKG_PROG_PKG_CONFIG
 
@@ -37,6 +66,8 @@ PKG_CHECK_MODULES(ERIS, eris-1.3, [ AC_MSG_NOTICE(Found Eris.)],
     [
         AC_MSG_ERROR(Couldn't find Eris.)
     ])
+
+AC_LANG(C++)
 
 dnl allow the user to provide the directory where python is installed in
 dnl

@@ -1,3 +1,8 @@
+2008-11-07  Al Riddoch  <alriddoch@googlemail.com>
+
+	* configure.ac: Add a check to see if we should disable strict
+	  aliasing, as python seems to break it.
+
 2008-09-15  Al Riddoch  <alriddoch@googlemail.com>
 
 	* src/Makefile.am: Remove an obsolete header from the distribution
