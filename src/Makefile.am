@@ -1,5 +1,7 @@
 bin_PROGRAMS = process gobshite bint
 
+INCLUDES = -I${top_builddir}
+
 process_SOURCES = \
 		  ClientConnection.cpp ClientConnection.h \
 		  process.cpp process_debug.h opfwd.h \
