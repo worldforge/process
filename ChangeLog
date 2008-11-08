@@ -1,3 +1,8 @@
+2008-11-08  Al Riddoch  <alriddoch@googlemail.com>
+
+	* configure.ac: Get rid of the AC_CACHE_CHECK call as it is no
+	  longer needed.
+
 2008-11-07  Al Riddoch  <alriddoch@googlemail.com>
 
 	* src/Makefile.am: Make sure the necessary include paths are

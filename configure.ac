@@ -71,16 +71,13 @@ AC_LANG(C++)
 
 dnl allow the user to provide the directory where python is installed in
 dnl
-AC_CACHE_CHECK(for location of python, python_prefix,
+python_prefix=/usr
+AC_ARG_WITH(python,
+[  --with-python=DIR       Prefix where python is installed in [default=/usr]],
 [
-    python_prefix=/usr
-    AC_ARG_WITH(python,
-    [  --with-python=DIR       Prefix where python is installed in [default=/usr]],
-    [
-        if test $withval != yes; then
-            python_prefix=$withval
-        fi
-    ])
+    if test $withval != yes; then
+        python_prefix=$withval
+    fi
 ])
 
 dnl then check for the header file Python.h and set
