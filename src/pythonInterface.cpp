@@ -587,35 +587,37 @@ static PyObject * entity_new(PyObject * self, PyObject * args, PyObject * kwds)
     return (PyObject *)o;
 }
 
-static inline void addToArgs(ListType & args, PyObject * ent)
+static int addToArgs(std::vector<Root> & args, PyObject * arg)
 {
-    if (ent == NULL) {
-        return;
-    }
-    if (PyMessageElement_Check(ent)) {
-        PyMessageElement * obj = (PyMessageElement*)ent;
+    if (PyMessageElement_Check(arg)) {
+        PyMessageElement * obj = (PyMessageElement*)arg;
+#ifndef NDEBUG
         if (obj->m_obj == NULL) {
-            fprintf(stderr, "Invalid object in Operation arguments\n");
-            return;
+            PyErr_SetString(PyExc_AssertionError,"NULL MessageElement in Operation constructor argument");
+            return -1;
         }
-        Element o(*obj->m_obj);
-        if (o.isMap() && (obj->m_attr != NULL)) {
-            MapType & ent = o.asMap();
-            MapType ent2 = PyDictObject_asElementMap(obj->m_attr);
-            MapType::iterator I = ent2.begin();
-            for(; I != ent2.end(); I++) {
-                if (ent.find(I->first) != ent.end()) {
-                    ent[I->first] = I->second;
-                }
-            }
+#endif // NDEBUG
+        const Element & o = *obj->m_obj;
+        if (o.isMap()) {
+            args.push_back(Atlas::Objects::Factories::instance()->createObject(o.asMap()));
+        } else {
+            PyErr_SetString(PyExc_TypeError, "Operation arg is not a map");
+            return -1;
         }
-        args.push_back(o);
-    } else if (PyOperation_Check(ent)) {
-        PyOperation * op = (PyOperation*)ent;
-        args.push_back(op->operation->asMessage());
+    } else if (PyOperation_Check(arg)) {
+        PyOperation * op = (PyOperation*)arg;
+#ifndef NDEBUG
+        if (!op->operation.isValid()) {
+            PyErr_SetString(PyExc_AssertionError,"Invalid operation in Operation constructor argument");
+            return -1;
+        }
+#endif // NDEBUG
+        args.push_back(op->operation);
     } else {
-        fprintf(stderr, "Non-entity passed as arg to Operation()\n");
+        PyErr_SetString(PyExc_TypeError, "Operation arg is of unknown type");
+        return -1;
     }
+    return 0;
 }
 
 static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwds)
@@ -623,8 +625,6 @@ static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwd
     PyOperation * op;
 
     char * type;
-    PyObject * to = NULL;
-    PyObject * from = NULL;
     PyObject * arg1 = NULL;
     PyObject * arg2 = NULL;
     PyObject * arg3 = NULL;
@@ -636,67 +636,71 @@ static PyObject * operation_new(PyObject * self, PyObject * args, PyObject * kwd
     if (op == NULL) {
         return NULL;
     }
-    if (strcmp(type, "sight") == 0) {
-        op->operation = Sight();
-    } else if (strcmp(type, "set") == 0) {
-        op->operation = Set();
-    } else if (strcmp(type, "action") == 0) {
-        op->operation = Action();
-    } else if (strcmp(type, "create") == 0) {
-        op->operation = Create();
-    } else if (strcmp(type, "look") == 0) {
-        op->operation = Look();
-    } else if (strcmp(type, "move") == 0) {
-        op->operation = Move();
-    } else if (strcmp(type, "talk") == 0) {
-        op->operation = Talk();
-    } else if (strcmp(type, "touch") == 0) {
-        op->operation = Touch();
-    } else if (strcmp(type, "info") == 0) {
-        op->operation = Info();
-    } else {
-        fprintf(stderr, "NOTICE: Python creating a custom %s op\n", type);
-        // *op->operation = RootOperation::Instantiate();
+    if (strcmp(type, "thought") == 0 || strcmp(type, "goal_info") == 0) {
         Py_DECREF(op);
         Py_INCREF(Py_None);
         return Py_None;
+    } else {
+        Root r = Atlas::Objects::Factories::instance()->createObject(type);
+        op->operation = Atlas::Objects::smart_dynamic_cast<RootOperation>(r);
+        if (!op->operation.isValid()) {
+            Py_DECREF(op);
+            PyErr_SetString(PyExc_TypeError, "Operation() unknown operation type requested");
+            return NULL;
+        }
     }
-    if (PyMapping_HasKeyString(kwds, "to")) {
-        to = PyMapping_GetItemString(kwds, "to");
-        PyObject * to_id;
-        if (PyString_Check(to)) {
-            to_id = to;
-        } else if ((to_id = PyObject_GetAttrString(to, "id")) == NULL) {
-            fprintf(stderr, "To was not really an entity, as it had no id\n");
-            return NULL;
+    if (kwds != NULL) {
+        PyObject * from = PyDict_GetItemString(kwds, "from_");
+        if (from != NULL) {
+            PyObject * from_id = 0;
+            if (PyString_Check(from)) {
+                from_id = from;
+                Py_INCREF(from_id);
+            } else if ((from_id = PyObject_GetAttrString(from, "id")) == NULL) {
+                PyErr_SetString(PyExc_TypeError, "from is not a string and has no id");
+                return NULL;
+            }
+            if (!PyString_Check(from_id)) {
+                Py_DECREF(from_id);
+                PyErr_SetString(PyExc_TypeError, "id of from is not a string");
+                return NULL;
+            }
+            op->operation->setFrom(PyString_AsString(from_id));
+            Py_DECREF(from_id);
         }
-        if (!PyString_Check(to_id)) {
-            fprintf(stderr, "To id is not a string\n");
-            return NULL;
+        PyObject * to = PyDict_GetItemString(kwds, "to");
+        if (to != NULL) {
+            PyObject * to_id = 0;
+            if (PyString_Check(to)) {
+                to_id = to;
+                Py_INCREF(to_id);
+            } else if ((to_id = PyObject_GetAttrString(to, "id")) == NULL) {
+                PyErr_SetString(PyExc_TypeError, "to is not a string and has no id");
+                return NULL;
+            }
+            if (!PyString_Check(to_id)) {
+                Py_DECREF(to_id);
+                PyErr_SetString(PyExc_TypeError, "id of to is not a string");
+                return NULL;
+            }
+            op->operation->setTo(PyString_AsString(to_id));
+            Py_DECREF(to_id);
         }
-        op->operation->setTo(PyString_AsString(to_id));
     }
-    if (PyMapping_HasKeyString(kwds, "from_")) {
-        from = PyMapping_GetItemString(kwds, "from_");
-        PyObject * from_id;
-        if (PyString_Check(from)) {
-            from_id = from;
-        } else if ((from_id = PyObject_GetAttrString(from, "id")) == NULL) {
-            fprintf(stderr, "From was not really an entity, as it had no id\n");
-            return NULL;
-        }
-        if (!PyString_Check(from_id)) {
-            fprintf(stderr, "From id is not a string\n");
-            return NULL;
-        }
-        op->operation->setFrom(PyString_AsString(from_id));
-        // FIXME I think I need to actually do something with said value now
+    std::vector<Root> & args_list = op->operation->modifyArgs();
+    assert(args_list.empty());
+    if (arg1 != 0 && addToArgs(args_list, arg1) != 0) {
+        Py_DECREF(op);
+        op = NULL;
     }
-    ListType args_list;
-    addToArgs(args_list, arg1);
-    addToArgs(args_list, arg2);
-    addToArgs(args_list, arg3);
-    op->operation->setArgsAsList(args_list);
+    if (arg2 != 0 && addToArgs(args_list, arg2) != 0) {
+        Py_DECREF(op);
+        op = NULL;
+    }
+    if (arg3 != 0 && addToArgs(args_list, arg3) != 0) {
+        Py_DECREF(op);
+        op = NULL;
+    }
     return (PyObject *)op;
 }
 
