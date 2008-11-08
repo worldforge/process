@@ -141,8 +141,6 @@ private:
 };
 
 
-#pragma mark -
-
 std::auto_ptr<Action> Action::newRandomAction(Character* c)
 {
     switch (random() % 7) {

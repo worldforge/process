@@ -53,8 +53,6 @@ void User::createCharacter()
     m_acc->createCharacter(charData);
 }
 
-#pragma mark -
-
 void User::onConnected()
 {
     cout << "user connected to server" << endl;

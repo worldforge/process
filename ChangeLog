@@ -1,5 +1,10 @@
 2008-11-08  Al Riddoch  <alriddoch@googlemail.com>
 
+	* loadtool/Action.cpp, loadtool/User.cpp: Remove a pragma that I
+	  don't think we use any more.
+
+2008-11-08  Al Riddoch  <alriddoch@googlemail.com>
+
 	* configure.ac: Get rid of the AC_CACHE_CHECK call as it is no
 	  longer needed.
 
