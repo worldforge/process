@@ -1,3 +1,7 @@
+2009-01-23  Al Riddoch  <alriddoch@googlemail.com>
+
+	* loadtool/main.cpp: Include <cstdlib> to get EXIT_SUCCESS.
+
 2008-11-08  Al Riddoch  <alriddoch@googlemail.com>
 
 	* src/pythonInterface.cpp: Replace some python API wrappers with

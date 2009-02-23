@@ -11,6 +11,8 @@
 
 #include <sigc++/functors/ptr_fun.h>
 
+#include <cstdlib>
+
 using std::cout;
 using std::endl;
 
