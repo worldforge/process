@@ -75,7 +75,9 @@ void testCharacterCreate(ClientConnection & connection1,
 
     Anonymous character;
     character->setObjtype("obj");
-    character->setParents(std::list<std::string>(1,"settler"));
+    if (connection1.addSpawnData(character) != 0) {
+        character->setParents(std::list<std::string>(1,"settler"));
+    }
     character->setName("Nivek");
 
     connection1.createChar(character);
