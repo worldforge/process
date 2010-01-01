@@ -219,12 +219,18 @@ void ClientConnection::objectInfoArrived(const Info & op)
         
     if (accountId.empty() && (op->getRefno() == oogActivationRefno)) {
         try {
-            Root ac = op->getArgs().front();
+            const Root & ac = op->getArgs().front();
             const std::string & id = ac->getId();
             if (!id.empty()) {
                 accountId = id;
                 verbose_only( std::cout << "Got account id of " << accountId
                                         << std::endl << std::flush; );
+                Element spawns;
+                if (ac->copyAttr("spawns", spawns) == 0 && spawns.isList()) {
+                    debug( std::cout << "Got list of " << spawns.List().size()
+                                     << " spawns" << std::endl << std::flush; );
+                    m_spawns = spawns.List();
+                }
             }
         }
         catch (...) {
@@ -685,6 +691,48 @@ RootOperation ClientConnection::pop()
 bool ClientConnection::pending()
 {
     return !operationQueue.empty();
+}
+
+int ClientConnection::addSpawnData(const Atlas::Objects::Entity::RootEntity & ent)
+{
+    if (m_spawns.empty()) {
+        return -1;
+    }
+    const Element & spawn = m_spawns.front();
+    if (!spawn.isMap()) {
+        std::cerr << "ERROR: Account has a non-map spawn"
+                  << std::endl << std::flush;
+        return -1;
+    }
+    const MapType & spawndata = spawn.Map();
+    MapType::const_iterator Iend = spawndata.end();
+    MapType::const_iterator I = spawndata.find("name");
+    if (I == Iend || !I->second.isString()) {
+        std::cerr << "ERROR: Account has spawn with malformed name"
+                  << std::endl << std::flush;
+        return -1;
+    }
+    ent->setAttr("spawn_name", I->second);
+    I = spawndata.find("character_types");
+    if (I == Iend || !I->second.isList()) {
+        std::cerr << "ERROR: Account has spawn with malformed character_types"
+                  << std::endl << std::flush;
+        return -1;
+    }
+    const ListType & character_types = I->second.List();
+    if (character_types.empty()) {
+        std::cerr << "WARNING: Account has spawn with empty character_types"
+                  << std::endl << std::flush;
+        return -1;
+    }
+    if (!character_types.front().isString()) {
+        std::cerr << "ERROR: Account has spawn with bad first character_type"
+                  << std::endl << std::flush;
+        return -1;
+    }
+    ent->setParents(std::list<std::string>(1, character_types.front().String()));
+    std::cout << "Got spawned!" << std::endl << std::flush;
+    return 0;
 }
 
 void ClientConnection::push(const Atlas::Objects::Root & op)

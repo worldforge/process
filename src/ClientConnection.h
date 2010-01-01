@@ -6,6 +6,7 @@
 #define PROCESS_CLIENT_CONNECTION_H
 
 #include <Atlas/Objects/Decoder.h>
+#include <Atlas/Objects/ObjectsFwd.h>
 
 #include <skstream/skstream.h>
 
@@ -34,6 +35,7 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     std::string accountId;
     
     Atlas::Message::MapType reply;
+    Atlas::Message::ListType m_spawns;
     static int serialNoBase;
     int serialNo;
 
@@ -91,6 +93,8 @@ class ClientConnection : public Atlas::Objects::ObjectsDecoder {
     bool poll(int time);
     RootOperation pop();
     bool pending();
+
+    int addSpawnData(const Atlas::Objects::Entity::RootEntity &);
 
     const std::string getAccount()
     { return getTag("account"); }
