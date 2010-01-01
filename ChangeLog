@@ -1,3 +1,8 @@
+2010-01-01  Al Riddoch  <alriddoch@googlemail.com>
+
+	* src/ClientConnection.cpp, src/ClientConnection.h,
+	  src/testCharacter.cpp: Add experimental support for spawn locations.
+
 2009-01-23  Al Riddoch  <alriddoch@googlemail.com>
 
 	* loadtool/main.cpp: Include <cstdlib> to get EXIT_SUCCESS.
