@@ -10,7 +10,8 @@ AC_CANONICAL_HOST
 
 dnl Initialise automake
 
-AM_INIT_AUTOMAKE([nostdinc dist-bzip2])
+AM_INIT_AUTOMAKE([nostdinc dist-bzip2 silent-rules])
+AM_SILENT_RULES([yes])
 
 dnl Test for C++ compiler
 
