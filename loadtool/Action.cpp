@@ -7,6 +7,13 @@
 #include <iostream>
 #include <cmath>
 
+using WFMath::CoordType;
+using WFMath::numeric_constants;
+using WFMath::Quaternion;
+using WFMath::TimeDiff;
+using WFMath::TimeStamp;
+using WFMath::Vector;
+
 using std::cout;
 using std::endl;
 using std::cerr;
@@ -18,11 +25,11 @@ public:
         Action(c)
     {
         int durationMsec = 2000 + (random() % 0x3fff); // 16 seconds max
-        m_finishTime = WFMath::TimeStamp::now() + WFMath::TimeDiff(durationMsec);
+        m_finishTime = TimeStamp::now() + TimeDiff(durationMsec);
         
-        WFMath::Quaternion q(2, drand48() * WFMath::Pi * 2); // random heading
+        Quaternion q(2, drand48() * numeric_constants<CoordType>::pi() * 2); // random heading
         double scalarVel = 3.0 + (drand48() * 3.0);
-        WFMath::Vector<3> vel(scalarVel, 0, 0);
+        Vector<3> vel(scalarVel, 0, 0);
     
         c->avatar()->moveInDirection(vel.rotate(q), q);
     }
@@ -33,11 +40,11 @@ public:
     
     virtual bool finished()
     {
-        return (WFMath::TimeStamp::now() >= m_finishTime);
+        return (TimeStamp::now() >= m_finishTime);
     }
     
 private:
-    WFMath::TimeStamp m_finishTime;
+    TimeStamp m_finishTime;
 };
 
 class MoveNearOrigin : public Action
