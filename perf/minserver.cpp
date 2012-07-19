@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     tcp_socket_server listener;
     
     // Bind the socket. 0.0.0.0 accepts on any incoming address
-    if (!listener.open(6767)) {
+    if (listener.open(6767) != 0) {
         std::cerr << "Failed to bind to port 67667" << std::endl << std::flush;
         return 1;
     }
