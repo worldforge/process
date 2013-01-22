@@ -8,4 +8,4 @@ fuckwad_SOURCES = main.cpp \
 	User.cpp User.h \
 	Character.cpp Character.h
 	
-fuckwad_LDFLAGS = @ERIS_LIBS@
+fuckwad_LDADD = @ERIS_LIBS@
